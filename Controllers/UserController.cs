@@ -5,26 +5,33 @@ using System.Linq;
 using System.Threading.Tasks;
 using Mercury_Backend.Contexts;
 using Mercury_Backend.Models;
-using System.Text.Json;
 using System.Text.Json.Serialization;
+using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using JsonSerializer = System.Text.Json.JsonSerializer;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
 namespace Mercury_Backend.Controllers
 {
+   
     [Route("api/[controller]")]
     [ApiController]
     public class UserController : ControllerBase
     {
+
         // GET: api/<UserController>
         [HttpGet]
         public String Get()
         {
-            var context = new UserContext();
-            var list = context.Users.OrderBy(b => b.Id);
-            System.Console.WriteLine(list);
-            String jsonString = JsonSerializer.Serialize(list);
-            Console.WriteLine(jsonString);
+            String jsonString = "";
+            using (var context = new ModelContext())
+            {
+                var list = context.SchoolUsers.OrderBy(b => b.SchoolId);
+                jsonString = JsonSerializer.Serialize(list);
+                Console.WriteLine(jsonString);   
+            }
             return jsonString;
             //return new string[] { "value1", "value2" };
         }
@@ -38,31 +45,28 @@ namespace Mercury_Backend.Controllers
 
         // POST api/<UserController>
         [HttpPost]
-        public void Post([FromForm]User NewUser)
+        public String Post([FromForm]SchoolUser NewUser)
         {
             //String Id, String NickName, String RealName, String Phone,
             //String Password, String Major, int Credit, String Role, int Grade,
             //String Brief = "", String AvatarId = ""
-            using (var context = new UserContext())
+            JObject msg = new JObject();
+            try
             {
-                var user = new User
+                using (var Context = new ModelContext())
                 {
-                    Id = NewUser.Id,
-                    NickName = NewUser.NickName,
-                    RealName = NewUser.RealName,
-                    Phone = NewUser.Phone,
-                    Password = NewUser.Password,
-                    Major = NewUser.Major,
-                    Credit = NewUser.Credit,
-                    Role = NewUser.Role,
-                    Grade = NewUser.Grade,
-                    Brief = NewUser.Brief,
-                    AvatarId = NewUser.AvatarId
-                };
-
-                context.Users.Add(user);
-                context.SaveChanges();
+                    Context.SchoolUsers.Add(NewUser);
+                    Console.WriteLine("haha");
+                    Context.SaveChanges();
+                    msg["status"] = "success";
+                }
             }
+            catch (Exception e)
+            {
+                msg["status"] = "fail";
+                Console.WriteLine(e.ToString());
+            }
+            return JsonConvert.SerializeObject(msg);
         }
 
         // PUT api/<UserController>/5
