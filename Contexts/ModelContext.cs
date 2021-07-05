@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Mercury_Backend.Models;
+using System.Configuration;
 
 #nullable disable
 
@@ -16,6 +17,7 @@ namespace Mercury_Backend.Contexts
         public ModelContext(DbContextOptions<ModelContext> options)
             : base(options)
         {
+            Console.WriteLine("haha");
         }
 
         public virtual DbSet<ChatRecord> ChatRecords { get; set; }
@@ -42,8 +44,7 @@ namespace Mercury_Backend.Contexts
         {
             if (!optionsBuilder.IsConfigured)
             {
-#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
-                optionsBuilder.UseOracle("User Id=yuanzhang;Password=123456;Data Source=(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=150.158.185.96)(PORT=1521))(CONNECT_DATA = (SERVER = DEDICATED)(SERVICE_NAME = xe))); ");
+                //optionsBuilder.UseOracle("ConnectionStrings:Mercury");
             }
         }
 

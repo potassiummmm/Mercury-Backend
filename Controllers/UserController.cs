@@ -20,18 +20,19 @@ namespace Mercury_Backend.Controllers
     [ApiController]
     public class UserController : ControllerBase
     {
-
+        private ModelContext context;
+        public UserController(ModelContext ModelContext)
+        {
+            context = ModelContext;
+        }
         // GET: api/<UserController>
         [HttpGet]
         public String Get()
         {
             String jsonString = "";
-            using (var context = new ModelContext())
-            {
-                var list = context.SchoolUsers.OrderBy(b => b.SchoolId);
-                jsonString = JsonSerializer.Serialize(list);
-                Console.WriteLine(jsonString);   
-            }
+            var list = context.SchoolUsers.OrderBy(b => b.SchoolId);
+            jsonString = JsonSerializer.Serialize(list);
+            Console.WriteLine(jsonString);   
             return jsonString;
             //return new string[] { "value1", "value2" };
         }
@@ -53,13 +54,9 @@ namespace Mercury_Backend.Controllers
             JObject msg = new JObject();
             try
             {
-                using (var Context = new ModelContext())
-                {
-                    Context.SchoolUsers.Add(NewUser);
-                    Console.WriteLine("haha");
-                    Context.SaveChanges();
-                    msg["status"] = "success";
-                }
+                context.SchoolUsers.Add(NewUser);
+                Console.WriteLine("haha");
+                context.SaveChanges();
             }
             catch (Exception e)
             {
