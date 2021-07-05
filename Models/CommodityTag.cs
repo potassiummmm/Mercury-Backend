@@ -1,13 +1,15 @@
-using System.ComponentModel.DataAnnotations.Schema;
+using System;
+using System.Collections.Generic;
+
+#nullable disable
 
 namespace Mercury_Backend.Models
 {
-    [Table("COMMODITY_TAG")]
-    public class CommodityTag
+    public partial class CommodityTag
     {
-        [Column("COMMODITY_ID")]
         public string CommodityId { get; set; }
-        [Column("TAG")]
         public string Tag { get; set; }
+
+        public virtual Commodity Commodity { get; set; }
     }
 }

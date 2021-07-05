@@ -1,15 +1,17 @@
-using System.ComponentModel.DataAnnotations.Schema;
+using System;
+using System.Collections.Generic;
+
+#nullable disable
 
 namespace Mercury_Backend.Models
 {
-    [Table("POST_IMAGE")]
-    public class PostImage
+    public partial class PostImage
     {
-        [Column("IMAGE_ID")]
         public string ImageId { get; set; }
-        [Column("POST_ID")]
         public string PostId { get; set; }
-        [Column("POSITION")]
         public string Position { get; set; }
+
+        public virtual Medium Image { get; set; }
+        public virtual NeedPost Post { get; set; }
     }
 }

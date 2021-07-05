@@ -1,13 +1,16 @@
-using System.ComponentModel.DataAnnotations.Schema;
+using System;
+using System.Collections.Generic;
+
+#nullable disable
 
 namespace Mercury_Backend.Models
 {
-    [Table("LIKE")]
-    public class Like
+    public partial class Like
     {
-        [Column("COMMODITY_ID")]
         public string CommodityId { get; set; }
-        [Column("USER_ID")]
         public string UserId { get; set; }
+
+        public virtual Commodity Commodity { get; set; }
+        public virtual SchoolUser User { get; set; }
     }
 }

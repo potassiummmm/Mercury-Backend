@@ -1,19 +1,25 @@
-using System.ComponentModel.DataAnnotations.Schema;
+using System;
+using System.Collections.Generic;
+
+#nullable disable
 
 namespace Mercury_Backend.Models
 {
-    [Table("NEED_POST")]
-    public class NeedPost
+    public partial class NeedPost
     {
-        [Column("ID")]
+        public NeedPost()
+        {
+            PostComments = new HashSet<PostComment>();
+            PostImages = new HashSet<PostImage>();
+        }
+
         public string Id { get; set; }
-        [Column("SENDER_ID")]
         public string SenderId { get; set; }
-        [Column("TITLE")]
         public string Title { get; set; }
-        [Column("CONTENT")]
         public string Content { get; set; }
-        [Column("SEND_TIME")]
-        public long SendTime { get; set; }
+
+        public virtual SchoolUser Sender { get; set; }
+        public virtual ICollection<PostComment> PostComments { get; set; }
+        public virtual ICollection<PostImage> PostImages { get; set; }
     }
 }

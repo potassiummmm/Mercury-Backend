@@ -1,37 +1,43 @@
-using System.ComponentModel.DataAnnotations.Schema;
+using System;
+using System.Collections.Generic;
+
+#nullable disable
 
 namespace Mercury_Backend.Models
 {
-    [Table("COMMODITY")]
-    public class Commodity
+    public partial class Commodity
     {
-        [Column("ID")]
+        public Commodity()
+        {
+            CommodityImages = new HashSet<CommodityImage>();
+            CommodityTags = new HashSet<CommodityTag>();
+            LikesNavigation = new HashSet<Like>();
+            Orders = new HashSet<Order>();
+            ShoppingCarts = new HashSet<ShoppingCart>();
+            Views = new HashSet<View>();
+        }
+
         public string Id { get; set; }
-        [Column("NAME")]
-        public string Name { get; set; }
-        [Column("OWNER_ID")]
         public string OwnerId { get; set; }
-        [Column("VIDEO_ID")]
         public string VideoId { get; set; }
-        [Column("CONDITION")]
         public string Condition { get; set; }
-        [Column("DESCRIPTION")]
-        public string Description { get; set; }
-        [Column("PRICE")]
-        public int Price { get; set; }
-        [Column("STOCK")]
-        public int Stock { get; set; }
-        [Column("FOR_RENT")]
-        public int ForRent { get; set; }
-        [Column("CLICKS")]
-        public int Clicks { get; set; }
-        [Column("LIKES")]
-        public int Likes { get; set; }
-        [Column("POPULARITY")]
-        public int Popularity { get; set; }
-        [Column("CLASSIFICATION")]
-        public int Classification { get; set; }
-        [Column("UNIT")]
+        public decimal? Price { get; set; }
+        public byte? Stock { get; set; }
+        public bool? ForRent { get; set; }
+        public decimal? Clicks { get; set; }
+        public decimal? Likes { get; set; }
+        public byte? Popularity { get; set; }
+        public byte? Classification { get; set; }
         public string Unit { get; set; }
+
+        public virtual Classification ClassificationNavigation { get; set; }
+        public virtual SchoolUser Owner { get; set; }
+        public virtual Medium Video { get; set; }
+        public virtual ICollection<CommodityImage> CommodityImages { get; set; }
+        public virtual ICollection<CommodityTag> CommodityTags { get; set; }
+        public virtual ICollection<Like> LikesNavigation { get; set; }
+        public virtual ICollection<Order> Orders { get; set; }
+        public virtual ICollection<ShoppingCart> ShoppingCarts { get; set; }
+        public virtual ICollection<View> Views { get; set; }
     }
 }

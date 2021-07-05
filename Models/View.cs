@@ -1,16 +1,17 @@
-using System.ComponentModel.DataAnnotations.Schema;
-using Microsoft.EntityFrameworkCore.Cosmos.Query.Internal;
+using System;
+using System.Collections.Generic;
+
+#nullable disable
 
 namespace Mercury_Backend.Models
 {
-    [Table("VIEW")]
-    public class View
+    public partial class View
     {
-        [Column("COMMODITY_ID")]
         public string CommodityId { get; set; }
-        [Column("TIME")]
-        public long Time { get; set; }
-        [Column("USER_ID")]
+        public DateTime? Time { get; set; }
         public string UserId { get; set; }
+
+        public virtual Commodity Commodity { get; set; }
+        public virtual SchoolUser User { get; set; }
     }
 }

@@ -1,21 +1,20 @@
-using System.ComponentModel.DataAnnotations.Schema;
+using System;
+using System.Collections.Generic;
+
+#nullable disable
 
 namespace Mercury_Backend.Models
 {
-    [Table("RATING")]
-    public class Rating
+    public partial class Rating
     {
-        [Column("USER_ID")]
         public string UserId { get; set; }
-        [Column("ORDER_ID")]
         public string OrderId { get; set; }
-        [Column("IS_BUYER")]
-        public int IsBuyer { get; set; }
-        [Column("RATING")]
-        public int RatingValue { get; set; }
-        [Column("COMMENT")]
+        public bool? IsBuyer { get; set; }
+        public byte? Rating1 { get; set; }
         public string Comment { get; set; }
-        [Column("TIME")]
-        public long Time { get; set; }
+        public DateTime? Time { get; set; }
+
+        public virtual Order Order { get; set; }
+        public virtual SchoolUser User { get; set; }
     }
 }

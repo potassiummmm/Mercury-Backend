@@ -1,27 +1,29 @@
-using System.ComponentModel.DataAnnotations.Schema;
+using System;
+using System.Collections.Generic;
+
+#nullable disable
 
 namespace Mercury_Backend.Models
 {
-    [Table("ORDER")]
-    public class Order
+    public partial class Order
     {
-        [Column("ID")]
+        public Order()
+        {
+            Ratings = new HashSet<Rating>();
+        }
+
         public string Id { get; set; }
-        [Column("BUYER_ID")]
         public string BuyerId { get; set; }
-        [Column("COMMODITY_ID")]
         public string CommodityId { get; set; }
-        [Column("COUNT")]
-        public int Count { get; set; }
-        [Column("TIME")]
-        public long Time { get; set; }
-        [Column("STATUS")]
-        public char Status { get; set; }
-        [Column("LOCATION")]
+        public byte? Count { get; set; }
+        public DateTime? Time { get; set; }
+        public string Status { get; set; }
         public string Location { get; set; }
-        [Column("RETURN_TIME")]
-        public long ReturnTime { get; set; }
-        [Column("RETURN_LOCATION")]
+        public DateTime ReturnTime { get; set; }
         public string ReturnLocation { get; set; }
+
+        public virtual SchoolUser Buyer { get; set; }
+        public virtual Commodity Commodity { get; set; }
+        public virtual ICollection<Rating> Ratings { get; set; }
     }
 }

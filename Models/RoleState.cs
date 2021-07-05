@@ -1,25 +1,26 @@
-using System.ComponentModel.DataAnnotations.Schema;
+using System;
+using System.Collections.Generic;
+
+#nullable disable
 
 namespace Mercury_Backend.Models
 {
-    [Table("ROLE_STATE")]
-    public class RoleState
+    public partial class RoleState
     {
-        [Column("ROLE_NAME")]
+        public RoleState()
+        {
+            SchoolUsers = new HashSet<SchoolUser>();
+        }
+
         public string RoleName { get; set; }
-        [Column("CAN_BAN")]
-        public int CanBan { get; set; }
-        [Column("CAN_POST")]
-        public int CanPost { get; set; }
-        [Column("CAN_PUBLISH")]
-        public int CanPublish { get; set; }
-        [Column("CAN_TRADE")]
-        public int CanTrade { get; set; }
-        [Column("CAN_COMMENT")]
-        public int CanComment { get; set; }
-        [Column("CAN_CHAT")]
-        public int CanChat { get; set; }
-        [Column("CAN_LOGIN")]
-        public int CanLogin { get; set; }
+        public bool? CanBan { get; set; }
+        public bool? CanPost { get; set; }
+        public bool? CanPublish { get; set; }
+        public bool? CanTrade { get; set; }
+        public bool? CanComment { get; set; }
+        public bool? CanChat { get; set; }
+        public bool? CanLogin { get; set; }
+
+        public virtual ICollection<SchoolUser> SchoolUsers { get; set; }
     }
 }
