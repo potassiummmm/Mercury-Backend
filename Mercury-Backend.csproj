@@ -4,7 +4,8 @@
         <TargetFramework>net5.0</TargetFramework>
         <RootNamespace>Mercury_Backend</RootNamespace>
         <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
-    </PropertyGroup>
+      <UserSecretsId>34d7084b-6186-44c4-912a-3d4484075fa2</UserSecretsId>
+  </PropertyGroup>
 
     <ItemGroup>
         <PackageReference Include="Microsoft.EntityFrameworkCore" Version="5.0.6" />

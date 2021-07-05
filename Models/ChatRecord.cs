@@ -1,23 +1,22 @@
-using System.ComponentModel.DataAnnotations.Schema;
+using System;
+using System.Collections.Generic;
+
+#nullable disable
 
 namespace Mercury_Backend.Models
 {
-    [Table("CHAT_RECORD")]
-    public class ChatRecord
+    public partial class ChatRecord
     {
-        [Column("SENDER_ID")]
         public string SenderId { get; set; }
-        [Column("RECEIVER_ID")]
         public string ReceiverId { get; set; }
-        [Column("INDEX")]
-        public int Index { get; set; }
-        [Column("CONTENT")]
+        public byte Index { get; set; }
         public string Content { get; set; }
-        [Column("MEDIA_ID")]
         public string MediaId { get; set; }
-        [Column("TIME")]
-        public long Time { get; set; }
-        [Column("STATUS")]
-        public char Status { get; set; }
+        public DateTime? Time { get; set; }
+        public string Status { get; set; }
+
+        public virtual Medium Media { get; set; }
+        public virtual SchoolUser Receiver { get; set; }
+        public virtual SchoolUser Sender { get; set; }
     }
 }

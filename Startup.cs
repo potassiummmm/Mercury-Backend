@@ -2,10 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Mercury_Backend.Contexts;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -16,6 +18,7 @@ namespace Mercury_Backend
 {
     public class Startup
     {
+        private String ConnectString = null;
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
@@ -31,6 +34,10 @@ namespace Mercury_Backend
             {
                 c.SwaggerDoc("v1", new OpenApiInfo {Title = "Mercury_Backend", Version = "v1"});
             });
+            ConnectString = Configuration["ConnectionStrings:Mercury"];
+            Console.WriteLine(ConnectString);
+            services.AddDbContext<ModelContext>(
+            options => options.UseOracle(ConnectString));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

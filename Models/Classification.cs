@@ -1,13 +1,20 @@
-using System.ComponentModel.DataAnnotations.Schema;
+using System;
+using System.Collections.Generic;
+
+#nullable disable
 
 namespace Mercury_Backend.Models
 {
-    [Table("CLASSIFICATION")]
-    public class Classification
+    public partial class Classification
     {
-        [Column("ID")]
-        public int Id { get; set; }
-        [Column("NAME")]
+        public Classification()
+        {
+            Commodities = new HashSet<Commodity>();
+        }
+
+        public byte Id { get; set; }
         public string Name { get; set; }
+
+        public virtual ICollection<Commodity> Commodities { get; set; }
     }
 }
