@@ -29,15 +29,15 @@ namespace Mercury_Backend
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddCors(option => option.AddPolicy("cors", policy => policy.AllowAnyHeader().AllowAnyMethod().AllowCredentials().AllowAnyOrigin()));
             services.AddControllers();
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo {Title = "Mercury_Backend", Version = "v1"});
             });
-            ConnectString = Configuration["ConnectionStrings:Mercury"];
-            Console.WriteLine(ConnectString);
-            services.AddDbContext<ModelContext>(
-            options => options.UseOracle(ConnectString));
+            //ConnectString = Configuration["ConnectionStrings:Mercury"];
+            //Console.WriteLine(ConnectString);
+            services.AddDbContext<ModelContext>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
