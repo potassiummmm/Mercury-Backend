@@ -55,7 +55,7 @@ namespace Mercury_Backend.Controllers
         }
 
         [HttpPost]
-        public String Post(View newView)
+        public String Post([FromForm] View newView)
         {
             JObject msg = new JObject();
             try

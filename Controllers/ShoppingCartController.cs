@@ -55,14 +55,15 @@ namespace Mercury_Backend.Controllers
         }
 
         [HttpPost]
-        public String Post([Bind("CommodityId,UserId,Count,AddTime")] ShoppingCart ShoppingCartItem)
+        public String Post([FromForm] ShoppingCart ShoppingCartItem)
         {
             JObject msg = new JObject();
             try
             {
                 context.ShoppingCarts.Add(ShoppingCartItem);
-                Console.WriteLine("okk");
+
                 context.SaveChanges();
+                msg["status"] = "success";
             }
             catch (Exception e)
             {
