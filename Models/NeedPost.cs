@@ -30,6 +30,8 @@ namespace Mercury_Backend.Models
         [Column("CONTENT")]
         [StringLength(2000)]
         public string Content { get; set; }
+        [Column("TIME")]
+        public DateTime? Time { get; set; }
 
         [ForeignKey(nameof(SenderId))]
         [InverseProperty(nameof(SchoolUser.NeedPosts))]
