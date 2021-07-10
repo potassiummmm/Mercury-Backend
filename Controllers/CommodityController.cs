@@ -1,59 +1,53 @@
+﻿using Mercury_Backend.Contexts;
+using Mercury_Backend.Models;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Mercury_Backend.Contexts;
-using Mercury_Backend.Models;
-using System.Text.Json.Serialization;
-using Microsoft.EntityFrameworkCore;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using JsonSerializer = System.Text.Json.JsonSerializer;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
 namespace Mercury_Backend.Controllers
 {
-   
     [Route("api/[controller]")]
     [ApiController]
-    public class UserController : ControllerBase
+    public class CommodityController : ControllerBase
     {
         private ModelContext context;
-        public UserController(ModelContext modelContext)
+        public CommodityController(ModelContext modelContext)
         {
             context = modelContext;
         }
-        // GET: api/<UserController>
+        // GET: api/<CommodityController>
         [HttpGet]
-        public String Get()
+        public string Get()
         {
-            JObject msg = new JObject();
-            var list = context.SchoolUsers.OrderBy(b => b.SchoolId).ToList<SchoolUser>();
-            msg["userList"] = JToken.FromObject(list);
-            return JsonConvert.SerializeObject(msg);
+            string jsonString = "";
+            var list = context.Commodities.OrderBy(b => b.Id);
+            jsonString = JsonSerializer.Serialize(list);
+            Console.WriteLine(jsonString);
+            return jsonString;
         }
 
-        // GET api/<UserController>/5
+        // GET api/<CommodityController>/5
         [HttpGet("{id}")]
         public string Get(int id)
         {
             return "value";
         }
 
-        // POST api/<UserController>
+        // POST api/<CommodityController>
         [HttpPost]
-        public String Post([FromForm]SchoolUser NewUser)
+        public string Post([FromForm]Commodity commodity)
         {
-            //String Id, String NickName, String RealName, String Phone,
-            //String Password, String Major, int Credit, String Role, int Grade,
-            //String Brief = "", String AvatarId = ""
             JObject msg = new JObject();
             try
             {
-                context.SchoolUsers.Add(NewUser);
-                Console.WriteLine("haha");
+                context.Commodities.Add(commodity);
                 context.SaveChanges();
             }
             catch (Exception e)
@@ -64,13 +58,13 @@ namespace Mercury_Backend.Controllers
             return JsonConvert.SerializeObject(msg);
         }
 
-        // PUT api/<UserController>/5
+        // PUT api/<CommodityController>/5
         [HttpPut("{id}")]
         public void Put(int id, [FromBody] string value)
         {
         }
 
-        // DELETE api/<UserController>/5
+        // DELETE api/<CommodityController>/5
         [HttpDelete("{id}")]
         public void Delete(int id)
         {

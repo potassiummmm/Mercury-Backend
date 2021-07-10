@@ -2,7 +2,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Mercury_Backend.Models;
-using System.Configuration;
 
 #nullable disable
 
@@ -17,7 +16,6 @@ namespace Mercury_Backend.Contexts
         public ModelContext(DbContextOptions<ModelContext> options)
             : base(options)
         {
-            Console.WriteLine("haha");
         }
 
         public virtual DbSet<ChatRecord> ChatRecords { get; set; }
@@ -44,7 +42,7 @@ namespace Mercury_Backend.Contexts
         {
             if (!optionsBuilder.IsConfigured)
             {
-                //optionsBuilder.UseOracle("ConnectionStrings:Mercury");
+                optionsBuilder.UseOracle("Name=ConnectionStrings:Mercury");
             }
         }
 
@@ -57,43 +55,23 @@ namespace Mercury_Backend.Contexts
                 entity.HasKey(e => new { e.SenderId, e.ReceiverId, e.Index })
                     .HasName("CHAT_RECORD_PK");
 
-                entity.ToTable("CHAT_RECORD");
+                entity.Property(e => e.SenderId).IsUnicode(false);
 
-                entity.Property(e => e.SenderId)
-                    .HasMaxLength(10)
-                    .IsUnicode(false)
-                    .HasColumnName("SENDER_ID");
+                entity.Property(e => e.ReceiverId).IsUnicode(false);
 
-                entity.Property(e => e.ReceiverId)
-                    .HasMaxLength(10)
-                    .IsUnicode(false)
-                    .HasColumnName("RECEIVER_ID");
+                entity.Property(e => e.Index).HasPrecision(4);
 
-                entity.Property(e => e.Index)
-                    .HasPrecision(4)
-                    .HasColumnName("INDEX");
-
-                entity.Property(e => e.Content)
-                    .HasMaxLength(2000)
-                    .IsUnicode(false)
-                    .HasColumnName("CONTENT");
+                entity.Property(e => e.Content).IsUnicode(false);
 
                 entity.Property(e => e.MediaId)
-                    .IsRequired()
-                    .HasMaxLength(20)
                     .IsUnicode(false)
-                    .HasColumnName("MEDIA_ID")
                     .IsFixedLength(true);
 
                 entity.Property(e => e.Status)
-                    .HasMaxLength(1)
                     .IsUnicode(false)
-                    .HasColumnName("STATUS")
                     .IsFixedLength(true);
 
-                entity.Property(e => e.Time)
-                    .HasPrecision(6)
-                    .HasColumnName("TIME");
+                entity.Property(e => e.Time).HasPrecision(6);
 
                 entity.HasOne(d => d.Media)
                     .WithMany(p => p.ChatRecords)
@@ -116,79 +94,35 @@ namespace Mercury_Backend.Contexts
 
             modelBuilder.Entity<Classification>(entity =>
             {
-                entity.ToTable("CLASSIFICATION");
+                entity.Property(e => e.Id).HasPrecision(3);
 
-                entity.HasIndex(e => e.Name, "CLASSIFICATION_NAME_UINDEX")
-                    .IsUnique();
-
-                entity.Property(e => e.Id)
-                    .HasPrecision(3)
-                    .HasColumnName("ID");
-
-                entity.Property(e => e.Name)
-                    .HasMaxLength(30)
-                    .IsUnicode(false)
-                    .HasColumnName("NAME");
+                entity.Property(e => e.Name).IsUnicode(false);
             });
 
             modelBuilder.Entity<Commodity>(entity =>
             {
-                entity.ToTable("COMMODITY");
-
                 entity.Property(e => e.Id)
-                    .HasMaxLength(12)
                     .IsUnicode(false)
-                    .HasColumnName("ID")
                     .IsFixedLength(true);
 
-                entity.Property(e => e.Classification)
-                    .HasPrecision(3)
-                    .HasColumnName("CLASSIFICATION");
+                entity.Property(e => e.Classification).HasPrecision(3);
 
-                entity.Property(e => e.Clicks)
-                    .HasColumnType("NUMBER(20)")
-                    .HasColumnName("CLICKS");
+                entity.Property(e => e.Condition).IsUnicode(false);
 
-                entity.Property(e => e.Condition)
-                    .HasMaxLength(20)
-                    .IsUnicode(false)
-                    .HasColumnName("CONDITION");
+                entity.Property(e => e.ForRent).HasPrecision(1);
 
-                entity.Property(e => e.ForRent)
-                    .HasPrecision(1)
-                    .HasColumnName("FOR_RENT");
+                entity.Property(e => e.Name).IsUnicode(false);
 
-                entity.Property(e => e.Likes)
-                    .HasColumnType("NUMBER(20)")
-                    .HasColumnName("LIKES");
+                entity.Property(e => e.OwnerId).IsUnicode(false);
 
-                entity.Property(e => e.OwnerId)
-                    .HasMaxLength(10)
-                    .IsUnicode(false)
-                    .HasColumnName("OWNER_ID");
+                entity.Property(e => e.Popularity).HasPrecision(3);
 
-                entity.Property(e => e.Popularity)
-                    .HasPrecision(3)
-                    .HasColumnName("POPULARITY");
+                entity.Property(e => e.Stock).HasPrecision(4);
 
-                entity.Property(e => e.Price)
-                    .HasColumnType("NUMBER(5,2)")
-                    .HasColumnName("PRICE");
-
-                entity.Property(e => e.Stock)
-                    .HasPrecision(4)
-                    .HasColumnName("STOCK");
-
-                entity.Property(e => e.Unit)
-                    .HasMaxLength(10)
-                    .IsUnicode(false)
-                    .HasColumnName("UNIT");
+                entity.Property(e => e.Unit).IsUnicode(false);
 
                 entity.Property(e => e.VideoId)
-                    .IsRequired()
-                    .HasMaxLength(20)
                     .IsUnicode(false)
-                    .HasColumnName("VIDEO_ID")
                     .IsFixedLength(true);
 
                 entity.HasOne(d => d.ClassificationNavigation)
@@ -213,23 +147,15 @@ namespace Mercury_Backend.Contexts
                 entity.HasKey(e => new { e.CommodityId, e.ImageId })
                     .HasName("COMMODITY_IMAGE_PK");
 
-                entity.ToTable("COMMODITY_IMAGE");
-
                 entity.Property(e => e.CommodityId)
-                    .HasMaxLength(12)
                     .IsUnicode(false)
-                    .HasColumnName("COMMODITY_ID")
                     .IsFixedLength(true);
 
                 entity.Property(e => e.ImageId)
-                    .HasMaxLength(20)
                     .IsUnicode(false)
-                    .HasColumnName("IMAGE_ID")
                     .IsFixedLength(true);
 
-                entity.Property(e => e.Order)
-                    .HasPrecision(1)
-                    .HasColumnName("ORDER");
+                entity.Property(e => e.Order).HasPrecision(1);
 
                 entity.HasOne(d => d.Commodity)
                     .WithMany(p => p.CommodityImages)
@@ -249,18 +175,11 @@ namespace Mercury_Backend.Contexts
                 entity.HasKey(e => new { e.CommodityId, e.Tag })
                     .HasName("COMMODITY_TAG_PK");
 
-                entity.ToTable("COMMODITY_TAG");
-
                 entity.Property(e => e.CommodityId)
-                    .HasMaxLength(12)
                     .IsUnicode(false)
-                    .HasColumnName("COMMODITY_ID")
                     .IsFixedLength(true);
 
-                entity.Property(e => e.Tag)
-                    .HasMaxLength(30)
-                    .IsUnicode(false)
-                    .HasColumnName("TAG");
+                entity.Property(e => e.Tag).IsUnicode(false);
 
                 entity.HasOne(d => d.Commodity)
                     .WithMany(p => p.CommodityTags)
@@ -274,18 +193,11 @@ namespace Mercury_Backend.Contexts
                 entity.HasKey(e => new { e.CommodityId, e.UserId })
                     .HasName("LIKE_PK");
 
-                entity.ToTable("LIKE");
-
                 entity.Property(e => e.CommodityId)
-                    .HasMaxLength(12)
                     .IsUnicode(false)
-                    .HasColumnName("COMMODITY_ID")
                     .IsFixedLength(true);
 
-                entity.Property(e => e.UserId)
-                    .HasMaxLength(10)
-                    .IsUnicode(false)
-                    .HasColumnName("USER_ID");
+                entity.Property(e => e.UserId).IsUnicode(false);
 
                 entity.HasOne(d => d.Commodity)
                     .WithMany(p => p.LikesNavigation)
@@ -302,61 +214,32 @@ namespace Mercury_Backend.Contexts
 
             modelBuilder.Entity<Medium>(entity =>
             {
-                entity.ToTable("MEDIA");
-
                 entity.Property(e => e.Id)
-                    .HasMaxLength(20)
                     .IsUnicode(false)
-                    .HasColumnName("ID")
                     .IsFixedLength(true);
 
-                entity.Property(e => e.Path)
-                    .HasMaxLength(100)
-                    .IsUnicode(false)
-                    .HasColumnName("PATH");
+                entity.Property(e => e.Path).IsUnicode(false);
 
-                entity.Property(e => e.Type)
-                    .HasMaxLength(10)
-                    .IsUnicode(false)
-                    .HasColumnName("TYPE");
+                entity.Property(e => e.Type).IsUnicode(false);
             });
 
             modelBuilder.Entity<Message>(entity =>
             {
-                entity.HasNoKey();
-
-                entity.ToTable("MESSAGE");
-
-                entity.Property(e => e.Content)
-                    .HasMaxLength(20)
-                    .IsUnicode(false)
-                    .HasColumnName("CONTENT");
+                entity.Property(e => e.Content).IsUnicode(false);
             });
 
             modelBuilder.Entity<NeedPost>(entity =>
             {
-                entity.ToTable("NEED_POST");
-
                 entity.Property(e => e.Id)
-                    .HasMaxLength(12)
                     .IsUnicode(false)
-                    .HasColumnName("ID")
                     .IsFixedLength(true);
 
-                entity.Property(e => e.Content)
-                    .HasMaxLength(2000)
-                    .IsUnicode(false)
-                    .HasColumnName("CONTENT");
+                entity.Property(e => e.Content).IsUnicode(false);
 
-                entity.Property(e => e.SenderId)
-                    .HasMaxLength(10)
-                    .IsUnicode(false)
-                    .HasColumnName("SENDER_ID");
+                entity.Property(e => e.SenderId).IsUnicode(false);
 
                 entity.Property(e => e.Title)
-                    .HasMaxLength(50)
                     .IsUnicode(false)
-                    .HasColumnName("TITLE")
                     .IsFixedLength(true);
 
                 entity.HasOne(d => d.Sender)
@@ -367,54 +250,29 @@ namespace Mercury_Backend.Contexts
 
             modelBuilder.Entity<Order>(entity =>
             {
-                entity.ToTable("ORDER");
-
                 entity.Property(e => e.Id)
-                    .HasMaxLength(20)
                     .IsUnicode(false)
-                    .HasColumnName("ID")
                     .IsFixedLength(true);
 
-                entity.Property(e => e.BuyerId)
-                    .HasMaxLength(10)
-                    .IsUnicode(false)
-                    .HasColumnName("BUYER_ID");
+                entity.Property(e => e.BuyerId).IsUnicode(false);
 
                 entity.Property(e => e.CommodityId)
-                    .HasMaxLength(12)
                     .IsUnicode(false)
-                    .HasColumnName("COMMODITY_ID")
                     .IsFixedLength(true);
 
-                entity.Property(e => e.Count)
-                    .HasPrecision(4)
-                    .HasColumnName("COUNT");
+                entity.Property(e => e.Count).HasPrecision(4);
 
-                entity.Property(e => e.Location)
-                    .IsRequired()
-                    .HasMaxLength(100)
-                    .IsUnicode(false)
-                    .HasColumnName("LOCATION");
+                entity.Property(e => e.Location).IsUnicode(false);
 
-                entity.Property(e => e.ReturnLocation)
-                    .IsRequired()
-                    .HasMaxLength(100)
-                    .IsUnicode(false)
-                    .HasColumnName("RETURN_LOCATION");
+                entity.Property(e => e.ReturnLocation).IsUnicode(false);
 
-                entity.Property(e => e.ReturnTime)
-                    .HasPrecision(6)
-                    .HasColumnName("RETURN_TIME");
+                entity.Property(e => e.ReturnTime).HasPrecision(6);
 
                 entity.Property(e => e.Status)
-                    .HasMaxLength(1)
                     .IsUnicode(false)
-                    .HasColumnName("STATUS")
                     .IsFixedLength(true);
 
-                entity.Property(e => e.Time)
-                    .HasPrecision(6)
-                    .HasColumnName("TIME");
+                entity.Property(e => e.Time).HasPrecision(6);
 
                 entity.HasOne(d => d.Buyer)
                     .WithMany(p => p.Orders)
@@ -429,33 +287,19 @@ namespace Mercury_Backend.Contexts
 
             modelBuilder.Entity<PostComment>(entity =>
             {
-                entity.ToTable("POST_COMMENT");
-
                 entity.Property(e => e.Id)
-                    .HasMaxLength(15)
                     .IsUnicode(false)
-                    .HasColumnName("ID")
                     .IsFixedLength(true);
 
-                entity.Property(e => e.Content)
-                    .HasMaxLength(300)
-                    .IsUnicode(false)
-                    .HasColumnName("CONTENT");
+                entity.Property(e => e.Content).IsUnicode(false);
 
                 entity.Property(e => e.PostId)
-                    .HasMaxLength(12)
                     .IsUnicode(false)
-                    .HasColumnName("POST_ID")
                     .IsFixedLength(true);
 
-                entity.Property(e => e.SenderId)
-                    .HasMaxLength(10)
-                    .IsUnicode(false)
-                    .HasColumnName("SENDER_ID");
+                entity.Property(e => e.SenderId).IsUnicode(false);
 
-                entity.Property(e => e.Time)
-                    .HasPrecision(6)
-                    .HasColumnName("TIME");
+                entity.Property(e => e.Time).HasPrecision(6);
 
                 entity.HasOne(d => d.Post)
                     .WithMany(p => p.PostComments)
@@ -473,24 +317,15 @@ namespace Mercury_Backend.Contexts
                 entity.HasKey(e => new { e.ImageId, e.PostId })
                     .HasName("POST_IMAGE_PK");
 
-                entity.ToTable("POST_IMAGE");
-
                 entity.Property(e => e.ImageId)
-                    .HasMaxLength(20)
                     .IsUnicode(false)
-                    .HasColumnName("IMAGE_ID")
                     .IsFixedLength(true);
 
                 entity.Property(e => e.PostId)
-                    .HasMaxLength(12)
                     .IsUnicode(false)
-                    .HasColumnName("POST_ID")
                     .IsFixedLength(true);
 
-                entity.Property(e => e.Position)
-                    .HasMaxLength(10)
-                    .IsUnicode(false)
-                    .HasColumnName("POSITION");
+                entity.Property(e => e.Position).IsUnicode(false);
 
                 entity.HasOne(d => d.Image)
                     .WithMany(p => p.PostImages)
@@ -510,36 +345,19 @@ namespace Mercury_Backend.Contexts
                 entity.HasKey(e => new { e.UserId, e.OrderId })
                     .HasName("RATING_PK");
 
-                entity.ToTable("RATING");
-
-                entity.Property(e => e.UserId)
-                    .HasMaxLength(10)
-                    .IsUnicode(false)
-                    .HasColumnName("USER_ID");
+                entity.Property(e => e.UserId).IsUnicode(false);
 
                 entity.Property(e => e.OrderId)
-                    .HasMaxLength(20)
                     .IsUnicode(false)
-                    .HasColumnName("ORDER_ID")
                     .IsFixedLength(true);
 
-                entity.Property(e => e.Comment)
-                    .IsRequired()
-                    .HasMaxLength(500)
-                    .IsUnicode(false)
-                    .HasColumnName("COMMENT");
+                entity.Property(e => e.Comment).IsUnicode(false);
 
-                entity.Property(e => e.IsBuyer)
-                    .HasPrecision(1)
-                    .HasColumnName("IS_BUYER");
+                entity.Property(e => e.IsBuyer).HasPrecision(1);
 
-                entity.Property(e => e.Rating1)
-                    .HasPrecision(2)
-                    .HasColumnName("RATING");
+                entity.Property(e => e.Rating1).HasPrecision(2);
 
-                entity.Property(e => e.Time)
-                    .HasPrecision(6)
-                    .HasColumnName("TIME");
+                entity.Property(e => e.Time).HasPrecision(6);
 
                 entity.HasOne(d => d.Order)
                     .WithMany(p => p.Ratings)
@@ -559,27 +377,15 @@ namespace Mercury_Backend.Contexts
                 entity.HasKey(e => new { e.ReporterId, e.InformantId })
                     .HasName("REPORT_USER_PK");
 
-                entity.ToTable("REPORT_USER");
+                entity.Property(e => e.ReporterId).IsUnicode(false);
 
-                entity.Property(e => e.ReporterId)
-                    .HasMaxLength(10)
-                    .IsUnicode(false)
-                    .HasColumnName("REPORTER_ID");
-
-                entity.Property(e => e.InformantId)
-                    .HasMaxLength(10)
-                    .IsUnicode(false)
-                    .HasColumnName("INFORMANT_ID");
+                entity.Property(e => e.InformantId).IsUnicode(false);
 
                 entity.Property(e => e.Status)
-                    .HasMaxLength(1)
                     .IsUnicode(false)
-                    .HasColumnName("STATUS")
                     .IsFixedLength(true);
 
-                entity.Property(e => e.Time)
-                    .HasPrecision(6)
-                    .HasColumnName("TIME");
+                entity.Property(e => e.Time).HasPrecision(6);
 
                 entity.HasOne(d => d.Informant)
                     .WithMany(p => p.ReportUserInformants)
@@ -599,40 +405,21 @@ namespace Mercury_Backend.Contexts
                 entity.HasKey(e => e.RoleName)
                     .HasName("ROLE_STATE_PK");
 
-                entity.ToTable("ROLE_STATE");
+                entity.Property(e => e.RoleName).IsUnicode(false);
 
-                entity.Property(e => e.RoleName)
-                    .HasMaxLength(15)
-                    .IsUnicode(false)
-                    .HasColumnName("ROLE_NAME");
+                entity.Property(e => e.CanBan).HasPrecision(1);
 
-                entity.Property(e => e.CanBan)
-                    .HasPrecision(1)
-                    .HasColumnName("CAN_BAN");
+                entity.Property(e => e.CanChat).HasPrecision(1);
 
-                entity.Property(e => e.CanChat)
-                    .HasPrecision(1)
-                    .HasColumnName("CAN_CHAT");
+                entity.Property(e => e.CanComment).HasPrecision(1);
 
-                entity.Property(e => e.CanComment)
-                    .HasPrecision(1)
-                    .HasColumnName("CAN_COMMENT");
+                entity.Property(e => e.CanLogin).HasPrecision(1);
 
-                entity.Property(e => e.CanLogin)
-                    .HasPrecision(1)
-                    .HasColumnName("CAN_LOGIN");
+                entity.Property(e => e.CanPost).HasPrecision(1);
 
-                entity.Property(e => e.CanPost)
-                    .HasPrecision(1)
-                    .HasColumnName("CAN_POST");
+                entity.Property(e => e.CanPublish).HasPrecision(1);
 
-                entity.Property(e => e.CanPublish)
-                    .HasPrecision(1)
-                    .HasColumnName("CAN_PUBLISH");
-
-                entity.Property(e => e.CanTrade)
-                    .HasPrecision(1)
-                    .HasColumnName("CAN_TRADE");
+                entity.Property(e => e.CanTrade).HasPrecision(1);
             });
 
             modelBuilder.Entity<SchoolUser>(entity =>
@@ -640,71 +427,31 @@ namespace Mercury_Backend.Contexts
                 entity.HasKey(e => e.SchoolId)
                     .HasName("SCHOOL_USER_PK");
 
-                entity.ToTable("SCHOOL_USER");
-
-                entity.HasIndex(e => e.Nickname, "SCHOOL_USER_NICKNAME_UINDEX")
-                    .IsUnique();
-
-                entity.HasIndex(e => e.Phone, "SCHOOL_USER_PHONE_UINDEX")
-                    .IsUnique();
-
-                entity.Property(e => e.SchoolId)
-                    .HasMaxLength(10)
-                    .IsUnicode(false)
-                    .HasColumnName("SCHOOL_ID");
+                entity.Property(e => e.SchoolId).IsUnicode(false);
 
                 entity.Property(e => e.AvatarId)
-                    .IsRequired()
-                    .HasMaxLength(20)
                     .IsUnicode(false)
-                    .HasColumnName("AVATAR_ID")
                     .IsFixedLength(true);
 
-                entity.Property(e => e.Brief)
-                    .IsRequired()
-                    .HasMaxLength(150)
-                    .IsUnicode(false)
-                    .HasColumnName("BRIEF");
+                entity.Property(e => e.Brief).IsUnicode(false);
 
-                entity.Property(e => e.Credit)
-                    .HasPrecision(3)
-                    .HasColumnName("CREDIT");
+                entity.Property(e => e.Credit).HasPrecision(3);
 
-                entity.Property(e => e.Grade)
-                    .HasPrecision(2)
-                    .HasColumnName("GRADE");
+                entity.Property(e => e.Grade).HasPrecision(2);
 
-                entity.Property(e => e.Major)
-                    .IsRequired()
-                    .HasMaxLength(40)
-                    .IsUnicode(false)
-                    .HasColumnName("MAJOR");
+                entity.Property(e => e.Major).IsUnicode(false);
 
-                entity.Property(e => e.Nickname)
-                    .HasMaxLength(30)
-                    .IsUnicode(false)
-                    .HasColumnName("NICKNAME");
+                entity.Property(e => e.Nickname).IsUnicode(false);
 
-                entity.Property(e => e.Password)
-                    .HasMaxLength(100)
-                    .IsUnicode(false)
-                    .HasColumnName("PASSWORD");
+                entity.Property(e => e.Password).IsUnicode(false);
 
                 entity.Property(e => e.Phone)
-                    .HasMaxLength(11)
                     .IsUnicode(false)
-                    .HasColumnName("PHONE")
                     .IsFixedLength(true);
 
-                entity.Property(e => e.RealName)
-                    .HasMaxLength(30)
-                    .IsUnicode(false)
-                    .HasColumnName("REAL_NAME");
+                entity.Property(e => e.RealName).IsUnicode(false);
 
-                entity.Property(e => e.Role)
-                    .HasMaxLength(15)
-                    .IsUnicode(false)
-                    .HasColumnName("ROLE");
+                entity.Property(e => e.Role).IsUnicode(false);
 
                 entity.HasOne(d => d.Avatar)
                     .WithMany(p => p.SchoolUsers)
@@ -723,26 +470,15 @@ namespace Mercury_Backend.Contexts
                 entity.HasKey(e => new { e.CommodityId, e.UserId })
                     .HasName("SHOPPING_CART_PK");
 
-                entity.ToTable("SHOPPING_CART");
-
                 entity.Property(e => e.CommodityId)
-                    .HasMaxLength(12)
                     .IsUnicode(false)
-                    .HasColumnName("COMMODITY_ID")
                     .IsFixedLength(true);
 
-                entity.Property(e => e.UserId)
-                    .HasMaxLength(10)
-                    .IsUnicode(false)
-                    .HasColumnName("USER_ID");
+                entity.Property(e => e.UserId).IsUnicode(false);
 
-                entity.Property(e => e.AddTime)
-                    .HasPrecision(6)
-                    .HasColumnName("ADD_TIME");
+                entity.Property(e => e.AddTime).HasPrecision(6);
 
-                entity.Property(e => e.Count)
-                    .HasPrecision(4)
-                    .HasColumnName("COUNT");
+                entity.Property(e => e.Count).HasPrecision(4);
 
                 entity.HasOne(d => d.Commodity)
                     .WithMany(p => p.ShoppingCarts)
@@ -762,36 +498,19 @@ namespace Mercury_Backend.Contexts
                 entity.HasKey(e => e.CaseId)
                     .HasName("USER_BANNED_PK");
 
-                entity.ToTable("USER_BANNED");
-
                 entity.Property(e => e.CaseId)
-                    .HasMaxLength(20)
                     .IsUnicode(false)
-                    .HasColumnName("CASE_ID")
                     .IsFixedLength(true);
 
-                entity.Property(e => e.AdminId)
-                    .HasMaxLength(10)
-                    .IsUnicode(false)
-                    .HasColumnName("ADMIN_ID");
+                entity.Property(e => e.AdminId).IsUnicode(false);
 
-                entity.Property(e => e.HandleTime)
-                    .HasPrecision(6)
-                    .HasColumnName("HANDLE_TIME");
+                entity.Property(e => e.HandleTime).HasPrecision(6);
 
-                entity.Property(e => e.OriginRole)
-                    .HasMaxLength(15)
-                    .IsUnicode(false)
-                    .HasColumnName("ORIGIN_ROLE");
+                entity.Property(e => e.OriginRole).IsUnicode(false);
 
-                entity.Property(e => e.TillTime)
-                    .HasPrecision(6)
-                    .HasColumnName("TILL_TIME");
+                entity.Property(e => e.TillTime).HasPrecision(6);
 
-                entity.Property(e => e.UserId)
-                    .HasMaxLength(10)
-                    .IsUnicode(false)
-                    .HasColumnName("USER_ID");
+                entity.Property(e => e.UserId).IsUnicode(false);
 
                 entity.HasOne(d => d.Admin)
                     .WithMany(p => p.UserBannedAdmins)
@@ -814,22 +533,13 @@ namespace Mercury_Backend.Contexts
                 entity.HasKey(e => new { e.CommodityId, e.UserId })
                     .HasName("VIEW_PK");
 
-                entity.ToTable("VIEW");
-
                 entity.Property(e => e.CommodityId)
-                    .HasMaxLength(12)
                     .IsUnicode(false)
-                    .HasColumnName("COMMODITY_ID")
                     .IsFixedLength(true);
 
-                entity.Property(e => e.UserId)
-                    .HasMaxLength(10)
-                    .IsUnicode(false)
-                    .HasColumnName("USER_ID");
+                entity.Property(e => e.UserId).IsUnicode(false);
 
-                entity.Property(e => e.Time)
-                    .HasPrecision(6)
-                    .HasColumnName("TIME");
+                entity.Property(e => e.Time).HasPrecision(6);
 
                 entity.HasOne(d => d.Commodity)
                     .WithMany(p => p.Views)
