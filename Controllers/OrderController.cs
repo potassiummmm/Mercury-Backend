@@ -1,12 +1,13 @@
-﻿using Mercury_Backend.Models;
+﻿using Mercury_Backend.Contexts;
+using Mercury_Backend.Models;
+using Mercury_Backend.Utils;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Mercury_Backend.Contexts;
-using Newtonsoft.Json.Linq;
-using Newtonsoft.Json;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -14,33 +15,27 @@ namespace Mercury_Backend.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class LikesController : ControllerBase
+    public class OrderController : ControllerBase
     {
         private ModelContext context;
-        public LikesController(ModelContext modelContext)
+        private static Random random;
+        public OrderController(ModelContext modelContext)
         {
             context = modelContext;
+            random = new Random();
         }
-        // GET: api/<LikesController>
+        // GET: api/<OrderController>
         [HttpGet]
-        public IEnumerable<string> Get()
-        {
-            return new string[] { "value1", "value2" };
-        }
-
-        // GET api/<LikesController>/5
-        [HttpGet("{userId}")]
-        public string Get(string userId)
+        public string Get()
         {
             JObject msg = new JObject();
             try
             {
-                var userList = context.Likes.Where(b => b.UserId == userId).ToList<Like>();
-                msg["userList"] = JToken.FromObject(userList);
-                msg["user"] = JToken.FromObject(userList[0].User);
+                var orderList = context.Orders.OrderByDescending(b => b.Time).ToList<Order>();
+                msg["orderList"] = JToken.FromObject(orderList);
                 msg["status"] = "success";
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 Console.WriteLine(e.ToString());
                 msg["status"] = "fail";
@@ -48,32 +43,43 @@ namespace Mercury_Backend.Controllers
             return JsonConvert.SerializeObject(msg);
         }
 
-        // POST api/<LikesController>
+        // GET api/<OrderController>/5
+        [HttpGet("{id}")]
+        public string Get(int id)
+        {
+            return "value";
+        }
+
+        // POST api/<OrderController>
         [HttpPost]
-        public string Post([FromForm] Like like)
+        public string Post([FromForm] Order order)
         {
             JObject msg = new JObject();
             try
             {
-                context.Likes.Add(like);
+                order.Id = Generator.GenerateId(20);
+                order.Time = DateTime.Now;
+                order.ReturnTime = Convert.ToDateTime(order.ReturnTime);
+                order.Status = "UNPAID";
+                context.Orders.Add(order);
                 context.SaveChanges();
                 msg["status"] = "success";
             }
-            catch(Exception e)
+            catch (Exception e)
             {
-                msg["status"] = "fail";
                 Console.WriteLine(e.ToString());
+                msg["status"] = "fail";
             }
             return JsonConvert.SerializeObject(msg);
         }
 
-        // PUT api/<LikesController>/5
+        // PUT api/<OrderController>/5
         [HttpPut("{id}")]
         public void Put(int id, [FromBody] string value)
         {
         }
 
-        // DELETE api/<LikesController>/5
+        // DELETE api/<OrderController>/5
         [HttpDelete("{id}")]
         public void Delete(int id)
         {

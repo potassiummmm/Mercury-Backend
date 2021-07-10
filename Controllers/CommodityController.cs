@@ -7,7 +7,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using JsonSerializer = System.Text.Json.JsonSerializer;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -26,11 +25,18 @@ namespace Mercury_Backend.Controllers
         [HttpGet]
         public string Get()
         {
-            string jsonString = "";
-            var list = context.Commodities.OrderBy(b => b.Id);
-            jsonString = JsonSerializer.Serialize(list);
-            Console.WriteLine(jsonString);
-            return jsonString;
+            JObject msg = new JObject();
+            try
+            {
+                var commodityList = context.Commodities.OrderBy(b => b.Id).ToList<Commodity>();
+                msg["commodityList"] = JToken.FromObject(commodityList);
+                msg["status"] = "success";
+            }
+            catch(Exception e)
+            {
+                msg["status"] = "fail";
+            }
+            return JsonConvert.SerializeObject(msg);
         }
 
         // GET api/<CommodityController>/5
@@ -49,6 +55,7 @@ namespace Mercury_Backend.Controllers
             {
                 context.Commodities.Add(commodity);
                 context.SaveChanges();
+                msg["status"] = "success";
             }
             catch (Exception e)
             {
