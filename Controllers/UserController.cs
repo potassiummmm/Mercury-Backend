@@ -21,20 +21,18 @@ namespace Mercury_Backend.Controllers
     public class UserController : ControllerBase
     {
         private ModelContext context;
-        public UserController(ModelContext ModelContext)
+        public UserController(ModelContext modelContext)
         {
-            context = ModelContext;
+            context = modelContext;
         }
         // GET: api/<UserController>
         [HttpGet]
         public String Get()
         {
-            String jsonString = "";
-            var list = context.SchoolUsers.OrderBy(b => b.SchoolId);
-            jsonString = JsonSerializer.Serialize(list);
-            Console.WriteLine(jsonString);   
-            return jsonString;
-            //return new string[] { "value1", "value2" };
+            JObject msg = new JObject();
+            var list = context.SchoolUsers.OrderBy(b => b.SchoolId).ToList<SchoolUser>();
+            msg["userList"] = JToken.FromObject(list);
+            return JsonConvert.SerializeObject(msg);
         }
 
         // GET api/<UserController>/5
