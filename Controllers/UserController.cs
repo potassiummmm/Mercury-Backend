@@ -9,7 +9,6 @@ using System.Text.Json.Serialization;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using JsonSerializer = System.Text.Json.JsonSerializer;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -55,6 +54,7 @@ namespace Mercury_Backend.Controllers
                 context.SchoolUsers.Add(NewUser);
                 Console.WriteLine("haha");
                 context.SaveChanges();
+                msg["status"] = "success";
             }
             catch (Exception e)
             {

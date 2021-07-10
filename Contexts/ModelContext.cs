@@ -238,6 +238,8 @@ namespace Mercury_Backend.Contexts
 
                 entity.Property(e => e.SenderId).IsUnicode(false);
 
+                entity.Property(e => e.Time).HasPrecision(6);
+
                 entity.Property(e => e.Title)
                     .IsUnicode(false)
                     .IsFixedLength(true);
@@ -268,9 +270,7 @@ namespace Mercury_Backend.Contexts
 
                 entity.Property(e => e.ReturnTime).HasPrecision(6);
 
-                entity.Property(e => e.Status)
-                    .IsUnicode(false)
-                    .IsFixedLength(true);
+                entity.Property(e => e.Status).IsUnicode(false);
 
                 entity.Property(e => e.Time).HasPrecision(6);
 
@@ -553,6 +553,8 @@ namespace Mercury_Backend.Contexts
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("VIEW_USER_SCHOOL_ID_FK");
             });
+
+            modelBuilder.HasSequence("SEQ");
 
             OnModelCreatingPartial(modelBuilder);
         }
