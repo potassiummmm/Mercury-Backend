@@ -1,15 +1,13 @@
+using Mercury_Backend.Models;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Mercury_Backend.Contexts;
-using Mercury_Backend.Models;
-using System.Text.Json.Serialization;
-using Microsoft.EntityFrameworkCore;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using JsonSerializer = System.Text.Json.JsonSerializer;
+using Newtonsoft.Json.Linq;
+using Newtonsoft.Json;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -131,16 +129,16 @@ namespace Mercury_Backend.Controllers
             return JsonConvert.SerializeObject(msg);
         }
 
-        [HttpPut("{commodityId,userId,count}")]
-        public void Put(string commodityId, string userId, byte count)
+        [HttpPut("{commdityId,userId,count}")]
+        public string Put(string commodityId, string userId,  byte count)
         {
-
+            JObject msg = new JObject();
             var ShoppingCartItem = context.ShoppingCarts.Where(e => e.UserId == userId);
 
             if (ShoppingCartItem == null)
             {
-
-                return;
+                msg["status"] = "fail";
+                return JsonConvert.SerializeObject(msg); ;
             }
             // return JsonSerializer.Serialize(ShoppingCartItem);
             foreach (var item in ShoppingCartItem)
@@ -156,15 +154,15 @@ namespace Mercury_Backend.Controllers
                         context.SaveChanges();
 
                     
-
+                        msg["status"] = "success";
                 }
 
-                // msg["status"] = "success";
+                
 
 
-                return;
+                
             }
-
+            return JsonConvert.SerializeObject(msg);
 
         }
 
