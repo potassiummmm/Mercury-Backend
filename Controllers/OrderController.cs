@@ -31,7 +31,7 @@ namespace Mercury_Backend.Controllers
             JObject msg = new JObject();
             try
             {
-                var orderList = context.Orders.OrderByDescending(b => b.Time).ToList<Order>();
+                var orderList = context.Orders.OrderByDescending(order => order.Time).ToList<Order>();
                 msg["orderList"] = JToken.FromObject(orderList);
                 msg["status"] = "success";
             }
@@ -45,9 +45,21 @@ namespace Mercury_Backend.Controllers
 
         // GET api/<OrderController>/5
         [HttpGet("{id}")]
-        public string Get(int id)
+        public string Get(string id)
         {
-            return "value";
+            JObject msg = new JObject();
+            try
+            {
+                var orderList = context.Orders.Where(order => order.Id == id).ToList<Order>();
+                msg["orderList"] = JToken.FromObject(orderList);
+                msg["status"] = "success";
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.ToString());
+                msg["status"] = "fail";
+            }
+            return JsonConvert.SerializeObject(msg);
         }
 
         // POST api/<OrderController>
@@ -75,14 +87,109 @@ namespace Mercury_Backend.Controllers
 
         // PUT api/<OrderController>/5
         [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
+        public string Put(string id, [FromForm]string newStatus)
         {
+            JObject msg = new JObject();
+            if(newStatus != "PAID" && newStatus != "CANCELLED")
+            {
+                msg["status"] = "fail";
+                msg["failReason"] = "Wrong status";
+                return JsonConvert.SerializeObject(msg);
+            }
+            try
+            {
+                var order = context.Orders.Where(order => order.Id == id).ToList<Order>();
+                if (order != null)
+                {
+                    if(order[0].Status != "UNPAID")
+                    {
+                        msg["status"] = "fail";
+                        msg["failReason"] = "Cannot change the status of paid or cancelled order";
+                        return JsonConvert.SerializeObject(msg);
+                    }
+                    order[0].Status = newStatus;
+                    context.SaveChanges();
+                    msg["status"] = "success";
+                }
+                else
+                {
+                    msg["status"] = "fail";
+                    msg["failReason"] = "Order not found";
+                }
+            }
+            catch(Exception e)
+            {
+                Console.WriteLine(e.ToString());
+                msg["status"] = "fail";
+            }
+            return JsonConvert.SerializeObject(msg);
         }
 
         // DELETE api/<OrderController>/5
         [HttpDelete("{id}")]
         public void Delete(int id)
         {
+        }
+
+        //GET api/order/<OrderId>/rating
+        [HttpGet("{orderId}/rating")]
+        public string PostRating(string orderId)
+        {
+            JObject msg = new JObject();
+            try
+            {
+                var ratingList = context.Ratings.Where(rating => rating.OrderId == orderId).ToList<Rating>();
+                msg["ratingList"] = JToken.FromObject(ratingList);
+                msg["status"] = "success";
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.ToString());
+                msg["status"] = "fail";
+            }
+            return JsonConvert.SerializeObject(msg);
+        }
+
+        //POST api/order/<OrderId>/rating
+        [HttpPost("{id}/rating")]
+        public string PostRating(string id, [FromForm]Rating rating)
+        {
+            JObject msg = new JObject();
+            try
+            {
+                rating.RatingId = Generator.GenerateId(20);
+                rating.OrderId = id;
+                rating.Time = DateTime.Now;
+                context.Ratings.Add(rating);
+                context.SaveChanges();
+                msg["status"] = "success";
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.ToString());
+                msg["status"] = "fail";
+            }
+            return JsonConvert.SerializeObject(msg);
+        }
+
+        //DELETE api/order/<OrderId>/rating/<RatingId>
+        [HttpDelete("{orderId}/rating/{ratingId}")]
+        public string PostRating(string id, string ratingId)
+        {
+            JObject msg = new JObject();
+            try
+            {
+                var rating = context.Ratings.Where(rating => rating.RatingId == ratingId).ToList<Rating>();
+                context.Ratings.Remove(rating[0]);
+                context.SaveChanges();
+                msg["status"] = "success";
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.ToString());
+                msg["status"] = "fail";
+            }
+            return JsonConvert.SerializeObject(msg);
         }
     }
 }
