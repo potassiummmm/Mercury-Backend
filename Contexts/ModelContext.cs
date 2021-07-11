@@ -138,7 +138,6 @@ namespace Mercury_Backend.Contexts
                 entity.HasOne(d => d.Video)
                     .WithMany(p => p.Commodities)
                     .HasForeignKey(d => d.VideoId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("COMMODITY_MEDIA_ID_FK");
             });
 
@@ -304,11 +303,13 @@ namespace Mercury_Backend.Contexts
                 entity.HasOne(d => d.Post)
                     .WithMany(p => p.PostComments)
                     .HasForeignKey(d => d.PostId)
+                    .OnDelete(DeleteBehavior.Cascade)
                     .HasConstraintName("POST_COMMENT_NEED_POST_ID_FK");
 
                 entity.HasOne(d => d.Sender)
                     .WithMany(p => p.PostComments)
                     .HasForeignKey(d => d.SenderId)
+                    .OnDelete(DeleteBehavior.Cascade)
                     .HasConstraintName("POST_COMMENT_USER_SCHOOL_ID_FK");
             });
 
@@ -330,13 +331,11 @@ namespace Mercury_Backend.Contexts
                 entity.HasOne(d => d.Image)
                     .WithMany(p => p.PostImages)
                     .HasForeignKey(d => d.ImageId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("POST_IMAGE_COM_VIDEO_ID_FK");
 
                 entity.HasOne(d => d.Post)
                     .WithMany(p => p.PostImages)
                     .HasForeignKey(d => d.PostId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("POST_IMAGE_NEED_POST_ID_FK");
             });
 
