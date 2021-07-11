@@ -63,6 +63,7 @@ namespace Mercury_Backend.Controllers
                 context.Views.Add(newView);
 
                 context.SaveChanges();
+                msg["status"] = "success";
             }
             catch (Exception e)
             {
