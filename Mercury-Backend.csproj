@@ -8,6 +8,7 @@
   </PropertyGroup>
 
     <ItemGroup>
+        <PackageReference Include="JWT" Version="8.2.2" />
         <PackageReference Include="Microsoft.Data.SqlClient" Version="3.0.0" />
         <PackageReference Include="Microsoft.EntityFrameworkCore" Version="5.0.7" />
         <PackageReference Include="Microsoft.EntityFrameworkCore.Cosmos" Version="5.0.7" />
