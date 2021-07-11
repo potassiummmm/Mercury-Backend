@@ -43,20 +43,29 @@ namespace Mercury_Backend.Controllers
         [HttpGet("{id}")]
         public string Get(string id)
         {
-            var list = context.Commodities.OrderBy(b => b.Id == id);
-            string jsonString = JsonSerializer.Serialize(list);
-            Console.WriteLine(jsonString);
-            return jsonString;
+            JObject msg = new JObject();
+            try
+            {
+                var commodityList = context.Commodities.OrderBy(b => b.Id == id).ToList<Commodity>();
+                msg["commodityList"] = JToken.FromObject(commodityList);
+                msg["status"] = "success";
+            }
+            catch(Exception e)
+            {
+                msg["status"] = "fail";
+            }
+            return JsonConvert.SerializeObject(msg);
         }
 
         // POST api/<CommodityController>
         [HttpPost]
-        public string Post([FromForm]Commodity commodity)
+        public string Post([FromForm]Commodity newCommodity)
         {
             JObject msg = new JObject();
             try
             {
-                context.Commodities.Add(commodity);
+                context.Commodities.Add(newCommodity);
+                // Console.WriteLine("haha");
                 context.SaveChanges();
                 msg["status"] = "success";
             }
