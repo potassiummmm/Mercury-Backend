@@ -28,7 +28,6 @@ namespace Mercury_Backend.Models
         [Column("OWNER_ID")]
         [StringLength(10)]
         public string OwnerId { get; set; }
-        [Required]
         [Column("VIDEO_ID")]
         [StringLength(20)]
         public string VideoId { get; set; }
