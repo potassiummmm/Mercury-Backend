@@ -100,6 +100,13 @@ namespace Mercury_Backend.Controllers
                     {
                         await videos[i].CopyToAsync(stream);
                     }
+
+                    var video = new Medium();
+                    video.Id = tmpVideoId;
+                    video.Type = "Video";
+                    video.Path = path;
+                    context.Media.Add(video);
+                    newCommodity.VideoId = tmpVideoId;
                 }
 
                 
