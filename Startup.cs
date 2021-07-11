@@ -18,7 +18,6 @@ namespace Mercury_Backend
 {
     public class Startup
     {
-        private String ConnectString = null;
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
@@ -35,8 +34,6 @@ namespace Mercury_Backend
             {
                 c.SwaggerDoc("v1", new OpenApiInfo {Title = "Mercury_Backend", Version = "v1"});
             });
-            //ConnectString = Configuration["ConnectionStrings:Mercury"];
-            //Console.WriteLine(ConnectString);
             services.AddDbContext<ModelContext>();
         }
 
