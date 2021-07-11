@@ -342,12 +342,7 @@ namespace Mercury_Backend.Contexts
 
             modelBuilder.Entity<Rating>(entity =>
             {
-                entity.HasKey(e => new { e.UserId, e.OrderId })
-                    .HasName("RATING_PK");
-
-                entity.Property(e => e.UserId).IsUnicode(false);
-
-                entity.Property(e => e.OrderId)
+                entity.Property(e => e.RatingId)
                     .IsUnicode(false)
                     .IsFixedLength(true);
 
@@ -355,20 +350,24 @@ namespace Mercury_Backend.Contexts
 
                 entity.Property(e => e.IsBuyer).HasPrecision(1);
 
-                entity.Property(e => e.Rating1).HasPrecision(2);
+                entity.Property(e => e.OrderId)
+                    .IsUnicode(false)
+                    .IsFixedLength(true);
+
+                entity.Property(e => e.Rate).HasPrecision(2);
 
                 entity.Property(e => e.Time).HasPrecision(6);
+
+                entity.Property(e => e.UserId).IsUnicode(false);
 
                 entity.HasOne(d => d.Order)
                     .WithMany(p => p.Ratings)
                     .HasForeignKey(d => d.OrderId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("RATING_ORDER_ID_FK");
 
                 entity.HasOne(d => d.User)
                     .WithMany(p => p.Ratings)
                     .HasForeignKey(d => d.UserId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("RATING_USER_SCHOOL_ID_FK");
             });
 
