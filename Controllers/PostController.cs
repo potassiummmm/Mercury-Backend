@@ -19,7 +19,7 @@ namespace Mercury_Backend.Controllers
     [ApiController]
     public class PostController : ControllerBase
     {
-        private ModelContext context;
+        private readonly ModelContext context;
         private static Random random;
         public PostController(ModelContext modelContext)
         {

@@ -17,7 +17,7 @@ namespace Mercury_Backend.Controllers
     [ApiController]
     public class OrderController : ControllerBase
     {
-        private ModelContext context;
+        private readonly ModelContext context;
         private static Random random;
         public OrderController(ModelContext modelContext)
         {
