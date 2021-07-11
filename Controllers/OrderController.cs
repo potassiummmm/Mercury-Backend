@@ -133,7 +133,7 @@ namespace Mercury_Backend.Controllers
 
         //GET api/order/<OrderId>/rating
         [HttpGet("{orderId}/rating")]
-        public string PostRating(string orderId)
+        public string GetRating(string orderId)
         {
             JObject msg = new JObject();
             try
@@ -174,7 +174,7 @@ namespace Mercury_Backend.Controllers
 
         //DELETE api/order/<OrderId>/rating/<RatingId>
         [HttpDelete("{orderId}/rating/{ratingId}")]
-        public string PostRating(string id, string ratingId)
+        public string DeleteRating(string id, string ratingId)
         {
             JObject msg = new JObject();
             try

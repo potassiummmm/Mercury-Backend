@@ -28,13 +28,26 @@ namespace Mercury_Backend.Controllers
         }
         // GET: api/<PostController>
         [HttpGet]
-        public string Get()
+        public string Get([FromForm] string userId, [FromForm] int maxNumber=10, [FromForm] int pageNumber=1)
         {
             JObject msg = new JObject();
             try
             {
-                var postList = context.NeedPosts.OrderBy(b => b.Time);
-                msg["postList"] = JToken.FromObject(postList);
+                List<NeedPost> postList = null;
+                if(userId != null)
+                {
+                    postList = context.NeedPosts.Where(post => post.SenderId == userId).OrderBy(post => post.Time).ToList();
+                }
+                else
+                {
+                    postList = context.NeedPosts.OrderBy(post => post.Time).ToList();
+                }
+                List<NeedPost> result = new List<NeedPost>();
+                for(int i = 0; i < maxNumber && i + (pageNumber - 1)*maxNumber < postList.Count(); ++i)
+                {
+                    result.Add(postList[i + (pageNumber - 1) * maxNumber]);
+                }
+                msg["postList"] = JToken.FromObject(result);
                 msg["status"] = "success";
             }
             catch(Exception e)
@@ -46,10 +59,22 @@ namespace Mercury_Backend.Controllers
         }
 
         // GET api/<PostController>/5
-        [HttpGet("{id}")]
-        public string Get(int id)
+        [HttpGet("{postId}")]
+        public string Get(string postId)
         {
-            return "value";
+            JObject msg = new JObject();
+            try
+            {
+                var post = context.NeedPosts.Where(post => post.Id == postId);
+                msg["post"] = JToken.FromObject(post);
+                msg["status"] = "success";
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.ToString());
+                msg["status"] = "fail";
+            }
+            return JsonConvert.SerializeObject(msg);
         }
 
         // POST api/<PostController>
@@ -108,9 +133,91 @@ namespace Mercury_Backend.Controllers
         }
 
         // DELETE api/<PostController>/5
-        [HttpDelete("{id}")]
-        public void Delete(int id)
+        [HttpDelete("{postId}")]
+        public string Delete(string postId)
         {
+            JObject msg = new JObject();
+            try
+            {
+                //var commentList = context.PostComments.Where(comment => comment.PostId == postId).ToList();
+                //for(int i = 0; i < commentList.Count(); ++i)
+                //{
+                //    context.PostComments.Remove(commentList[i]);
+                //    Console.WriteLine(commentList.Count());
+                //}
+                //Console.WriteLine("Delete all comments");
+                var post = context.NeedPosts.Where(post => post.Id == postId).ToList();
+                context.NeedPosts.Remove(post[0]);
+                context.SaveChanges();
+                msg["status"] = "success";
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.ToString());
+                msg["status"] = "fail";
+            }
+            return JsonConvert.SerializeObject(msg);
+        }
+
+        // GET api/post/<postId>/comment
+        [HttpGet("{postId}/comment")]
+        public string PostComment(string postId)
+        {
+            JObject msg = new JObject();
+            try
+            {
+                var commentList = context.PostComments.Where(comment => comment.PostId == postId).ToList<PostComment>();
+                msg["commentList"] = JToken.FromObject(commentList);
+                msg["status"] = "success";
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.ToString());
+                msg["status"] = "fail";
+            }
+            return JsonConvert.SerializeObject(msg);
+        }
+
+        // POST api/post/<postId>/comment
+        [HttpPost("{postId}/comment")]
+        public string PostComment(string postId, [FromForm] PostComment comment)
+        {
+            JObject msg = new JObject();
+            try
+            {
+                comment.Id = Generator.GenerateId(15);
+                comment.Time = DateTime.Now;
+                comment.PostId = postId;
+                context.PostComments.Add(comment);
+                context.SaveChanges();
+                msg["status"] = "success";
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.ToString());
+                msg["status"] = "fail";
+            }
+            return JsonConvert.SerializeObject(msg);
+        }
+
+        // DELETE api/post/<postId>/comment/<commentId>
+        [HttpDelete("{postId}/comment/{commentId}")]
+        public string DeleteComment(string postId, string commentId)
+        {
+            JObject msg = new JObject();
+            try
+            {
+                var comment = context.PostComments.Where(comment => comment.Id == commentId).ToList<PostComment>();
+                context.PostComments.Remove(comment[0]);
+                context.SaveChanges();
+                msg["status"] = "success";
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.ToString());
+                msg["status"] = "fail";
+            }
+            return JsonConvert.SerializeObject(msg);
         }
     }
 }
