@@ -40,12 +40,12 @@ namespace Mercury_Backend.Controllers
         }
 
 
-        [HttpGet("{id}")]
-        public string Get(string id)
+        [HttpGet("{userId}")]
+        public string Get(string userId)
         {
             String jsonString = "";
             var list = context.Views
-                .Where(e => e.UserId == id)
+                .Where(e => e.UserId == userId)
                 .OrderBy(e => e.CommodityId);
             jsonString = JsonSerializer.Serialize(list);
             Console.WriteLine(jsonString);
@@ -61,7 +61,7 @@ namespace Mercury_Backend.Controllers
             try
             {
                 context.Views.Add(newView);
-                Console.WriteLine("okk");
+
                 context.SaveChanges();
             }
             catch (Exception e)
@@ -78,12 +78,16 @@ namespace Mercury_Backend.Controllers
             JObject msg = new JObject();
 
             var views = context.Views.Where(e => e.UserId == userId);
-            foreach(var view in views)
+            if (views != null)
             {
-                context.Views.Remove(view);
+                foreach (var view in views)
+                {
+                    context.Views.Remove(view);
+                    context.SaveChanges();
+                }
+
+
             }
-            
-            context.SaveChanges();
             return JsonConvert.SerializeObject(msg);
         }
 

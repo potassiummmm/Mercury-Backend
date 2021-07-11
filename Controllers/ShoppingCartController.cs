@@ -32,27 +32,48 @@ namespace Mercury_Backend.Controllers
         public String Get()
         {
             String jsonString = "";
-            var list =  context.ShoppingCarts.OrderBy(b => b.UserId);
+            var list = context.ShoppingCarts.OrderBy(b => b.UserId);
             jsonString = JsonSerializer.Serialize(list);
             Console.WriteLine(jsonString);
             return jsonString;
-          
+
         }
 
-
-        [HttpGet("{id}")]
-        public string Get(string id)
+        /*
+        [HttpGet("{userId}")]
+        public string Get(string userId)
         {
             String jsonString = "";
             var list = context.ShoppingCarts
-                .Where(e => e.UserId == id)
-                .OrderBy(e => e.CommodityId);
+                .Where(e => e.UserId == userId).ToList();
             jsonString = JsonSerializer.Serialize(list);
             Console.WriteLine(jsonString);
             return jsonString;
 
 
         }
+        */
+
+        [HttpGet("{userId}")]
+        public string Get(string userId)
+        {
+            JObject msg = new JObject();
+            String jsonString = "";
+            try
+            {
+                var list = context.ShoppingCarts.Where(b => b.UserId == userId).ToList<ShoppingCart>();
+                jsonString = JsonSerializer.Serialize(list);
+
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.ToString());
+                msg["status"] = "fail";
+            }
+            return jsonString;
+        }
+
+
 
         [HttpPost]
         public String Post([FromForm] ShoppingCart ShoppingCartItem)
@@ -73,36 +94,98 @@ namespace Mercury_Backend.Controllers
             return JsonConvert.SerializeObject(msg);
         }
 
-        [HttpDelete("{id}")]
-        public string delete(string commodityId,string userId)
+
+        [HttpDelete("{commodityId,userId}")]
+        public string delete(string commodityId, string userId)
         {
             JObject msg = new JObject();
-            var ShoppingCartItem= context.ShoppingCarts.Find(commodityId,userId);
+            var ShoppingCartItem = context.ShoppingCarts.Where(e => e.UserId == userId);
+
             if (ShoppingCartItem == null)
             {
                 msg["status"] = "fail";
+                return JsonConvert.SerializeObject(msg);
             }
-            context.ShoppingCarts.Remove(ShoppingCartItem);
-            context.SaveChanges();
+            try
+            {
+                // return JsonSerializer.Serialize(ShoppingCartItem);
+                foreach (var item in ShoppingCartItem)
+                {
+                    if (item.CommodityId == commodityId)
+                    {
+                        context.ShoppingCarts.Remove(item);
+
+                        context.SaveChanges();
+
+                    }
+                    msg["status"] = "success";
+                }
+
+                // msg["status"] = "success";
+            }
+            catch (Exception e)
+            {
+                msg["status"] = "fail";
+                Console.WriteLine(e.ToString());
+            }
             return JsonConvert.SerializeObject(msg);
         }
 
-        
+        [HttpPut("{commodityId,userId,count}")]
+        public void Put(string commodityId, string userId, byte count)
+        {
+
+            var ShoppingCartItem = context.ShoppingCarts.Where(e => e.UserId == userId);
+
+            if (ShoppingCartItem == null)
+            {
+
+                return;
+            }
+            // return JsonSerializer.Serialize(ShoppingCartItem);
+            foreach (var item in ShoppingCartItem)
+            {
+                if (item.CommodityId == commodityId)
+                {
+
+                    
+                        item.Count=count;
+
+                       
+
+                        context.SaveChanges();
+
+                    
+
+                }
+
+                // msg["status"] = "success";
+
+
+                return;
+            }
+
+
+        }
+
+
+
+
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
