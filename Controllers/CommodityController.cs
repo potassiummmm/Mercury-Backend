@@ -5,8 +5,13 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Threading.Tasks;
+using Mercury_Backend.Utils;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Azure.Cosmos.Linq;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -46,8 +51,8 @@ namespace Mercury_Backend.Controllers
             JObject msg = new JObject();
             try
             {
-                var commodityList = context.Commodities.OrderBy(b => b.Id == id).ToList<Commodity>();
-                msg["commodityList"] = JToken.FromObject(commodityList);
+                var commodityList = context.Commodities.FirstOrDefault(b => b.Id == id);
+                msg["targetCommodity"] = JToken.FromObject(commodityList);
                 msg["status"] = "success";
             }
             catch(Exception e)
@@ -59,13 +64,48 @@ namespace Mercury_Backend.Controllers
 
         // POST api/<CommodityController>
         [HttpPost]
-        public string Post([FromForm]Commodity newCommodity)
+        public async Task<string> Post([FromForm]Commodity newCommodity, [FromForm] List<IFormFile> videos)
         {
             JObject msg = new JObject();
+            var id = Generator.GenerateId(12);
+            newCommodity.Id = id;
+            var videoPaths = new List<string>();
             try
             {
+                Console.WriteLine(videos.Count());
+                if (videos.Count() == 0)
+                {
+                    Console.WriteLine("No videos uploaded.");
+                }
+                for (int i = 0; i < videos.Count(); i++)
+                {
+                    var tmpVideoId = Generator.GenerateId(20);
+                    var splitFileName =videos[i].FileName.Split('.');
+                    var len = splitFileName.Length;
+                    var postFix = splitFileName[len - 1];
+                    var path = "Media" + "/Video/" + tmpVideoId + '.' + postFix;
+                    if (Directory.Exists(path))
+                    {
+                        Console.WriteLine("This path exists.");
+                    }
+                    else
+                    {
+                        Directory.CreateDirectory("Media");
+                        Directory.CreateDirectory("Media/Video");
+                    }
+                    // Console.WriteLine(path);
+                    Console.WriteLine(path);
+                    videoPaths.Add(path);
+                    using (var stream = new FileStream(path, FileMode.Create))
+                    {
+                        await videos[i].CopyToAsync(stream);
+                    }
+                }
+
+                
+                
                 context.Commodities.Add(newCommodity);
-                // Console.WriteLine("haha");
+                Console.WriteLine("haha");
                 context.SaveChanges();
                 msg["status"] = "success";
             }

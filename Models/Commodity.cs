@@ -25,6 +25,7 @@ namespace Mercury_Backend.Models
         [Column("ID")]
         [StringLength(12)]
         public string Id { get; set; }
+        // [Key]
         [Column("OWNER_ID")]
         [StringLength(10)]
         public string OwnerId { get; set; }
