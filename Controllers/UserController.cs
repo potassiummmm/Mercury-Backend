@@ -48,7 +48,7 @@ namespace Mercury_Backend.Controllers
         {
             return "value";
         }
-
+        
         // POST api/<UserController>
         [HttpPost]
         public String Post([FromForm]SchoolUser NewUser)
