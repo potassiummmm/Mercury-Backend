@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Mercury_Backend.Utils;
+using Microsoft.EntityFrameworkCore;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -36,19 +37,15 @@ namespace Mercury_Backend.Controllers
                 List<NeedPost> postList = null;
                 if(userId != null)
                 {
-                    postList = context.NeedPosts.Where(post => post.SenderId == userId).OrderBy(post => post.Time).ToList();
+                    postList = context.NeedPosts.Include(post => post.Sender).ThenInclude(sender => sender.Avatar).Where(post => post.SenderId == userId).OrderBy(post => post.Time).ToList();
                 }
                 else
                 {
-                    postList = context.NeedPosts.OrderBy(post => post.Time).ToList();
+                    postList = context.NeedPosts.Include(post => post.Sender).ThenInclude(sender => sender.Avatar).OrderBy(post => post.Time).ToList();
                 }
                 List<SimplifiedPost> result = new List<SimplifiedPost>();
                 for(int i = 0; i < maxNumber && i + (pageNumber - 1)*maxNumber < postList.Count(); ++i)
                 {
-                    var sender = context.SchoolUsers.Single(sender => sender.SchoolId == postList[i].SenderId);
-                    var avatar = context.Media.Single(avatar => avatar.Id == sender.AvatarId);
-                    sender.Avatar = avatar;
-                    postList[i].Sender = sender;
                     result.Add(postList[i + (pageNumber - 1) * maxNumber].Simplify());
                 }
                 msg["PostList"] = JToken.FromObject(result);
@@ -69,14 +66,11 @@ namespace Mercury_Backend.Controllers
             JObject msg = new JObject();
             try
             {
-                var post = context.NeedPosts.Where(post => post.Id == postId).ToList()[0];
-                var comments = context.PostComments.Where(comment => comment.PostId == postId).ToList();
-                var tmpContext = context.PostImages.Select(postImage => new { PostId = postImage.PostId, ImageId = postImage.ImageId });
-                var imageIdList = tmpContext.Where(postImage => postImage.PostId == postId).ToList();
+                var post = context.NeedPosts.Include(post => post.PostComments).Include(post => post.PostImages).Single(post => post.Id == postId);
                 var imageList = new List<string>();
-                for (int i = 0; i < imageIdList.Count; ++i)
+                for (int i = 0; i < post.PostImages.Count(); ++i)
                 {
-                    var image = context.Media.Where(image => image.Id == imageIdList[i].ImageId).ToList();
+                    var image = context.Media.Where(image => image.Id == post.PostImages.ElementAt(i).ImageId).ToList();
                     imageList.Add(image[0].Path);
                 }
                 msg["ImagePaths"] = JToken.FromObject(imageList);
