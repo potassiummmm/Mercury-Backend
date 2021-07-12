@@ -32,7 +32,16 @@ namespace Mercury_Backend.Controllers
             try
             {
                 var orderList = context.Orders.OrderByDescending(order => order.Time).ToList<Order>();
-                msg["orderList"] = JToken.FromObject(orderList);
+                var simplifiedOrderList = new List<SimplifiedOrder>();
+                for(int i = 0; i < orderList.Count(); ++i)
+                {
+                    var commodity = context.Commodities.Where(commodity => commodity.Id == orderList[i].CommodityId).ToList();
+                    var owner = context.SchoolUsers.Where(user => user.SchoolId == commodity[0].OwnerId).ToList();
+                    commodity[0].Owner = owner[0];
+                    orderList[i].Commodity = commodity[0];
+                    simplifiedOrderList.Add(orderList[i].Simplify());
+                }
+                msg["orderList"] = JToken.FromObject(simplifiedOrderList);
                 msg["status"] = "success";
             }
             catch (Exception e)
@@ -51,7 +60,7 @@ namespace Mercury_Backend.Controllers
             try
             {
                 var orderList = context.Orders.Where(order => order.Id == id).ToList<Order>();
-                msg["orderList"] = JToken.FromObject(orderList);
+                msg["order"] = JToken.FromObject(orderList);
                 msg["status"] = "success";
             }
             catch (Exception e)
