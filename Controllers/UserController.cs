@@ -37,9 +37,22 @@ namespace Mercury_Backend.Controllers
 
         // GET api/<UserController>/5
         [HttpGet("{id}")]
-        public string Get(int id)
+        public string Get(string id)
         {
-            return "value";
+            JObject msg = new JObject();
+            String jsonString = "";
+            try
+            {
+                var user = context.SchoolUsers.Find(id);
+                jsonString = JsonSerializer.Serialize(user);
+
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.ToString());
+                msg["status"] = "fail";
+            }
+            return jsonString;
         }
 
         // POST api/<UserController>
@@ -66,8 +79,39 @@ namespace Mercury_Backend.Controllers
 
         // PUT api/<UserController>/5
         [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
+        public void Put([FromForm] SchoolUser value)
         {
+            JObject msg = new JObject();
+            var user=context.SchoolUsers.Find(value.SchoolId);
+            /*
+            if (value.Nickname != null) user.Nickname = value.Nickname;
+            if (value.RealName != null) user.RealName = value.RealName;
+            if (value.Phone != null) user.Phone = value.Phone;
+            if (value.Password != null) user.Password = value.Password;
+            if (value.Major != null) user.Major = value.Major;
+            if (value.Credit != null) user.Credit = value.Credit;
+            if (value.Role != null) user.Nickname = value.Nickname;
+            if (value.Nickname != null) user.Nickname = value.Nickname;
+            */
+            foreach(var p in value.GetType().GetProperties())
+            {
+                if (p.GetValue(value) != null && p.Name != "SchoolId")
+                {
+                    context.Entry(value).Property(p.Name).IsModified = true;
+                }
+
+            }
+            try
+            {
+                context.SaveChanges();
+            }
+            catch (Exception e)
+            {
+                msg["status"] = "fail";
+                return;
+            }
+            return;
+
         }
 
         // DELETE api/<UserController>/5
