@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Mercury_Backend.Contexts;
-using JsonSerializer = System.Text.Json.JsonSerializer;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
 
@@ -17,7 +16,7 @@ namespace Mercury_Backend.Controllers
     [ApiController]
     public class LikesController : ControllerBase
     {
-        private ModelContext context;
+        private readonly ModelContext context;
         public LikesController(ModelContext modelContext)
         {
             context = modelContext;
@@ -37,15 +36,15 @@ namespace Mercury_Backend.Controllers
             try
             {
                 var userList = context.Likes.Where(b => b.UserId == userId).ToList<Like>();
-                msg["userList"] = JToken.FromObject(userList);
-                msg["user"] = JToken.FromObject(userList[0].User);
+                msg["UserList"] = JToken.FromObject(userList);
+                msg["User"] = JToken.FromObject(userList[0].User);
+                msg["Status"] = "Success";
             }
             catch(Exception e)
             {
                 Console.WriteLine(e.ToString());
-                msg["status"] = "fail";
+                msg["Status"] = "Fail";
             }
-            msg["status"] = "success";
             return JsonConvert.SerializeObject(msg);
         }
 
@@ -58,14 +57,13 @@ namespace Mercury_Backend.Controllers
             {
                 context.Likes.Add(like);
                 context.SaveChanges();
+                msg["Status"] = "Success";
             }
             catch(Exception e)
             {
-                msg["status"] = "fail";
+                msg["Status"] = "Fail";
                 Console.WriteLine(e.ToString());
             }
-            msg["status"] = "success";
-
             return JsonConvert.SerializeObject(msg);
         }
 

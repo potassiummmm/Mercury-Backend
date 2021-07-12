@@ -138,7 +138,6 @@ namespace Mercury_Backend.Contexts
                 entity.HasOne(d => d.Video)
                     .WithMany(p => p.Commodities)
                     .HasForeignKey(d => d.VideoId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("COMMODITY_MEDIA_ID_FK");
             });
 
@@ -238,6 +237,8 @@ namespace Mercury_Backend.Contexts
 
                 entity.Property(e => e.SenderId).IsUnicode(false);
 
+                entity.Property(e => e.Time).HasPrecision(6);
+
                 entity.Property(e => e.Title)
                     .IsUnicode(false)
                     .IsFixedLength(true);
@@ -268,9 +269,7 @@ namespace Mercury_Backend.Contexts
 
                 entity.Property(e => e.ReturnTime).HasPrecision(6);
 
-                entity.Property(e => e.Status)
-                    .IsUnicode(false)
-                    .IsFixedLength(true);
+                entity.Property(e => e.Status).IsUnicode(false);
 
                 entity.Property(e => e.Time).HasPrecision(6);
 
@@ -304,11 +303,13 @@ namespace Mercury_Backend.Contexts
                 entity.HasOne(d => d.Post)
                     .WithMany(p => p.PostComments)
                     .HasForeignKey(d => d.PostId)
+                    .OnDelete(DeleteBehavior.Cascade)
                     .HasConstraintName("POST_COMMENT_NEED_POST_ID_FK");
 
                 entity.HasOne(d => d.Sender)
                     .WithMany(p => p.PostComments)
                     .HasForeignKey(d => d.SenderId)
+                    .OnDelete(DeleteBehavior.Cascade)
                     .HasConstraintName("POST_COMMENT_USER_SCHOOL_ID_FK");
             });
 
@@ -330,24 +331,17 @@ namespace Mercury_Backend.Contexts
                 entity.HasOne(d => d.Image)
                     .WithMany(p => p.PostImages)
                     .HasForeignKey(d => d.ImageId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("POST_IMAGE_COM_VIDEO_ID_FK");
 
                 entity.HasOne(d => d.Post)
                     .WithMany(p => p.PostImages)
                     .HasForeignKey(d => d.PostId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("POST_IMAGE_NEED_POST_ID_FK");
             });
 
             modelBuilder.Entity<Rating>(entity =>
             {
-                entity.HasKey(e => new { e.UserId, e.OrderId })
-                    .HasName("RATING_PK");
-
-                entity.Property(e => e.UserId).IsUnicode(false);
-
-                entity.Property(e => e.OrderId)
+                entity.Property(e => e.RatingId)
                     .IsUnicode(false)
                     .IsFixedLength(true);
 
@@ -355,20 +349,24 @@ namespace Mercury_Backend.Contexts
 
                 entity.Property(e => e.IsBuyer).HasPrecision(1);
 
-                entity.Property(e => e.Rating1).HasPrecision(2);
+                entity.Property(e => e.OrderId)
+                    .IsUnicode(false)
+                    .IsFixedLength(true);
+
+                entity.Property(e => e.Rate).HasPrecision(2);
 
                 entity.Property(e => e.Time).HasPrecision(6);
+
+                entity.Property(e => e.UserId).IsUnicode(false);
 
                 entity.HasOne(d => d.Order)
                     .WithMany(p => p.Ratings)
                     .HasForeignKey(d => d.OrderId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("RATING_ORDER_ID_FK");
 
                 entity.HasOne(d => d.User)
                     .WithMany(p => p.Ratings)
                     .HasForeignKey(d => d.UserId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("RATING_USER_SCHOOL_ID_FK");
             });
 
@@ -553,6 +551,8 @@ namespace Mercury_Backend.Contexts
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("VIEW_USER_SCHOOL_ID_FK");
             });
+
+            modelBuilder.HasSequence("SEQ");
 
             OnModelCreatingPartial(modelBuilder);
         }

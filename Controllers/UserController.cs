@@ -9,7 +9,12 @@ using System.Text.Json.Serialization;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using JsonSerializer = System.Text.Json.JsonSerializer;
+using System.Configuration;
+using Microsoft.Extensions.Configuration;
+using JWT.Algorithms;
+using JWT.Serializers;
+using JWT;
+using JWT.Exceptions;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -20,10 +25,12 @@ namespace Mercury_Backend.Controllers
     [ApiController]
     public class UserController : ControllerBase
     {
-        private ModelContext context;
-        public UserController(ModelContext modelContext)
+        private readonly ModelContext context;
+        private readonly IConfiguration config;
+        public UserController(ModelContext modelContext, IConfiguration configuration)
         {
             context = modelContext;
+            config = configuration;
         }
         // GET: api/<UserController>
         [HttpGet]
@@ -31,7 +38,7 @@ namespace Mercury_Backend.Controllers
         {
             JObject msg = new JObject();
             var list = context.SchoolUsers.OrderBy(b => b.SchoolId).ToList<SchoolUser>();
-            msg["userList"] = JToken.FromObject(list);
+            msg["UserList"] = JToken.FromObject(list);
             return JsonConvert.SerializeObject(msg);
         }
 
@@ -54,7 +61,7 @@ namespace Mercury_Backend.Controllers
             }
             return jsonString;
         }
-
+        
         // POST api/<UserController>
         [HttpPost]
         public String Post([FromForm]SchoolUser NewUser)
@@ -68,13 +75,22 @@ namespace Mercury_Backend.Controllers
                 context.SchoolUsers.Add(NewUser);
                 Console.WriteLine("haha");
                 context.SaveChanges();
+                msg["Status"] = "Success";
             }
             catch (Exception e)
             {
-                msg["status"] = "fail";
+                msg["Status"] = "Fail";
                 Console.WriteLine(e.ToString());
             }
             return JsonConvert.SerializeObject(msg);
+        }
+        
+        // POST api/<UserController>
+        [HttpPost]
+        [Route("register")]
+        public String Register()
+        {
+            return "TBD";
         }
 
         // PUT api/<UserController>/5
@@ -118,6 +134,90 @@ namespace Mercury_Backend.Controllers
         [HttpDelete("{id}")]
         public void Delete(int id)
         {
+        }
+
+        //POST api/<UserController>/login
+        [HttpPost("login")]
+        public string Login([FromForm] string userId, [FromForm] string password)
+        {
+            JObject msg = new JObject();
+            try
+            {
+                var user = context.SchoolUsers.Where(user => user.SchoolId == userId).ToList();
+                if(user == null)
+                {
+                    msg["Status"] = "Fail";
+                    msg["FailReason"] = "User doesn't exist";
+                }
+                if(user[0].Password == password)
+                {
+                    var provider = new UtcDateTimeProvider();
+                    var now = provider.GetNow();
+                    var secondsSinceEpoch = UnixEpoch.GetSecondsSince(now);
+
+                    //add information to dictionary
+                    var loginInformation = new Dictionary<string, object>();
+                    loginInformation.Add("userId", userId);
+                    loginInformation.Add("password", password);
+                    loginInformation.Add("exp", secondsSinceEpoch + 300);
+
+                    //encode
+                    var secretKey = config["TokenKey"];
+                    IJwtAlgorithm algorithm = new HMACSHA256Algorithm(); // symmetric
+                    IJsonSerializer serializer = new JsonNetSerializer();
+                    IBase64UrlEncoder urlEncoder = new JwtBase64UrlEncoder();
+                    IJwtEncoder encoder = new JwtEncoder(algorithm, serializer, urlEncoder);
+                    var token = encoder.Encode(loginInformation, secretKey);
+
+                    msg["Token"] = token;
+                    msg["User"] = JToken.FromObject(user);
+                    msg["Status"] = "Success";
+                }
+                else
+                {
+                    msg["Status"] = "Fail";
+                    msg["FailReason"] = "Incorrect password";
+                }
+            }
+            catch (Exception e)
+            {
+                msg["Status"] = "Fail";
+                Console.WriteLine(e.ToString());
+            }
+            return JsonConvert.SerializeObject(msg);
+        }
+
+        // POST api/<UserController>/autoLogin
+        [HttpPost("autoLogin")]
+        public string AutoLogin([FromForm] string token)
+        {
+            JObject msg = new JObject();
+            var secretKey = config["TokenKey"];
+            try
+            {
+                IJsonSerializer serializer = new JsonNetSerializer();
+                var provider = new UtcDateTimeProvider();
+                IJwtValidator validator = new JwtValidator(serializer, provider);
+                IBase64UrlEncoder urlEncoder = new JwtBase64UrlEncoder();
+                IJwtAlgorithm algorithm = new HMACSHA256Algorithm(); // symmetric
+                IJwtDecoder decoder = new JwtDecoder(serializer, validator, urlEncoder, algorithm);
+
+                var loginInformation = decoder.DecodeToObject<IDictionary<string, object>>(token, secretKey, verify: true);
+                var user = context.SchoolUsers.Where(user => user.SchoolId == (string)loginInformation["userId"]).ToList();
+                msg["User"] = JToken.FromObject(user);
+                msg["Status"] = "Success";
+            }
+            catch (TokenExpiredException)
+            {
+                msg["Status"] = "Fail";
+                msg["FailReason"] = "Token has expired";
+            }
+            catch (SignatureVerificationException)
+            {
+                msg["Status"] = "Fail";
+                msg["FailReason"] = "Token has invalid signature";
+            }
+            return JsonConvert.SerializeObject(msg);
         }
     }
 }

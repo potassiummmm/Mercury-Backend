@@ -30,6 +30,8 @@ namespace Mercury_Backend.Models
         [Column("CONTENT")]
         [StringLength(2000)]
         public string Content { get; set; }
+        [Column("TIME")]
+        public DateTime? Time { get; set; }
 
         [ForeignKey(nameof(SenderId))]
         [InverseProperty(nameof(SchoolUser.NeedPosts))]
@@ -38,5 +40,26 @@ namespace Mercury_Backend.Models
         public virtual ICollection<PostComment> PostComments { get; set; }
         [InverseProperty(nameof(PostImage.Post))]
         public virtual ICollection<PostImage> PostImages { get; set; }
+        public SimplifiedPost Simplify()
+        {
+            var content = "";
+            if(Content.Length > 30)
+            {
+                content = Content.Substring(0, 30) + "...";
+            }
+            else
+            {
+                content = Content;
+            }
+            var simplifiedPost = new SimplifiedPost
+            {
+                Name = Sender.Nickname,
+                Title = Title,
+                Content = content,
+                SenderId = SenderId,
+                AvatarPath = Sender.Avatar.Path
+            };
+            return simplifiedPost;
+        }
     }
 }

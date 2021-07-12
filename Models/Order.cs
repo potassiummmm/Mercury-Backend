@@ -30,9 +30,6 @@ namespace Mercury_Backend.Models
         public byte? Count { get; set; }
         [Column("TIME")]
         public DateTime? Time { get; set; }
-        [Column("STATUS")]
-        [StringLength(1)]
-        public string Status { get; set; }
         [Required]
         [Column("LOCATION")]
         [StringLength(100)]
@@ -43,6 +40,9 @@ namespace Mercury_Backend.Models
         [Column("RETURN_LOCATION")]
         [StringLength(100)]
         public string ReturnLocation { get; set; }
+        [Column("STATUS")]
+        [StringLength(10)]
+        public string Status { get; set; }
 
         [ForeignKey(nameof(BuyerId))]
         [InverseProperty(nameof(SchoolUser.Orders))]
@@ -52,5 +52,13 @@ namespace Mercury_Backend.Models
         public virtual Commodity Commodity { get; set; }
         [InverseProperty(nameof(Rating.Order))]
         public virtual ICollection<Rating> Ratings { get; set; }
+        public SimplifiedOrder Simplify()
+        {
+            var order = new SimplifiedOrder();
+            order.Id = Id;
+            order.BuyerId = BuyerId;
+            order.Commodity = Commodity.Simplify();
+            return order;
+        }
     }
 }
