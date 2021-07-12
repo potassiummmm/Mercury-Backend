@@ -20,7 +20,7 @@ namespace Mercury_Backend.Utils
 
         public static SimplifiedPost SimplfyPost(NeedPost post)
         {
-            var simplifiedPost = new SimplifiedPost(post.Title, post.Sender.Nickname, post.Content, post.SenderId,
+            var simplifiedPost = new SimplifiedPost(post.Id, post.Title, post.Sender.Nickname, post.Content, post.SenderId,
                 post.Sender.Avatar.Path);
             return simplifiedPost;
         }
