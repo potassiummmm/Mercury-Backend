@@ -16,7 +16,7 @@ namespace Mercury_Backend.Controllers
     [ApiController]
     public class LikesController : ControllerBase
     {
-        private ModelContext context;
+        private readonly ModelContext context;
         public LikesController(ModelContext modelContext)
         {
             context = modelContext;

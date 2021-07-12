@@ -25,7 +25,7 @@ namespace Mercury_Backend.Controllers
     [ApiController]
     public class UserController : ControllerBase
     {
-        private ModelContext context;
+        private readonly ModelContext context;
         private readonly IConfiguration config;
         public UserController(ModelContext modelContext, IConfiguration configuration)
         {
@@ -70,6 +70,14 @@ namespace Mercury_Backend.Controllers
                 Console.WriteLine(e.ToString());
             }
             return JsonConvert.SerializeObject(msg);
+        }
+        
+        // POST api/<UserController>
+        [HttpPost]
+        [Route("register")]
+        public String Register()
+        {
+            return "TBD";
         }
 
         // PUT api/<UserController>/5

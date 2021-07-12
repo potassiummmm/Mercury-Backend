@@ -1,4 +1,4 @@
-using Mercury_Backend.Contexts;
+﻿using Mercury_Backend.Contexts;
 using Mercury_Backend.Models;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
@@ -21,7 +21,7 @@ namespace Mercury_Backend.Controllers
     [ApiController]
     public class CommodityController : ControllerBase
     {
-        private ModelContext context;
+        private readonly ModelContext context;
         public CommodityController(ModelContext modelContext)
         {
             context = modelContext;
