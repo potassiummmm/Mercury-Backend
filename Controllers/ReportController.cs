@@ -29,8 +29,7 @@ namespace Mercury_Backend.Controllers
             var list = context.ReportUsers
                 .Where(report => report.ReporterId == userId || report.InformantId == userId)
                 .OrderBy(report => report.Time);
-            msg["CharRecord"] = JToken.FromObject(list);
-            msg["CharRecord"] = JToken.FromObject(list);
+            msg["charRecord"] = JToken.FromObject(list);
             return JsonConvert.SerializeObject(msg);
         }
         
@@ -43,11 +42,13 @@ namespace Mercury_Backend.Controllers
             {
                 context.ReportUsers.Add(report);
                 context.SaveChanges();
-                msg["Status"] = "Success";
+                msg["status"] = "success";
+                msg["information"] = "Reported successfully";
             }
             catch (Exception e)
             {
-                msg["Status"] = "Fail";
+                msg["status"] = "fail";
+                msg["information"] = "Fail to modify database";
                 Console.WriteLine(e.ToString());
             }
             return JsonConvert.SerializeObject(msg);
