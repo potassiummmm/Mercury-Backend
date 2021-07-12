@@ -77,5 +77,16 @@ namespace Mercury_Backend.Models
         public virtual ICollection<ShoppingCart> ShoppingCarts { get; set; }
         [InverseProperty(nameof(View.Commodity))]
         public virtual ICollection<View> Views { get; set; }
+        public SimplifiedCommodity Simplify()
+        {
+            var commodity = new SimplifiedCommodity();
+            commodity.Id = Id;
+            commodity.Name = Name;
+            commodity.Price = (decimal)Price;
+            commodity.Likes = (int)Likes;
+            commodity.SellerId = OwnerId;
+            commodity.SellerAvatar = Owner.AvatarId;
+            return commodity;
+        }
     }
 }

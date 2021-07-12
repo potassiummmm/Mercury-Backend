@@ -52,5 +52,13 @@ namespace Mercury_Backend.Models
         public virtual Commodity Commodity { get; set; }
         [InverseProperty(nameof(Rating.Order))]
         public virtual ICollection<Rating> Ratings { get; set; }
+        public SimplifiedOrder Simplify()
+        {
+            var order = new SimplifiedOrder();
+            order.Id = Id;
+            order.BuyerId = BuyerId;
+            order.Commodity = Commodity.Simplify();
+            return order;
+        }
     }
 }
