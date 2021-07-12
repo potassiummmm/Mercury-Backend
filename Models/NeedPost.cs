@@ -40,26 +40,5 @@ namespace Mercury_Backend.Models
         public virtual ICollection<PostComment> PostComments { get; set; }
         [InverseProperty(nameof(PostImage.Post))]
         public virtual ICollection<PostImage> PostImages { get; set; }
-        public SimplifiedPost Simplify()
-        {
-            var content = "";
-            if(Content.Length > 30)
-            {
-                content = Content.Substring(0, 30) + "...";
-            }
-            else
-            {
-                content = Content;
-            }
-            var simplifiedPost = new SimplifiedPost
-            {
-                Name = Sender.Nickname,
-                Title = Title,
-                Content = content,
-                SenderId = SenderId,
-                AvatarPath = Sender.Avatar.Path
-            };
-            return simplifiedPost;
-        }
     }
 }

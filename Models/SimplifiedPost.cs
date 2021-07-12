@@ -12,5 +12,21 @@ namespace Mercury_Backend.Models
         public string Content { get; set; }
         public string SenderId { get; set; }
         public string AvatarPath { get; set; }
+
+        public SimplifiedPost(string title, string name, string content, string senderId, string avatarPath)
+        {
+            Title = title;
+            Name = name;
+            SenderId = senderId;
+            AvatarPath = avatarPath;
+            if (content.Length > 30)
+            {
+                Content = content.Substring(0, 30) + "...";
+            }
+            else
+            {
+                Content = content;
+            }
+        }
     }
 }
