@@ -153,7 +153,7 @@ namespace Mercury_Backend.Controllers
             }
             catch (Exception e)
             {
-                msg["Status"] = "Fail";
+                msg["Status"] = "fail";
             }
             return JsonConvert.SerializeObject(msg);
         }
@@ -249,11 +249,11 @@ namespace Mercury_Backend.Controllers
                 context.Commodities.Add(newCommodity);
                 // Console.WriteLine("haha");
                 context.SaveChanges();
-                msg["Status"] = "Success";
+                msg["Status"] = "success";
             }
             catch (Exception e)
             {
-                msg["Status"] = "Fail";
+                msg["Status"] = "fail";
                 Console.WriteLine(e.ToString());
             }
             return JsonConvert.SerializeObject(msg);
@@ -261,14 +261,225 @@ namespace Mercury_Backend.Controllers
 
         // PUT api/<CommodityController>/5
         [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
+        public string Put(string id)
         {
+            JObject msg = new JObject();
+            msg["Status"] = "success";
+            try
+            {
+                var test = Request.Form["test"].ToString();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                msg["Status"] = "fail";
+                msg["Detail"] = "No form data";
+                return JsonConvert.SerializeObject(msg);
+            }
+            var commodityToChange = context.Commodities.Find(id);
+            if (commodityToChange == null)
+            {
+                msg["Status"] = "fail";
+                msg["Detail"] = "No such Id.";
+                 return JsonConvert.SerializeObject(msg);
+            }
+            var detailMsg = "Integrity constraint invoked by";
+            
+            
+           
+            
+            if (Request.Form["id"].ToString() != "" == true)
+            {
+                // commodityToChange.OwnerId = Request.Form["owner_id"].ToString();
+                // context.SaveChanges();
+                msg["Status"] = "fail";
+                detailMsg += " id ";
+            }   
+            if (Request.Form["owner_id"].ToString() != "" == true)
+            {
+                detailMsg += " owner_id ";
+                
+            }
+
+            if (Request.Form["video_id"].ToString() != "" == true)
+            {
+                // commodityToChange.VideoId = Request.Form["video_id"].ToString();
+                msg["Status"] = "fail";
+                detailMsg += " video_id ";
+                
+            }
+            if (Request.Form["condition"].ToString() != "" == true)
+            {
+                commodityToChange.Condition = Request.Form["condition"].ToString();
+                detailMsg += " owner_id ";
+                
+            }
+
+            if (Request.Form["price"].ToString() != "" == true)
+            {
+                try
+                {
+                    commodityToChange.Price = Decimal.ToInt32(int.Parse(Request.Form["price"].ToString()));
+                }
+                catch (Exception e)
+                {
+                    msg["Status"] = "fail";
+                    detailMsg += " price ";
+                }
+            }
+            
+            if (Request.Form["stock"].ToString() != "" == true)
+            {
+                try
+                {
+                    commodityToChange.Stock = Decimal.ToByte(int.Parse(Request.Form["stock"].ToString()));
+                }
+                catch (Exception e)
+                {
+                    msg["Status"] = "fail";
+                    detailMsg += " stock ";
+                }
+            }
+            
+            if (Request.Form["forRent"].ToString() != "" == true)
+            {
+                try
+                {
+                    commodityToChange.ForRent = Request.Form["forRent"].ToString() != "0";
+                }
+                catch (Exception e)
+                {
+                    msg["Status"] = "fail";
+                    detailMsg += " forRent ";
+                }
+            }
+            if (Request.Form["clicks"].ToString() != "" == true)
+            {
+                try
+                {
+                    commodityToChange.Clicks = int.Parse(Request.Form["clicks"].ToString());
+                }
+                catch (Exception e)
+                {
+                    msg["Status"] = "fail";
+                    detailMsg += " clicks ";
+                }
+            }
+            
+            if (Request.Form["likes"].ToString() != "" == true)
+            {
+                try
+                {
+                    commodityToChange.Likes = int.Parse(Request.Form["likes"].ToString());
+                }
+                catch (Exception e)
+                {
+                    msg["Status"] = "fail";
+                    detailMsg += " likes ";
+                }
+            }
+            if (Request.Form["popularity"].ToString() != "" == true)
+            {
+                try
+                {
+                    commodityToChange.Popularity = byte.Parse(Request.Form["popularity"].ToString());
+                }
+                catch (Exception e)
+                {
+                    msg["Status"] = "fail";
+                    detailMsg += " popularity ";
+                }
+            }
+            
+            if (Request.Form["popularity"].ToString() != "" == true)
+            {
+                try
+                {
+                    commodityToChange.Likes = int.Parse(Request.Form["popularity"].ToString());
+                }
+                catch (Exception e)
+                {
+                    msg["Status"] = "fail";
+                    detailMsg += " popularity ";
+                }
+            }
+            if (Request.Form["classification"].ToString() != "" == true)
+            {
+                
+                msg["Status"] = "fail";
+                detailMsg += " classification ";
+                
+            }
+            if (Request.Form["unit"].ToString() != "" == true)
+            {
+                try
+                {
+                    commodityToChange.Unit = Request.Form["unit"].ToString();
+                }
+                catch (Exception e)
+                {
+                    msg["Status"] = "fail";
+                    detailMsg += " unit ";
+                }
+            }
+            if (Request.Form["name"].ToString() != "" == true)
+            {
+                try
+                {
+                    commodityToChange.Name = Request.Form["name"].ToString();
+                }
+                catch (Exception e)
+                {
+                    msg["Status"] = "fail";
+                    detailMsg += " name ";
+                }
+            }
+
+            if (msg["Status"].ToString() == "success")
+            {
+                context.SaveChanges();
+                msg["changedCommodity"] = JToken.FromObject(commodityToChange);
+            }
+
+            if (detailMsg == "Integrity constraint invoked by")
+            {
+                detailMsg += " nothing.";
+            }
+            else
+            {
+                detailMsg += ".";
+            }
+
+            msg["detailMessage"] = detailMsg;
+            return JsonConvert.SerializeObject(msg);
         }
 
         // DELETE api/<CommodityController>/5
         [HttpDelete("{id}")]
-        public void Delete(int id)
+        public string Delete(string id)
         {
+            JObject msg = new JObject();
+            try
+            {
+
+                var commodityToDelete = context.Commodities.Find(id);
+                if (commodityToDelete == null)
+                {
+                    msg["Status"] = "fail";
+                    msg["detailMessage"] = "No such id.";
+                    return JsonConvert.SerializeObject(msg);
+                }
+
+                context.Commodities.Remove(commodityToDelete);
+                context.SaveChanges();
+                msg["Status"] = "success";
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.ToString());
+                msg["Status"] = "fail";
+            }
+            return JsonConvert.SerializeObject(msg);
         }
     }
 }
