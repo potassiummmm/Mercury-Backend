@@ -2,14 +2,10 @@ using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using Mercury_Backend.Contexts;
 using Mercury_Backend.Models;
-using System.Text.Json.Serialization;
-using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using System.Configuration;
 using Microsoft.Extensions.Configuration;
 using JWT.Algorithms;
 using JWT.Serializers;
@@ -34,11 +30,11 @@ namespace Mercury_Backend.Controllers
         }
         // GET: api/<UserController>
         [HttpGet]
-        public String Get()
+        public string Get()
         {
             JObject msg = new JObject();
             var list = context.SchoolUsers.OrderBy(b => b.SchoolId).ToList<SchoolUser>();
-            msg["UserList"] = JToken.FromObject(list);
+            msg["userList"] = JToken.FromObject(list);
             return JsonConvert.SerializeObject(msg);
         }
 
@@ -51,33 +47,74 @@ namespace Mercury_Backend.Controllers
         
         // POST api/<UserController>
         [HttpPost]
-        public String Post([FromForm]SchoolUser NewUser)
+        public string Post([FromForm]SchoolUser newUser)
         {
-            //String Id, String NickName, String RealName, String Phone,
-            //String Password, String Major, int Credit, String Role, int Grade,
-            //String Brief = "", String AvatarId = ""
             JObject msg = new JObject();
             try
             {
-                context.SchoolUsers.Add(NewUser);
+                context.SchoolUsers.Add(newUser);
                 Console.WriteLine("haha");
                 context.SaveChanges();
-                msg["Status"] = "Success";
+                msg["status"] = "success";
             }
             catch (Exception e)
             {
-                msg["Status"] = "Fail";
+                msg["status"] = "fail";
                 Console.WriteLine(e.ToString());
             }
             return JsonConvert.SerializeObject(msg);
         }
+
+        public class RegisterRequest
+        {
+            public string SchoolId { get; set; }
+            public string Nickname { get; set; }
+            public string RealName { get; set; }
+            public string Phone { get; set; }
+            public string Password { get; set; }
+        }
         
-        // POST api/<UserController>
+        // POST api/<UserController>/register
         [HttpPost]
         [Route("register")]
-        public String Register()
+        public string Register(RegisterRequest request)
         {
-            return "TBD";
+            JObject msg = new JObject();
+            if (context.SchoolUsers.Find(request.SchoolId) != null)
+            {
+                msg["status"] = "fail";
+                msg["information"] = "User already exists.";
+            }
+            else
+            {
+                var newUser = new SchoolUser()
+                {
+                    SchoolId = request.SchoolId,
+                    Nickname = request.Nickname,
+                    RealName = request.RealName,
+                    Phone = request.Phone,
+                    Password = request.Password,
+                    Brief = "该用户很懒，还没有写简介。",
+                    Major = "SE",
+                    Role = "Student",
+                    Grade = 1,
+                    AvatarId = "1",
+                    Credit = 60
+                };
+                try
+                {
+                    context.SchoolUsers.Add(newUser);
+                    context.SaveChanges();
+                    msg["status"] = "success";
+                    msg["information"] = "Registered successfully";
+                }
+                catch (Exception e)
+                {
+                    msg["status"] = "fail";
+                    msg["information"] = "Fail to modify database";
+                }
+            }
+            return JsonConvert.SerializeObject(msg);
         }
 
         // PUT api/<UserController>/5
@@ -97,25 +134,27 @@ namespace Mercury_Backend.Controllers
         public string Login([FromForm] string userId, [FromForm] string password)
         {
             JObject msg = new JObject();
-            try
+            var user = context.SchoolUsers.Find(userId);
+            if(user == null)
             {
-                var user = context.SchoolUsers.Where(user => user.SchoolId == userId).ToList();
-                if(user == null)
-                {
-                    msg["Status"] = "Fail";
-                    msg["FailReason"] = "User doesn't exist";
-                }
-                if(user[0].Password == password)
+                msg["status"] = "fail";
+                msg["failReason"] = "User doesn't exist";
+            }
+            else
+            {
+                if(user.Password == password)
                 {
                     var provider = new UtcDateTimeProvider();
                     var now = provider.GetNow();
                     var secondsSinceEpoch = UnixEpoch.GetSecondsSince(now);
 
                     //add information to dictionary
-                    var loginInformation = new Dictionary<string, object>();
-                    loginInformation.Add("userId", userId);
-                    loginInformation.Add("password", password);
-                    loginInformation.Add("exp", secondsSinceEpoch + 300);
+                    var loginInformation = new Dictionary<string, object>
+                    {
+                        {"userId", userId},
+                        {"password", password},
+                        {"exp", secondsSinceEpoch + 300}
+                    };
 
                     //encode
                     var secretKey = config["TokenKey"];
@@ -125,20 +164,15 @@ namespace Mercury_Backend.Controllers
                     IJwtEncoder encoder = new JwtEncoder(algorithm, serializer, urlEncoder);
                     var token = encoder.Encode(loginInformation, secretKey);
 
-                    msg["Token"] = token;
-                    msg["User"] = JToken.FromObject(user);
-                    msg["Status"] = "Success";
+                    msg["_token"] = token;
+                    msg["user"] = JToken.FromObject(user);
+                    msg["status"] = "success";
                 }
                 else
                 {
-                    msg["Status"] = "Fail";
-                    msg["FailReason"] = "Incorrect password";
+                    msg["status"] = "fail";
+                    msg["failReason"] = "Incorrect password";
                 }
-            }
-            catch (Exception e)
-            {
-                msg["Status"] = "Fail";
-                Console.WriteLine(e.ToString());
             }
             return JsonConvert.SerializeObject(msg);
         }
@@ -159,19 +193,19 @@ namespace Mercury_Backend.Controllers
                 IJwtDecoder decoder = new JwtDecoder(serializer, validator, urlEncoder, algorithm);
 
                 var loginInformation = decoder.DecodeToObject<IDictionary<string, object>>(token, secretKey, verify: true);
-                var user = context.SchoolUsers.Where(user => user.SchoolId == (string)loginInformation["userId"]).ToList();
-                msg["User"] = JToken.FromObject(user);
-                msg["Status"] = "Success";
+                var user = context.SchoolUsers.Where(u => u.SchoolId == (string)loginInformation["userId"]).ToList();
+                msg["user"] = JToken.FromObject(user);
+                msg["status"] = "success";
             }
             catch (TokenExpiredException)
             {
-                msg["Status"] = "Fail";
-                msg["FailReason"] = "Token has expired";
+                msg["status"] = "fail";
+                msg["failReason"] = "Token has expired";
             }
             catch (SignatureVerificationException)
             {
-                msg["Status"] = "Fail";
-                msg["FailReason"] = "Token has invalid signature";
+                msg["status"] = "fail";
+                msg["failReason"] = "Token has invalid signature";
             }
             return JsonConvert.SerializeObject(msg);
         }
