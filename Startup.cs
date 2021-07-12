@@ -13,6 +13,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
+using Newtonsoft.Json;
 
 namespace Mercury_Backend
 {
@@ -35,7 +36,11 @@ namespace Mercury_Backend
                 c.SwaggerDoc("v1", new OpenApiInfo {Title = "Mercury_Backend", Version = "v1"});
             });
             services.AddDbContext<ModelContext>();
+            
+           
         }
+
+        
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
