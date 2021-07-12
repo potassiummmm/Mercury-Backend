@@ -276,11 +276,27 @@ namespace Mercury_Backend.Controllers
                 msg["Detail"] = "No form data";
                 return JsonConvert.SerializeObject(msg);
             }
-            
+            var commodityToChange = context.Commodities.Find(id);
+            if (commodityToChange == null)
+            {
+                msg["Status"] = "fail";
+                msg["Detail"] = "No such Id.";
+                return JsonConvert.SerializeObject(msg);
+            }
             var detailMsg = "Integrity constraint invoked by";
             var sucMsg = "Changes implemented on";
             int flag = 0;
-            var commodityToChange = context.Commodities.Find(id);
+            // try
+            // {
+            //     commodityToChange = context.Commodities.Find(id);
+            // }
+            // if (true )
+            // {
+            //     msg["Status"] = "fail";
+            //     msg["Detail"] = "No such Id.";
+            //     return JsonConvert.SerializeObject(msg);
+            // }
+            
             if (Request.Form["id"].ToString() != "" == true)
             {
                 // commodityToChange.OwnerId = Request.Form["owner_id"].ToString();
