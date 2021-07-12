@@ -19,11 +19,9 @@ namespace Mercury_Backend.Controllers
     public class OrderController : ControllerBase
     {
         private readonly ModelContext context;
-        private static Random random;
         public OrderController(ModelContext modelContext)
         {
             context = modelContext;
-            random = new Random();
         }
         // GET: api/<OrderController>
         [HttpGet]
@@ -35,10 +33,11 @@ namespace Mercury_Backend.Controllers
                 List<Order> orderList = new List<Order>();
                 if(userId != null)
                 {
-                    orderList = context.Orders.Include(order => order.Commodity)
+                    orderList = context.Orders.Where(order => order.BuyerId == userId)
+                        .Include(order => order.Commodity)
                         .ThenInclude(commodity => commodity.CommodityImages)
                         .ThenInclude(commodityImages => commodityImages.Image)
-                        .Where(order => order.BuyerId == userId).OrderByDescending(order => order.Time).ToList();
+                        .OrderByDescending(order => order.Time).ToList();
                 }
                 else
                 {

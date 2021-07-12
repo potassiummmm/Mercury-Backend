@@ -37,11 +37,14 @@ namespace Mercury_Backend.Controllers
                 List<NeedPost> postList = null;
                 if(userId != null)
                 {
-                    postList = context.NeedPosts.Include(post => post.Sender).ThenInclude(sender => sender.Avatar).Where(post => post.SenderId == userId).OrderBy(post => post.Time).ToList();
+                    postList = context.NeedPosts.Where(post => post.SenderId == userId)
+                        .Include(post => post.Sender).ThenInclude(sender => sender.Avatar)
+                        .OrderBy(post => post.Time).ToList();
                 }
                 else
                 {
-                    postList = context.NeedPosts.Include(post => post.Sender).ThenInclude(sender => sender.Avatar).OrderBy(post => post.Time).ToList();
+                    postList = context.NeedPosts.Include(post => post.Sender)
+                        .ThenInclude(sender => sender.Avatar).OrderBy(post => post.Time).ToList();
                 }
                 List<SimplifiedPost> result = new List<SimplifiedPost>();
                 for (int i = 0; i < maxNumber && i + (pageNumber - 1) * maxNumber < postList.Count(); ++i)
@@ -67,19 +70,20 @@ namespace Mercury_Backend.Controllers
             JObject msg = new JObject();
             try
             {
-                var post = context.NeedPosts.Include(post => post.PostComments).Include(post => post.PostImages).Single(post => post.Id == postId);
+                var post = context.NeedPosts.Where(post => post.Id == postId)
+                    .Include(post => post.PostComments).Include(post => post.PostImages).Single();
                 var imageList = new List<string>();
                 for (int i = 0; i < post.PostImages.Count(); ++i)
                 {
                     var image = context.Media.Where(image => image.Id == post.PostImages.ElementAt(i).ImageId).ToList();
                     imageList.Add(image[0].Path);
                 }
+                // var imageList = context.Media.Where(image => post.PostImages);
                 msg["ImagePaths"] = JToken.FromObject(imageList);
                 msg["Post"] = JToken.FromObject(post, new JsonSerializer()
                 {
                     ReferenceLoopHandling = ReferenceLoopHandling.Ignore
                 });
-                //msg["Post"] = JToken.FromObject(post);
                 msg["Status"] = "Success";
             }
             catch (Exception e)
@@ -152,13 +156,6 @@ namespace Mercury_Backend.Controllers
             JObject msg = new JObject();
             try
             {
-                //var commentList = context.PostComments.Where(comment => comment.PostId == postId).ToList();
-                //for(int i = 0; i < commentList.Count(); ++i)
-                //{
-                //    context.PostComments.Remove(commentList[i]);
-                //    Console.WriteLine(commentList.Count());
-                //}
-                //Console.WriteLine("Delete all comments");
                 var post = context.NeedPosts.Where(post => post.Id == postId).ToList();
                 context.NeedPosts.Remove(post[0]);
                 context.SaveChanges();
