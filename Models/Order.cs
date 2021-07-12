@@ -57,7 +57,9 @@ namespace Mercury_Backend.Models
             var order = new SimplifiedOrder();
             order.Id = Id;
             order.BuyerId = BuyerId;
-            order.Commodity = Commodity.Simplify();
+            order.Price = (decimal)Commodity.Price;
+            order.Count = (int)Count;
+            order.Status = Status;
             return order;
         }
     }

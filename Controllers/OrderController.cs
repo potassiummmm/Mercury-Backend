@@ -2,6 +2,7 @@
 using Mercury_Backend.Models;
 using Mercury_Backend.Utils;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
@@ -26,20 +27,34 @@ namespace Mercury_Backend.Controllers
         }
         // GET: api/<OrderController>
         [HttpGet]
-        public string Get()
+        public string Get([FromForm] string userId, [FromForm] int maxNumber = 10, [FromForm] int pageNumber = 1)
         {
             JObject msg = new JObject();
             try
             {
-                var orderList = context.Orders.OrderByDescending(order => order.Time).ToList<Order>();
-                var simplifiedOrderList = new List<SimplifiedOrder>();
-                for(int i = 0; i < orderList.Count(); ++i)
+                List<Order> orderList = new List<Order>();
+                if(userId != null)
                 {
-                    var commodity = context.Commodities.Where(commodity => commodity.Id == orderList[i].CommodityId).ToList();
-                    var owner = context.SchoolUsers.Where(user => user.SchoolId == commodity[0].OwnerId).ToList();
-                    commodity[0].Owner = owner[0];
-                    orderList[i].Commodity = commodity[0];
-                    simplifiedOrderList.Add(orderList[i].Simplify());
+                    orderList = context.Orders.Include(order => order.Commodity)
+                        .ThenInclude(commodity => commodity.CommodityImages)
+                        .ThenInclude(commodityImages => commodityImages.Image)
+                        .Where(order => order.BuyerId == userId).OrderByDescending(order => order.Time).ToList();
+                }
+                else
+                {
+                    orderList = context.Orders.Include(order => order.Commodity)
+                        .ThenInclude(commodity => commodity.CommodityImages)
+                        .ThenInclude(commodityImages => commodityImages.Image)
+                        .OrderByDescending(order => order.Time).ToList();
+                }
+                var simplifiedOrderList = new List<SimplifiedOrder>();
+                for(int i = 0; i + (pageNumber - 1) * maxNumber < orderList.Count(); ++i)
+                {
+                    //var commodity = context.Commodities.Where(commodity => commodity.Id == orderList[i].CommodityId).ToList();
+                    //var owner = context.SchoolUsers.Where(user => user.SchoolId == commodity[0].OwnerId).ToList();
+                    //commodity[0].Owner = owner[0];
+                    //orderList[i].Commodity = commodity[0];
+                    simplifiedOrderList.Add(orderList[i + (pageNumber - 1) * maxNumber].Simplify());
                 }
                 msg["OrderList"] = JToken.FromObject(simplifiedOrderList);
                 msg["Status"] = "Success";

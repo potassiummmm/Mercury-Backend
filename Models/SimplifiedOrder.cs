@@ -9,7 +9,10 @@ namespace Mercury_Backend.Models
     {
         public string Id { get; set; }
         public string BuyerId { get; set; }
-        public SimplifiedCommodity Commodity { get; set; }
+        public decimal Price { get; set; }
+        public int Count { get; set; }
+        public string Status { get; set; }
+        public string Cover { get; set; }
 
     }
 }
