@@ -44,10 +44,11 @@ namespace Mercury_Backend.Controllers
                     postList = context.NeedPosts.Include(post => post.Sender).ThenInclude(sender => sender.Avatar).OrderBy(post => post.Time).ToList();
                 }
                 List<SimplifiedPost> result = new List<SimplifiedPost>();
-                for(int i = 0; i < maxNumber && i + (pageNumber - 1)*maxNumber < postList.Count(); ++i)
+                for (int i = 0; i < maxNumber && i + (pageNumber - 1) * maxNumber < postList.Count(); ++i)
                 {
-                    result.Add(postList[i + (pageNumber - 1) * maxNumber].Simplify());
+                    result.Add(Simplify.SimplfyPost(postList[i + (pageNumber - 1) * maxNumber]));
                 }
+
                 msg["PostList"] = JToken.FromObject(result);
                 msg["Status"] = "Success";
             }

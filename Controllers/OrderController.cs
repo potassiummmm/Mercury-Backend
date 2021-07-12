@@ -48,13 +48,9 @@ namespace Mercury_Backend.Controllers
                         .OrderByDescending(order => order.Time).ToList();
                 }
                 var simplifiedOrderList = new List<SimplifiedOrder>();
-                for(int i = 0; i + (pageNumber - 1) * maxNumber < orderList.Count(); ++i)
+                for(int i = 0; i + (pageNumber - 1) * maxNumber < orderList.Count() && i < maxNumber; ++i)
                 {
-                    //var commodity = context.Commodities.Where(commodity => commodity.Id == orderList[i].CommodityId).ToList();
-                    //var owner = context.SchoolUsers.Where(user => user.SchoolId == commodity[0].OwnerId).ToList();
-                    //commodity[0].Owner = owner[0];
-                    //orderList[i].Commodity = commodity[0];
-                    simplifiedOrderList.Add(orderList[i + (pageNumber - 1) * maxNumber].Simplify());
+                    simplifiedOrderList.Add(Simplify.SimplifyOrder(orderList[i + (pageNumber - 1) * maxNumber]));
                 }
                 msg["OrderList"] = JToken.FromObject(simplifiedOrderList);
                 msg["Status"] = "Success";
