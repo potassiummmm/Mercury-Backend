@@ -1,4 +1,4 @@
-using Mercury_Backend.Contexts;
+﻿using Mercury_Backend.Contexts;
 using Mercury_Backend.Models;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
@@ -23,7 +23,7 @@ namespace Mercury_Backend.Controllers
     [ApiController]
     public class CommodityController : ControllerBase
     {
-        private ModelContext context;
+        private readonly ModelContext context;
         public CommodityController(ModelContext modelContext)
         {
             context = modelContext;
@@ -55,10 +55,13 @@ namespace Mercury_Backend.Controllers
             var commodityList = new List<Commodity>();
             try
             {
+
                 var judge = Request.Form["keyword"].ToString();
+
             }
             catch (Exception e)
             {
+
                 msg["status"] = "fail";
                 return JsonConvert.SerializeObject(msg);
             }
@@ -124,6 +127,7 @@ namespace Mercury_Backend.Controllers
             }
             try
             {
+
                 msg["commodityList"] = JToken.FromObject(commodityList, new JsonSerializer()
                 {
                     ReferenceLoopHandling = ReferenceLoopHandling.Ignore //忽略循环引用，默认是throw exception
@@ -149,7 +153,7 @@ namespace Mercury_Backend.Controllers
             }
             catch (Exception e)
             {
-                msg["status"] = "fail";
+                msg["Status"] = "Fail";
             }
             return JsonConvert.SerializeObject(msg);
         }
@@ -245,11 +249,11 @@ namespace Mercury_Backend.Controllers
                 context.Commodities.Add(newCommodity);
                 // Console.WriteLine("haha");
                 context.SaveChanges();
-                msg["status"] = "success";
+                msg["Status"] = "Success";
             }
             catch (Exception e)
             {
-                msg["status"] = "fail";
+                msg["Status"] = "Fail";
                 Console.WriteLine(e.ToString());
             }
             return JsonConvert.SerializeObject(msg);

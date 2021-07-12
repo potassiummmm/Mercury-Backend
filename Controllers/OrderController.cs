@@ -17,7 +17,7 @@ namespace Mercury_Backend.Controllers
     [ApiController]
     public class OrderController : ControllerBase
     {
-        private ModelContext context;
+        private readonly ModelContext context;
         private static Random random;
         public OrderController(ModelContext modelContext)
         {
@@ -32,13 +32,22 @@ namespace Mercury_Backend.Controllers
             try
             {
                 var orderList = context.Orders.OrderByDescending(order => order.Time).ToList<Order>();
-                msg["orderList"] = JToken.FromObject(orderList);
-                msg["status"] = "success";
+                var simplifiedOrderList = new List<SimplifiedOrder>();
+                for(int i = 0; i < orderList.Count(); ++i)
+                {
+                    var commodity = context.Commodities.Where(commodity => commodity.Id == orderList[i].CommodityId).ToList();
+                    var owner = context.SchoolUsers.Where(user => user.SchoolId == commodity[0].OwnerId).ToList();
+                    commodity[0].Owner = owner[0];
+                    orderList[i].Commodity = commodity[0];
+                    simplifiedOrderList.Add(orderList[i].Simplify());
+                }
+                msg["OrderList"] = JToken.FromObject(simplifiedOrderList);
+                msg["Status"] = "Success";
             }
             catch (Exception e)
             {
                 Console.WriteLine(e.ToString());
-                msg["status"] = "fail";
+                msg["Status"] = "Fail";
             }
             return JsonConvert.SerializeObject(msg);
         }
@@ -51,13 +60,13 @@ namespace Mercury_Backend.Controllers
             try
             {
                 var orderList = context.Orders.Where(order => order.Id == id).ToList<Order>();
-                msg["orderList"] = JToken.FromObject(orderList);
-                msg["status"] = "success";
+                msg["order"] = JToken.FromObject(orderList);
+                msg["Status"] = "Success";
             }
             catch (Exception e)
             {
                 Console.WriteLine(e.ToString());
-                msg["status"] = "fail";
+                msg["Status"] = "Fail";
             }
             return JsonConvert.SerializeObject(msg);
         }
@@ -75,12 +84,12 @@ namespace Mercury_Backend.Controllers
                 order.Status = "UNPAID";
                 context.Orders.Add(order);
                 context.SaveChanges();
-                msg["status"] = "success";
+                msg["Status"] = "Success";
             }
             catch (Exception e)
             {
                 Console.WriteLine(e.ToString());
-                msg["status"] = "fail";
+                msg["Status"] = "Fail";
             }
             return JsonConvert.SerializeObject(msg);
         }
@@ -92,8 +101,8 @@ namespace Mercury_Backend.Controllers
             JObject msg = new JObject();
             if(newStatus != "PAID" && newStatus != "CANCELLED")
             {
-                msg["status"] = "fail";
-                msg["failReason"] = "Wrong status";
+                msg["Status"] = "Fail";
+                msg["FailReason"] = "Wrong status";
                 return JsonConvert.SerializeObject(msg);
             }
             try
@@ -103,24 +112,24 @@ namespace Mercury_Backend.Controllers
                 {
                     if(order[0].Status != "UNPAID")
                     {
-                        msg["status"] = "fail";
-                        msg["failReason"] = "Cannot change the status of paid or cancelled order";
+                        msg["Status"] = "Fail";
+                        msg["FailReason"] = "Cannot change the status of paid or cancelled order";
                         return JsonConvert.SerializeObject(msg);
                     }
                     order[0].Status = newStatus;
                     context.SaveChanges();
-                    msg["status"] = "success";
+                    msg["Status"] = "Success";
                 }
                 else
                 {
-                    msg["status"] = "fail";
-                    msg["failReason"] = "Order not found";
+                    msg["Status"] = "Fail";
+                    msg["FailReason"] = "Order not found";
                 }
             }
             catch(Exception e)
             {
                 Console.WriteLine(e.ToString());
-                msg["status"] = "fail";
+                msg["Status"] = "Fail";
             }
             return JsonConvert.SerializeObject(msg);
         }
@@ -139,13 +148,13 @@ namespace Mercury_Backend.Controllers
             try
             {
                 var ratingList = context.Ratings.Where(rating => rating.OrderId == orderId).ToList<Rating>();
-                msg["ratingList"] = JToken.FromObject(ratingList);
-                msg["status"] = "success";
+                msg["RatingList"] = JToken.FromObject(ratingList);
+                msg["Status"] = "Success";
             }
             catch (Exception e)
             {
                 Console.WriteLine(e.ToString());
-                msg["status"] = "fail";
+                msg["Status"] = "Fail";
             }
             return JsonConvert.SerializeObject(msg);
         }
@@ -162,12 +171,12 @@ namespace Mercury_Backend.Controllers
                 rating.Time = DateTime.Now;
                 context.Ratings.Add(rating);
                 context.SaveChanges();
-                msg["status"] = "success";
+                msg["Status"] = "Success";
             }
             catch (Exception e)
             {
                 Console.WriteLine(e.ToString());
-                msg["status"] = "fail";
+                msg["Status"] = "Fail";
             }
             return JsonConvert.SerializeObject(msg);
         }
@@ -182,12 +191,12 @@ namespace Mercury_Backend.Controllers
                 var rating = context.Ratings.Where(rating => rating.RatingId == ratingId).ToList<Rating>();
                 context.Ratings.Remove(rating[0]);
                 context.SaveChanges();
-                msg["status"] = "success";
+                msg["Status"] = "Success";
             }
             catch (Exception e)
             {
                 Console.WriteLine(e.ToString());
-                msg["status"] = "fail";
+                msg["Status"] = "Fail";
             }
             return JsonConvert.SerializeObject(msg);
         }
