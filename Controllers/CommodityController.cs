@@ -281,21 +281,12 @@ namespace Mercury_Backend.Controllers
             {
                 msg["Status"] = "fail";
                 msg["Detail"] = "No such Id.";
-                return JsonConvert.SerializeObject(msg);
+                 return JsonConvert.SerializeObject(msg);
             }
             var detailMsg = "Integrity constraint invoked by";
-            var sucMsg = "Changes implemented on";
-            int flag = 0;
-            // try
-            // {
-            //     commodityToChange = context.Commodities.Find(id);
-            // }
-            // if (true )
-            // {
-            //     msg["Status"] = "fail";
-            //     msg["Detail"] = "No such Id.";
-            //     return JsonConvert.SerializeObject(msg);
-            // }
+            
+            
+           
             
             if (Request.Form["id"].ToString() != "" == true)
             {
@@ -303,12 +294,11 @@ namespace Mercury_Backend.Controllers
                 // context.SaveChanges();
                 msg["Status"] = "fail";
                 detailMsg += " id ";
-                flag = 1;
             }   
             if (Request.Form["owner_id"].ToString() != "" == true)
             {
                 detailMsg += " owner_id ";
-                flag = 1;
+                
             }
 
             if (Request.Form["video_id"].ToString() != "" == true)
@@ -316,13 +306,13 @@ namespace Mercury_Backend.Controllers
                 // commodityToChange.VideoId = Request.Form["video_id"].ToString();
                 msg["Status"] = "fail";
                 detailMsg += " video_id ";
-                flag = 1;
+                
             }
             if (Request.Form["condition"].ToString() != "" == true)
             {
                 commodityToChange.Condition = Request.Form["condition"].ToString();
                 detailMsg += " owner_id ";
-                flag = 1;
+                
             }
 
             if (Request.Form["price"].ToString() != "" == true)
@@ -466,8 +456,30 @@ namespace Mercury_Backend.Controllers
 
         // DELETE api/<CommodityController>/5
         [HttpDelete("{id}")]
-        public void Delete(int id)
+        public string Delete(string id)
         {
+            JObject msg = new JObject();
+            try
+            {
+
+                var commodityToDelete = context.Commodities.Find(id);
+                if (commodityToDelete == null)
+                {
+                    msg["Status"] = "fail";
+                    msg["detailMessage"] = "No such id.";
+                    return JsonConvert.SerializeObject(msg);
+                }
+
+                context.Commodities.Remove(commodityToDelete);
+                context.SaveChanges();
+                msg["Status"] = "success";
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.ToString());
+                msg["Status"] = "fail";
+            }
+            return JsonConvert.SerializeObject(msg);
         }
     }
 }
