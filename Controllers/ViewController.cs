@@ -31,11 +31,10 @@ namespace Mercury_Backend.Controllers
         [HttpGet]
         public String Get()
         {
-            String jsonString = "";
+            JObject msg = new JObject();
             var list = context.Views.OrderBy(b => b.UserId);
-            jsonString = JsonSerializer.Serialize(list);
-            Console.WriteLine(jsonString);
-            return jsonString;
+            msg["ViewList"] = JToken.FromObject(list);
+            return JsonConvert.SerializeObject(msg);
 
         }
 
@@ -43,48 +42,49 @@ namespace Mercury_Backend.Controllers
         [HttpGet("{userId}")]
         public string Get(string userId)
         {
-            String jsonString = "";
+            JObject msg = new JObject();
             var list = context.Views
                 .Where(e => e.UserId == userId)
                 .OrderBy(e => e.CommodityId);
-            jsonString = JsonSerializer.Serialize(list);
-            Console.WriteLine(jsonString);
-            return jsonString;
+            msg["ViewList"] = JToken.FromObject(list);
+            return JsonConvert.SerializeObject(msg);
 
 
         }
 
         [HttpPost]
-        public String Post([FromForm] View newView)
+        public String Post([FromForm] View NewView)
         {
             JObject msg = new JObject();
             try
             {
-                context.Views.Add(newView);
+                context.Views.Add(NewView);
 
                 context.SaveChanges();
-                msg["status"] = "success";
+                msg["Status"] = "Success";
             }
             catch (Exception e)
             {
-                msg["status"] = "fail";
+                msg["Status"] = "Fail";
                 Console.WriteLine(e.ToString());
             }
             return JsonConvert.SerializeObject(msg);
         }
 
-        [HttpDelete("{id}")]
+        [HttpDelete("{userId}")]
         public string delete(string userId)
         {
             JObject msg = new JObject();
 
             var views = context.Views.Where(e => e.UserId == userId);
+
             if (views != null)
             {
                 foreach (var view in views)
                 {
                     context.Views.Remove(view);
                     context.SaveChanges();
+                    msg["Status"] = "Success";
                 }
 
 

@@ -20,7 +20,7 @@ using JWT.Exceptions;
 
 namespace Mercury_Backend.Controllers
 {
-   
+
     [Route("api/[controller]")]
     [ApiController]
     public class UserController : ControllerBase
@@ -43,28 +43,28 @@ namespace Mercury_Backend.Controllers
         }
 
         // GET api/<UserController>/5
-        [HttpGet("{id}")]
-        public string Get(string id)
+        [HttpGet("{schoolId}")]
+        public string Get(string schoolId)
         {
             JObject msg = new JObject();
-            String jsonString = "";
+
             try
             {
-                var user = context.SchoolUsers.Find(id);
-                jsonString = JsonSerializer.Serialize(user);
+                var user = context.SchoolUsers.Find(schoolId);
+                msg["User"] = JToken.FromObject(user);
 
             }
             catch (Exception e)
             {
                 Console.WriteLine(e.ToString());
-                msg["status"] = "fail";
+                msg["Status"] = "Fail";
             }
-            return jsonString;
+            return JsonConvert.SerializeObject(msg);
         }
-        
+
         // POST api/<UserController>
         [HttpPost]
-        public String Post([FromForm]SchoolUser NewUser)
+        public String Post([FromForm] SchoolUser NewUser)
         {
             //String Id, String NickName, String RealName, String Phone,
             //String Password, String Major, int Credit, String Role, int Grade,
@@ -73,7 +73,6 @@ namespace Mercury_Backend.Controllers
             try
             {
                 context.SchoolUsers.Add(NewUser);
-                Console.WriteLine("haha");
                 context.SaveChanges();
                 msg["Status"] = "Success";
             }
@@ -84,7 +83,7 @@ namespace Mercury_Backend.Controllers
             }
             return JsonConvert.SerializeObject(msg);
         }
-        
+
         // POST api/<UserController>
         [HttpPost]
         [Route("register")]
@@ -95,20 +94,25 @@ namespace Mercury_Backend.Controllers
 
         // PUT api/<UserController>/5
         [HttpPut("{id}")]
-        public void Put([FromForm] SchoolUser value)
+        public string Put(string id,[FromForm] SchoolUser value)
         {
             JObject msg = new JObject();
             var user=context.SchoolUsers.Find(value.SchoolId);
+            msg["Status"] = "Fail";
+            if (user != null)
+            {
+                if (value.Nickname != null) user.Nickname = value.Nickname;
+                if (value.RealName != null) user.RealName = value.RealName;
+                if (value.Phone != null) user.Phone = value.Phone;
+                if (value.Password != null) user.Password = value.Password;
+                if (value.Major != null) user.Major = value.Major;
+                if (value.Credit != null) user.Credit = value.Credit;
+                if (value.Role != null) user.Nickname = value.Nickname;
+                if (value.Brief != null) user.Brief = value.Brief;
+                context.SaveChanges();
+                msg["Status"] = "Success";
+            }
             /*
-            if (value.Nickname != null) user.Nickname = value.Nickname;
-            if (value.RealName != null) user.RealName = value.RealName;
-            if (value.Phone != null) user.Phone = value.Phone;
-            if (value.Password != null) user.Password = value.Password;
-            if (value.Major != null) user.Major = value.Major;
-            if (value.Credit != null) user.Credit = value.Credit;
-            if (value.Role != null) user.Nickname = value.Nickname;
-            if (value.Nickname != null) user.Nickname = value.Nickname;
-            */
             foreach(var p in value.GetType().GetProperties())
             {
                 if (p.GetValue(value) != null && p.Name != "SchoolId")
@@ -126,7 +130,8 @@ namespace Mercury_Backend.Controllers
                 msg["status"] = "fail";
                 return;
             }
-            return;
+            */
+            return JsonConvert.SerializeObject(msg);
 
         }
 

@@ -29,46 +29,31 @@ namespace Mercury_Backend.Controllers
         [HttpGet]
         public String Get()
         {
-            String jsonString = "";
+            JObject msg = new JObject();
             var list = context.ShoppingCarts.OrderBy(b => b.UserId);
-            jsonString = JsonSerializer.Serialize(list);
-            Console.WriteLine(jsonString);
-            return jsonString;
+            msg["UserList"] = JToken.FromObject(list);
+            return JsonConvert.SerializeObject(msg);
 
         }
 
-        /*
-        [HttpGet("{userId}")]
-        public string Get(string userId)
-        {
-            String jsonString = "";
-            var list = context.ShoppingCarts
-                .Where(e => e.UserId == userId).ToList();
-            jsonString = JsonSerializer.Serialize(list);
-            Console.WriteLine(jsonString);
-            return jsonString;
 
-
-        }
-        */
 
         [HttpGet("{userId}")]
         public string Get(string userId)
         {
             JObject msg = new JObject();
-            String jsonString = "";
             try
             {
-                var list = context.ShoppingCarts.Where(b => b.UserId == userId).ToList<ShoppingCart>();
-                jsonString = JsonSerializer.Serialize(list);
+                var userList = context.ShoppingCarts.Where(b => b.UserId == userId).ToList<ShoppingCart>();
+                msg["UserList"] = JToken.FromObject(userList);
 
             }
             catch (Exception e)
             {
                 Console.WriteLine(e.ToString());
-                msg["status"] = "fail";
+                msg["Status"] = "Fail";
             }
-            return jsonString;
+            return JsonConvert.SerializeObject(msg);
         }
 
 
@@ -82,26 +67,26 @@ namespace Mercury_Backend.Controllers
                 context.ShoppingCarts.Add(ShoppingCartItem);
 
                 context.SaveChanges();
-                msg["status"] = "success";
+                msg["Status"] = "Success";
             }
             catch (Exception e)
             {
-                msg["status"] = "fail";
+                msg["Status"] = "Fail";
                 Console.WriteLine(e.ToString());
             }
             return JsonConvert.SerializeObject(msg);
         }
 
 
-        [HttpDelete("{commodityId,userId}")]
-        public string delete(string commodityId, string userId)
+        [HttpDelete]
+        public string delete([FromForm]string commodityId, [FromForm]string userId)
         {
             JObject msg = new JObject();
             var ShoppingCartItem = context.ShoppingCarts.Where(e => e.UserId == userId);
 
             if (ShoppingCartItem == null)
             {
-                msg["status"] = "fail";
+                msg["Status"] = "Fail";
                 return JsonConvert.SerializeObject(msg);
             }
             try
@@ -116,52 +101,44 @@ namespace Mercury_Backend.Controllers
                         context.SaveChanges();
 
                     }
-                    msg["status"] = "success";
+                    msg["Status"] = "Success";
                 }
 
                 // msg["status"] = "success";
             }
             catch (Exception e)
             {
-                msg["status"] = "fail";
+                msg["status"] = "Fail";
                 Console.WriteLine(e.ToString());
             }
             return JsonConvert.SerializeObject(msg);
         }
 
-        [HttpPut("{commdityId,userId,count}")]
-        public string Put(string commodityId, string userId,  byte count)
+        [HttpPut]
+        public string Put([FromForm]string commodityId, [FromForm] string userId, [FromForm] byte count)
         {
             JObject msg = new JObject();
             var ShoppingCartItem = context.ShoppingCarts.Where(e => e.UserId == userId);
 
             if (ShoppingCartItem == null)
             {
-                msg["status"] = "fail";
-                return JsonConvert.SerializeObject(msg); ;
+                msg["Status"] = "fail";
+                return JsonConvert.SerializeObject(msg);
             }
             // return JsonSerializer.Serialize(ShoppingCartItem);
+            msg["Status"] = "Not Found";
             foreach (var item in ShoppingCartItem)
             {
                 if (item.CommodityId == commodityId)
                 {
-
-                    
                         item.Count=count;
-
-                       
-
                         context.SaveChanges();
 
                     
-                        msg["status"] = "success";
+                        msg["Status"] = "Success";
                 }
-
-                
-
-
-                
             }
+
             return JsonConvert.SerializeObject(msg);
 
         }
