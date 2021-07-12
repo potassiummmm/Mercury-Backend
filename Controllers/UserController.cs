@@ -104,7 +104,7 @@ namespace Mercury_Backend.Controllers
                 if (value.Nickname != null) user.Nickname = value.Nickname;
                 if (value.RealName != null) user.RealName = value.RealName;
                 if (value.Phone != null) user.Phone = value.Phone;
-                if (value.Password != null) user.Password = value.Password;
+                if (value.Password != null) user.Password = value.Password; 
                 if (value.Major != null) user.Major = value.Major;
                 if (value.Credit != null) user.Credit = value.Credit;
                 if (value.Role != null) user.Nickname = value.Nickname;
