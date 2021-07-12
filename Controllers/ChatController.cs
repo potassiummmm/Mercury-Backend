@@ -29,7 +29,7 @@ namespace Mercury_Backend.Controllers
             var list = context.ChatRecords
                 .Where(record => record.SenderId == userId && record.ReceiverId == targetId || record.SenderId == targetId && record.ReceiverId == userId)
                 .OrderBy(record => record.Time);
-            msg["charRecord"] = JToken.FromObject(list);
+            msg["CharRecord"] = JToken.FromObject(list);
             return JsonConvert.SerializeObject(msg);
         }
         
@@ -42,11 +42,11 @@ namespace Mercury_Backend.Controllers
             {
                 context.ChatRecords.Add(record);
                 context.SaveChanges();
-                msg["status"] = "success";
+                msg["Status"] = "Success";
             }
             catch (Exception e)
             {
-                msg["status"] = "fail";
+                msg["Status"] = "Fail";
                 Console.WriteLine(e.ToString());
             }
             return JsonConvert.SerializeObject(msg);

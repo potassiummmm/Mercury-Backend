@@ -47,13 +47,13 @@ namespace Mercury_Backend.Controllers
                 {
                     result.Add(postList[i + (pageNumber - 1) * maxNumber]);
                 }
-                msg["postList"] = JToken.FromObject(result);
-                msg["status"] = "success";
+                msg["PostList"] = JToken.FromObject(result);
+                msg["Status"] = "Success";
             }
             catch(Exception e)
             {
                 Console.WriteLine(e.ToString());
-                msg["status"] = "fail";
+                msg["Status"] = "Fail";
             }
             return JsonConvert.SerializeObject(msg);
         }
@@ -66,13 +66,14 @@ namespace Mercury_Backend.Controllers
             try
             {
                 var post = context.NeedPosts.Where(post => post.Id == postId);
-                msg["post"] = JToken.FromObject(post);
-                msg["status"] = "success";
+
+                msg["Post"] = JToken.FromObject(post);
+                msg["Status"] = "Success";
             }
             catch (Exception e)
             {
                 Console.WriteLine(e.ToString());
-                msg["status"] = "fail";
+                msg["Status"] = "Fail";
             }
             return JsonConvert.SerializeObject(msg);
         }
@@ -91,8 +92,7 @@ namespace Mercury_Backend.Controllers
                 }
                 else
                 {
-                    Console.WriteLine(photos.Count());
-                    for(int i = 0; i < photos.Count(); ++i)
+                    for (int i = 0; i < photos.Count(); ++i)
                     {
                         var imageStream = System.Drawing.Bitmap.FromStream(photos[i].OpenReadStream());
                         var image = new Medium();
@@ -113,14 +113,15 @@ namespace Mercury_Backend.Controllers
 
                         post.PostImages.Add(postImage);
                     }
-                    context.NeedPosts.Add(post);
                 }
+                post.Time = DateTime.Now;
+                context.NeedPosts.Add(post);
                 context.SaveChanges();
-                msg["status"] = "success";
+                msg["Status"] = "Success";
             }
             catch(Exception e)
             {
-                msg["status"] = "fail";
+                msg["Status"] = "Fail";
                 Console.WriteLine(e.ToString());
             }
             return JsonConvert.SerializeObject(msg);
@@ -149,12 +150,12 @@ namespace Mercury_Backend.Controllers
                 var post = context.NeedPosts.Where(post => post.Id == postId).ToList();
                 context.NeedPosts.Remove(post[0]);
                 context.SaveChanges();
-                msg["status"] = "success";
+                msg["Status"] = "Success";
             }
             catch (Exception e)
             {
                 Console.WriteLine(e.ToString());
-                msg["status"] = "fail";
+                msg["Status"] = "Fail";
             }
             return JsonConvert.SerializeObject(msg);
         }
@@ -167,13 +168,13 @@ namespace Mercury_Backend.Controllers
             try
             {
                 var commentList = context.PostComments.Where(comment => comment.PostId == postId).ToList<PostComment>();
-                msg["commentList"] = JToken.FromObject(commentList);
-                msg["status"] = "success";
+                msg["CommentList"] = JToken.FromObject(commentList);
+                msg["Status"] = "Success";
             }
             catch (Exception e)
             {
                 Console.WriteLine(e.ToString());
-                msg["status"] = "fail";
+                msg["Status"] = "Fail";
             }
             return JsonConvert.SerializeObject(msg);
         }
@@ -190,12 +191,12 @@ namespace Mercury_Backend.Controllers
                 comment.PostId = postId;
                 context.PostComments.Add(comment);
                 context.SaveChanges();
-                msg["status"] = "success";
+                msg["Status"] = "Success";
             }
             catch (Exception e)
             {
                 Console.WriteLine(e.ToString());
-                msg["status"] = "fail";
+                msg["Status"] = "Fail";
             }
             return JsonConvert.SerializeObject(msg);
         }
@@ -210,12 +211,12 @@ namespace Mercury_Backend.Controllers
                 var comment = context.PostComments.Where(comment => comment.Id == commentId).ToList<PostComment>();
                 context.PostComments.Remove(comment[0]);
                 context.SaveChanges();
-                msg["status"] = "success";
+                msg["Status"] = "Success";
             }
             catch (Exception e)
             {
                 Console.WriteLine(e.ToString());
-                msg["status"] = "fail";
+                msg["Status"] = "Fail";
             }
             return JsonConvert.SerializeObject(msg);
         }

@@ -35,11 +35,11 @@ namespace Mercury_Backend.Controllers
             {
                 var commodityList = context.Commodities.OrderBy(b => b.Id).ToList<Commodity>();
                 msg["commodityList"] = JToken.FromObject(commodityList);
-                msg["status"] = "success";
+                msg["Status"] = "Success";
             }
             catch(Exception e)
             {
-                msg["status"] = "fail";
+                msg["Status"] = "Fail";
             }
             return JsonConvert.SerializeObject(msg);
         }
@@ -53,11 +53,11 @@ namespace Mercury_Backend.Controllers
             {
                 var commodityList = context.Commodities.FirstOrDefault(b => b.Id == id);
                 msg["targetCommodity"] = JToken.FromObject(commodityList);
-                msg["status"] = "success";
+                msg["Status"] = "Success";
             }
             catch(Exception e)
             {
-                msg["status"] = "fail";
+                msg["Status"] = "Fail";
             }
             return JsonConvert.SerializeObject(msg);
         }
@@ -114,11 +114,11 @@ namespace Mercury_Backend.Controllers
                 context.Commodities.Add(newCommodity);
                 Console.WriteLine("haha");
                 context.SaveChanges();
-                msg["status"] = "success";
+                msg["Status"] = "Success";
             }
             catch (Exception e)
             {
-                msg["status"] = "fail";
+                msg["Status"] = "Fail";
                 Console.WriteLine(e.ToString());
             }
             return JsonConvert.SerializeObject(msg);
