@@ -42,10 +42,14 @@ namespace Mercury_Backend.Controllers
                 {
                     postList = context.NeedPosts.OrderBy(post => post.Time).ToList();
                 }
-                List<NeedPost> result = new List<NeedPost>();
+                List<SimplifiedPost> result = new List<SimplifiedPost>();
                 for(int i = 0; i < maxNumber && i + (pageNumber - 1)*maxNumber < postList.Count(); ++i)
                 {
-                    result.Add(postList[i + (pageNumber - 1) * maxNumber]);
+                    var sender = context.SchoolUsers.Single(sender => sender.SchoolId == postList[i].SenderId);
+                    var avatar = context.Media.Single(avatar => avatar.Id == sender.AvatarId);
+                    sender.Avatar = avatar;
+                    postList[i].Sender = sender;
+                    result.Add(postList[i + (pageNumber - 1) * maxNumber].Simplify());
                 }
                 msg["PostList"] = JToken.FromObject(result);
                 msg["Status"] = "Success";
@@ -65,9 +69,22 @@ namespace Mercury_Backend.Controllers
             JObject msg = new JObject();
             try
             {
-                var post = context.NeedPosts.Where(post => post.Id == postId);
-
-                msg["Post"] = JToken.FromObject(post);
+                var post = context.NeedPosts.Where(post => post.Id == postId).ToList()[0];
+                var comments = context.PostComments.Where(comment => comment.PostId == postId).ToList();
+                var tmpContext = context.PostImages.Select(postImage => new { PostId = postImage.PostId, ImageId = postImage.ImageId });
+                var imageIdList = tmpContext.Where(postImage => postImage.PostId == postId).ToList();
+                var imageList = new List<string>();
+                for (int i = 0; i < imageIdList.Count; ++i)
+                {
+                    var image = context.Media.Where(image => image.Id == imageIdList[i].ImageId).ToList();
+                    imageList.Add(image[0].Path);
+                }
+                msg["ImagePaths"] = JToken.FromObject(imageList);
+                msg["Post"] = JToken.FromObject(post, new JsonSerializer()
+                {
+                    ReferenceLoopHandling = ReferenceLoopHandling.Ignore
+                });
+                //msg["Post"] = JToken.FromObject(post);
                 msg["Status"] = "Success";
             }
             catch (Exception e)
@@ -98,7 +115,7 @@ namespace Mercury_Backend.Controllers
                         var image = new Medium();
                         image.Id = Generator.GenerateId(20);
                         image.Type = "IMAGE";
-                        var path = "Media/Picture/" + image.Id + ".png";
+                        var path = "Media/Image/" + image.Id + ".png";
                         imageStream.Save(path);
                         image.Path = path;
                         context.Media.Add(image);
