@@ -61,13 +61,12 @@ namespace Mercury_Backend.Controllers
         // POST api/<UserController>
         [HttpPost]
         public String Post([FromForm] SchoolUser NewUser)
-        public string Post([FromForm]SchoolUser newUser)
+
         {
             JObject msg = new JObject();
             try
             {
                 context.SchoolUsers.Add(NewUser);
-                context.SchoolUsers.Add(newUser);
                 Console.WriteLine("haha");
                 context.SaveChanges();
                 msg["status"] = "success";
