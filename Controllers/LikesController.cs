@@ -23,9 +23,22 @@ namespace Mercury_Backend.Controllers
         }
         // GET: api/<LikesController>
         [HttpGet]
-        public IEnumerable<string> Get()
+        public string Get()
         {
-            return new string[] { "value1", "value2" };
+            JObject msg = new JObject();
+            try
+            {
+                var userList = context.Likes.ToList<Like>();
+                msg["UserList"] = JToken.FromObject(userList);
+                //msg["User"] = JToken.FromObject(userList[0].User);
+                msg["Status"] = "Success";
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.ToString());
+                msg["Status"] = "Fail";
+            }
+            return JsonConvert.SerializeObject(msg);
         }
 
         // GET api/<LikesController>/5
