@@ -55,18 +55,18 @@ namespace Mercury_Backend.Controllers
                 }
 
                 msg["OrderList"] = JToken.FromObject(simplifiedOrderList);
-                msg["Status"] = "200";
+                msg["Code"] = "200";
             }
             catch (ArgumentNullException e)
             {
                 Console.WriteLine(e.ToString());
-                msg["Status"] = "500";
+                msg["Code"] = "500";
                 msg["Description"] = "Internal exception happens";
             }
             catch (Exception e)
             {
                 Console.WriteLine(e.ToString());
-                msg["Status"] = "400";
+                msg["Code"] = "400";
                 msg["Description"] = "Unknown exception";
             }
             return JsonConvert.SerializeObject(msg);
@@ -79,20 +79,34 @@ namespace Mercury_Backend.Controllers
             JObject msg = new JObject();
             try
             {
-                var orderList = context.Orders.Where(order => order.Id == id).ToList<Order>();
-                msg["order"] = JToken.FromObject(orderList);
-                msg["Status"] = "200";
+                var order = context.Orders.Where(o => o.Id == id).Select(o => new
+                {
+                    OrderId = o.Id,
+                    BuyerId = o.BuyerId,
+                    Commodity = o.Commodity,
+                    Count = o.Count,
+                    Time = o.Time,
+                    Location = o.Location,
+                    ReturnTime = o.ReturnTime,
+                    ReturnLocation = o.ReturnLocation,
+                    Status = o.Status,
+                }).Single();
+                msg["order"] = JToken.FromObject(order, new JsonSerializer()
+                {
+                    ReferenceLoopHandling = ReferenceLoopHandling.Ignore //忽略循环引用，默认是throw exception
+                });
+                msg["Code"] = "200";
             }
             catch (ArgumentNullException e)
             {
                 Console.WriteLine(e.ToString());
-                msg["Status"] = "500";
+                msg["Code"] = "500";
                 msg["Description"] = "Internal exception happens";
             }
             catch (Exception e)
             {
                 Console.WriteLine(e.ToString());
-                msg["Status"] = "400";
+                msg["Code"] = "400";
                 msg["Description"] = "Unknown exception";
             }
             return JsonConvert.SerializeObject(msg);
@@ -111,12 +125,13 @@ namespace Mercury_Backend.Controllers
                 order.Status = "UNPAID";
                 context.Orders.Add(order);
                 context.SaveChanges();
-                msg["Status"] = "201";
+                msg["Code"] = "201";
+                msg["OrderId"] = order.Id;
             }
             catch (Exception e)
             {
                 Console.WriteLine(e.ToString());
-                msg["Status"] = "400";
+                msg["Code"] = "400";
             }
             return JsonConvert.SerializeObject(msg);
         }
@@ -128,7 +143,7 @@ namespace Mercury_Backend.Controllers
             JObject msg = new JObject();
             if(newStatus != "PAID" && newStatus != "CANCELLED")
             {
-                msg["Status"] = "403";
+                msg["Code"] = "403";
                 msg["Description"] = "Cannot change status to unpaid";
                 return JsonConvert.SerializeObject(msg);
             }
@@ -137,30 +152,30 @@ namespace Mercury_Backend.Controllers
                 var order = context.Orders.Single(o => o.Id == id);
                 if(order.Status != "UNPAID")
                 {
-                    msg["Status"] = "403";
+                    msg["Code"] = "403";
                     msg["Description"] = "Cannot update a paid or cancelled order";
                     return JsonConvert.SerializeObject(msg);
                 }
                 order.Status = newStatus;
                 context.SaveChanges();
-                msg["Status"] = "200";
+                msg["Code"] = "200";
             }
             catch (DbUpdateException e)
             {
                 Console.WriteLine(e.ToString());
-                msg["Status"] = "403";
+                msg["Code"] = "403";
                 msg["Description"] = "Cannot update database";
             }
             catch (DBConcurrencyException e)
             {
                 Console.WriteLine(e.ToString());
-                msg["Status"] = "403";
+                msg["Code"] = "500";
                 msg["Description"] = "Fail to update database because of concurrent requests";
             }
             catch(Exception e)
             {
                 Console.WriteLine(e.ToString());
-                msg["Status"] = "400";
+                msg["Code"] = "400";
                 msg["Description"] = "Unknown exception";
             }
             return JsonConvert.SerializeObject(msg);
@@ -181,18 +196,18 @@ namespace Mercury_Backend.Controllers
             {
                 var ratingList = context.Ratings.Where(rating => rating.OrderId == orderId).ToList<Rating>();
                 msg["RatingList"] = JToken.FromObject(ratingList);
-                msg["Status"] = "200";
+                msg["Code"] = "200";
             }
             catch (ArgumentNullException e)
             {
                 Console.WriteLine(e.ToString());
-                msg["Status"] = "500";
+                msg["Code"] = "500";
                 msg["Description"] = "Internal exception happens";
             }
             catch (Exception e)
             {
                 Console.WriteLine(e.ToString());
-                msg["Status"] = "400";
+                msg["Code"] = "400";
             }
             return JsonConvert.SerializeObject(msg);
         }
@@ -209,24 +224,24 @@ namespace Mercury_Backend.Controllers
                 rating.Time = DateTime.Now;
                 context.Ratings.Add(rating);
                 context.SaveChanges();
-                msg["Status"] = "201";
+                msg["Code"] = "201";
             }
             catch (DbUpdateException e)
             {
                 Console.WriteLine(e.ToString());
-                msg["Status"] = "403";
+                msg["Code"] = "403";
                 msg["Description"] = "Cannot update database";
             }
             catch (DBConcurrencyException e)
             {
                 Console.WriteLine(e.ToString());
-                msg["Status"] = "403";
+                msg["Code"] = "500";
                 msg["Description"] = "Fail to update database because of concurrent requests";
             }
             catch (Exception e)
             {
                 Console.WriteLine(e.ToString());
-                msg["Status"] = "400";
+                msg["Code"] = "400";
             }
             return JsonConvert.SerializeObject(msg);
         }
@@ -241,24 +256,24 @@ namespace Mercury_Backend.Controllers
                 var rating = context.Ratings.Where(rating => rating.RatingId == ratingId).ToList<Rating>();
                 context.Ratings.Remove(rating[0]);
                 context.SaveChanges();
-                msg["Status"] = "200";
+                msg["Code"] = "200";
             }
             catch (DbUpdateException e)
             {
                 Console.WriteLine(e.ToString());
-                msg["Status"] = "403";
+                msg["Code"] = "403";
                 msg["Description"] = "Cannot update database";
             }
             catch (DBConcurrencyException e)
             {
                 Console.WriteLine(e.ToString());
-                msg["Status"] = "403";
+                msg["Code"] = "500";
                 msg["Description"] = "Fail to update database because of concurrent requests";
             }
             catch (Exception e)
             {
                 Console.WriteLine(e.ToString());
-                msg["Status"] = "400";
+                msg["Code"] = "400";
             }
             return JsonConvert.SerializeObject(msg);
         }

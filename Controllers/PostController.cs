@@ -53,18 +53,18 @@ namespace Mercury_Backend.Controllers
                 }
 
                 msg["PostList"] = JToken.FromObject(result);
-                msg["Status"] = "200";
+                msg["Code"] = "200";
             }
             catch (ArgumentNullException e)
             {
                 Console.WriteLine(e.ToString());
-                msg["Status"] = "500";
+                msg["Code"] = "500";
                 msg["Description"] = "Internal exception happens";
             }
             catch(Exception e)
             {
                 Console.WriteLine(e.ToString());
-                msg["Status"] = "400";
+                msg["Code"] = "400";
                 msg["Description"] = "Unknown exception happens";
             }
             return JsonConvert.SerializeObject(msg);
@@ -90,18 +90,18 @@ namespace Mercury_Backend.Controllers
                 {
                     ReferenceLoopHandling = ReferenceLoopHandling.Ignore
                 });
-                msg["Status"] = "200";
+                msg["Code"] = "200";
             }
             catch (ArgumentNullException e)
             {
                 Console.WriteLine(e.ToString());
-                msg["Status"] = "500";
+                msg["Code"] = "500";
                 msg["Description"] = "Internal exception happens";
             }
             catch (Exception e)
             {
                 Console.WriteLine(e.ToString());
-                msg["Status"] = "400";
+                msg["Code"] = "400";
                 msg["Description"] = "Unknown exception happens";
             }
             return JsonConvert.SerializeObject(msg);
@@ -143,22 +143,22 @@ namespace Mercury_Backend.Controllers
                 post.Time = DateTime.Now;
                 context.NeedPosts.Add(post);
                 context.SaveChanges();
-                msg["Status"] = "201";
+                msg["Code"] = "201";
             }
             catch (ExternalException)
             {
-                msg["Status"] = "500";
+                msg["Code"] = "500";
                 msg["Description"] = "The image was saved with the wrong image format. Or the image was saved to the same file it was created from.";
             }
             catch (ArgumentException)
             {
-                msg["Status"] = "415";
+                msg["Code"] = "415";
                 msg["Description"] = "Unsupported media";
             }
             catch(Exception e)
             {
-                msg["Status"] = "400";
-                msg["Status"] = "Unknown exception happens";
+                msg["Code"] = "400";
+                msg["Code"] = "Unknown exception happens";
                 Console.WriteLine(e.ToString());
             }
             return JsonConvert.SerializeObject(msg);
@@ -180,12 +180,12 @@ namespace Mercury_Backend.Controllers
                 var post = context.NeedPosts.Single(p => p.Id == postId);
                 context.NeedPosts.Remove(post);
                 context.SaveChanges();
-                msg["Status"] = "200";
+                msg["Code"] = "200";
             }
             catch (Exception e)
             {
                 Console.WriteLine(e.ToString());
-                msg["Status"] = "400";
+                msg["Code"] = "400";
                 msg["Description"] = "Unknown exception happens";
             }
             return JsonConvert.SerializeObject(msg);
@@ -200,12 +200,12 @@ namespace Mercury_Backend.Controllers
             {
                 var commentList = context.PostComments.Where(comment => comment.PostId == postId).ToList();
                 msg["CommentList"] = JToken.FromObject(commentList);
-                msg["Status"] = "200";
+                msg["Code"] = "200";
             }
             catch (Exception e)
             {
                 Console.WriteLine(e.ToString());
-                msg["Status"] = "400";
+                msg["Code"] = "400";
                 msg["Description"] = "Unknown exception happens";
             }
             return JsonConvert.SerializeObject(msg);
@@ -223,24 +223,24 @@ namespace Mercury_Backend.Controllers
                 comment.PostId = postId;
                 context.PostComments.Add(comment);
                 context.SaveChanges();
-                msg["Status"] = "201";
+                msg["Code"] = "201";
             }
             catch (DbUpdateException e)
             {
                 Console.WriteLine(e.ToString());
-                msg["Status"] = "403";
+                msg["Code"] = "403";
                 msg["Description"] = "Cannot update database";
             }
             catch (DBConcurrencyException e)
             {
                 Console.WriteLine(e.ToString());
-                msg["Status"] = "403";
+                msg["Code"] = "500";
                 msg["Description"] = "Fail to update database because of concurrent requests";
             }
             catch (Exception e)
             {
                 Console.WriteLine(e.ToString());
-                msg["Status"] = "400";
+                msg["Code"] = "400";
                 msg["Description"] = "Unknown exception happens";
             }
             return JsonConvert.SerializeObject(msg);
@@ -256,24 +256,24 @@ namespace Mercury_Backend.Controllers
                 var comment = context.PostComments.Where(c => c.Id == commentId).ToList();
                 context.PostComments.Remove(comment[0]);
                 context.SaveChanges();
-                msg["Status"] = "Success";
+                msg["Code"] = "Success";
             }
             catch (DbUpdateException e)
             {
                 Console.WriteLine(e.ToString());
-                msg["Status"] = "403";
+                msg["Code"] = "403";
                 msg["Description"] = "Cannot update database";
             }
             catch (DBConcurrencyException e)
             {
                 Console.WriteLine(e.ToString());
-                msg["Status"] = "403";
+                msg["Code"] = "500";
                 msg["Description"] = "Fail to update database because of concurrent requests";
             }
             catch (Exception e)
             {
                 Console.WriteLine(e.ToString());
-                msg["Status"] = "400";
+                msg["Code"] = "400";
                 msg["Description"] = "Unknown exception happens";
             }
             return JsonConvert.SerializeObject(msg);

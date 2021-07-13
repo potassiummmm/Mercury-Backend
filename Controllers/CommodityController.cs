@@ -8,12 +8,9 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Security.Cryptography;
 using System.Threading.Tasks;
 using Mercury_Backend.Utils;
 using Microsoft.AspNetCore.Http;
-using Microsoft.Azure.Cosmos.Linq;
 using Microsoft.EntityFrameworkCore;
 
 
@@ -39,11 +36,11 @@ namespace Mercury_Backend.Controllers
         //     {
         //         var commodityList = context.Commodities.OrderBy(b => b.Id).ToList<Commodity>();
         //         msg["commodityList"] = JToken.FromObject(commodityList);
-        //         msg["status"] = "success";
+        //         msg["Code"] = "success";
         //     }
         //     catch(Exception e)
         //     {
-        //         msg["status"] = "fail";
+        //         msg["Code"] = "fail";
         //     }
         //     return JsonConvert.SerializeObject(msg);
         // }
@@ -64,7 +61,7 @@ namespace Mercury_Backend.Controllers
             catch (Exception e)
             {
 
-                msg["status"] = "fail";
+                msg["Code"] = "fail";
                 return JsonConvert.SerializeObject(msg);
             }
 
@@ -81,11 +78,11 @@ namespace Mercury_Backend.Controllers
                 flag = 1;
                 try
                 {
-                    msg["status"] = "success";
+                    msg["Code"] = "success";
                 }
                 catch(Exception e)
                 {
-                    msg["status"] = "fail";
+                    msg["Code"] = "fail";
                 }
                 // 
                 // todo: 用关键词搜索
@@ -124,7 +121,7 @@ namespace Mercury_Backend.Controllers
 
             else
             {
-                msg["status"] = "fail";
+                msg["Code"] = "fail";
                 return JsonConvert.SerializeObject(msg);
             }
             try
@@ -156,13 +153,13 @@ namespace Mercury_Backend.Controllers
                 msg["tags"] = JToken.FromObject(tagSet);
                 
                     
-                msg["status"] = "success";
+                msg["Code"] = "success";
                 msg["totalPage"] = commodityList.Count;
             }
             catch (Exception e)
             {
                 Console.WriteLine(e);
-                msg["Status"] = "fail";
+                msg["Code"] = "fail";
             }
             return JsonConvert.SerializeObject(msg);
         }
@@ -180,7 +177,7 @@ namespace Mercury_Backend.Controllers
             try
             {
                 Console.WriteLine(files.Count());
-                if (files.Count() == 0)
+                if (files.Any())
                 {
                     Console.WriteLine("No files uploaded.");
                 }
@@ -258,11 +255,11 @@ namespace Mercury_Backend.Controllers
                 context.Commodities.Add(newCommodity);
                 // Console.WriteLine("haha");
                 context.SaveChanges();
-                msg["Status"] = "success";
+                msg["Code"] = "success";
             }
             catch (Exception e)
             {
-                msg["Status"] = "fail";
+                msg["Code"] = "fail";
                 Console.WriteLine(e.ToString());
             }
             return JsonConvert.SerializeObject(msg);
@@ -273,7 +270,7 @@ namespace Mercury_Backend.Controllers
         public string Put(string id)
         {
             JObject msg = new JObject();
-            msg["Status"] = "success";
+            msg["Code"] = "success";
             try
             {
                 var test = Request.Form["test"].ToString();
@@ -281,14 +278,14 @@ namespace Mercury_Backend.Controllers
             catch (Exception e)
             {
                 Console.WriteLine(e);
-                msg["Status"] = "fail";
+                msg["Code"] = "fail";
                 msg["Detail"] = "No form data";
                 return JsonConvert.SerializeObject(msg);
             }
             var commodityToChange = context.Commodities.Find(id);
             if (commodityToChange == null)
             {
-                msg["Status"] = "fail";
+                msg["Code"] = "fail";
                 msg["Detail"] = "No such Id.";
                  return JsonConvert.SerializeObject(msg);
             }
@@ -297,34 +294,34 @@ namespace Mercury_Backend.Controllers
             
            
             
-            if (Request.Form["id"].ToString() != "" == true)
+            if (Request.Form["id"].ToString() != "")
             {
                 // commodityToChange.OwnerId = Request.Form["owner_id"].ToString();
                 // context.SaveChanges();
-                msg["Status"] = "fail";
+                msg["Code"] = "fail";
                 detailMsg += " id ";
             }   
-            if (Request.Form["owner_id"].ToString() != "" == true)
+            if (Request.Form["owner_id"].ToString() != "")
             {
                 detailMsg += " owner_id ";
                 
             }
 
-            if (Request.Form["video_id"].ToString() != "" == true)
+            if (Request.Form["video_id"].ToString() != "")
             {
                 // commodityToChange.VideoId = Request.Form["video_id"].ToString();
-                msg["Status"] = "fail";
+                msg["Code"] = "fail";
                 detailMsg += " video_id ";
                 
             }
-            if (Request.Form["condition"].ToString() != "" == true)
+            if (Request.Form["condition"].ToString() != "")
             {
                 commodityToChange.Condition = Request.Form["condition"].ToString();
                 detailMsg += " owner_id ";
                 
             }
 
-            if (Request.Form["price"].ToString() != "" == true)
+            if (Request.Form["price"].ToString() != "")
             {
                 try
                 {
@@ -332,12 +329,12 @@ namespace Mercury_Backend.Controllers
                 }
                 catch (Exception e)
                 {
-                    msg["Status"] = "fail";
+                    msg["Code"] = "fail";
                     detailMsg += " price ";
                 }
             }
             
-            if (Request.Form["stock"].ToString() != "" == true)
+            if (Request.Form["stock"].ToString() != "")
             {
                 try
                 {
@@ -345,12 +342,12 @@ namespace Mercury_Backend.Controllers
                 }
                 catch (Exception e)
                 {
-                    msg["Status"] = "fail";
+                    msg["Code"] = "fail";
                     detailMsg += " stock ";
                 }
             }
             
-            if (Request.Form["forRent"].ToString() != "" == true)
+            if (Request.Form["forRent"].ToString() != "")
             {
                 try
                 {
@@ -358,11 +355,11 @@ namespace Mercury_Backend.Controllers
                 }
                 catch (Exception e)
                 {
-                    msg["Status"] = "fail";
+                    msg["Code"] = "fail";
                     detailMsg += " forRent ";
                 }
             }
-            if (Request.Form["clicks"].ToString() != "" == true)
+            if (Request.Form["clicks"].ToString() != "")
             {
                 try
                 {
@@ -370,12 +367,12 @@ namespace Mercury_Backend.Controllers
                 }
                 catch (Exception e)
                 {
-                    msg["Status"] = "fail";
+                    msg["Code"] = "fail";
                     detailMsg += " clicks ";
                 }
             }
             
-            if (Request.Form["likes"].ToString() != "" == true)
+            if (Request.Form["likes"].ToString() != "")
             {
                 try
                 {
@@ -383,11 +380,11 @@ namespace Mercury_Backend.Controllers
                 }
                 catch (Exception e)
                 {
-                    msg["Status"] = "fail";
+                    msg["Code"] = "fail";
                     detailMsg += " likes ";
                 }
             }
-            if (Request.Form["popularity"].ToString() != "" == true)
+            if (Request.Form["popularity"].ToString() != "")
             {
                 try
                 {
@@ -395,12 +392,12 @@ namespace Mercury_Backend.Controllers
                 }
                 catch (Exception e)
                 {
-                    msg["Status"] = "fail";
+                    msg["Code"] = "fail";
                     detailMsg += " popularity ";
                 }
             }
             
-            if (Request.Form["popularity"].ToString() != "" == true)
+            if (Request.Form["popularity"].ToString() != "")
             {
                 try
                 {
@@ -408,18 +405,18 @@ namespace Mercury_Backend.Controllers
                 }
                 catch (Exception e)
                 {
-                    msg["Status"] = "fail";
+                    msg["Code"] = "fail";
                     detailMsg += " popularity ";
                 }
             }
-            if (Request.Form["classification"].ToString() != "" == true)
+            if (Request.Form["classification"].ToString() != "")
             {
                 
-                msg["Status"] = "fail";
+                msg["Code"] = "fail";
                 detailMsg += " classification ";
                 
             }
-            if (Request.Form["unit"].ToString() != "" == true)
+            if (Request.Form["unit"].ToString() != "")
             {
                 try
                 {
@@ -427,11 +424,11 @@ namespace Mercury_Backend.Controllers
                 }
                 catch (Exception e)
                 {
-                    msg["Status"] = "fail";
+                    msg["Code"] = "fail";
                     detailMsg += " unit ";
                 }
             }
-            if (Request.Form["name"].ToString() != "" == true)
+            if (Request.Form["name"].ToString() != "")
             {
                 try
                 {
@@ -439,12 +436,12 @@ namespace Mercury_Backend.Controllers
                 }
                 catch (Exception e)
                 {
-                    msg["Status"] = "fail";
+                    msg["Code"] = "fail";
                     detailMsg += " name ";
                 }
             }
 
-            if (msg["Status"].ToString() == "success")
+            if (msg["Code"].ToString() == "success")
             {
                 context.SaveChanges();
                 msg["changedCommodity"] = JToken.FromObject(commodityToChange);
@@ -474,19 +471,19 @@ namespace Mercury_Backend.Controllers
                 var commodityToDelete = context.Commodities.Find(id);
                 if (commodityToDelete == null)
                 {
-                    msg["Status"] = "fail";
+                    msg["Code"] = "fail";
                     msg["detailMessage"] = "No such id.";
                     return JsonConvert.SerializeObject(msg);
                 }
 
                 context.Commodities.Remove(commodityToDelete);
                 context.SaveChanges();
-                msg["Status"] = "success";
+                msg["Code"] = "success";
             }
             catch (Exception e)
             {
                 Console.WriteLine(e.ToString());
-                msg["Status"] = "fail";
+                msg["Code"] = "fail";
             }
             return JsonConvert.SerializeObject(msg);
         }
