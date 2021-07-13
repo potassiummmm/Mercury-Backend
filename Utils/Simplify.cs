@@ -1,4 +1,5 @@
-﻿using Mercury_Backend.Models;
+﻿using System;
+using Mercury_Backend.Models;
 
 namespace Mercury_Backend.Utils
 {
@@ -13,8 +14,23 @@ namespace Mercury_Backend.Utils
 
         public static SimplifiedCommodity SimplifyCommodity(Commodity commodity)
         {
-            var simplifiedCommodity = new SimplifiedCommodity(commodity.Id, commodity.Name, (decimal) commodity.Price,
-                (int) commodity.Likes, commodity.Cover, commodity.OwnerId, commodity.Owner.Avatar.Path);
+            var id = commodity.Id;
+            var name = commodity.Name;
+            var price = (decimal)commodity.Price;
+            var likes = (int)commodity.Likes;
+            var cover = commodity.Cover;
+            var ownerId = commodity.OwnerId;
+            var sellerAvt = commodity.Owner.Avatar.Path;
+            
+            var simplifiedCommodity = new SimplifiedCommodity(
+                id,
+                name,
+                price,
+                likes,
+                cover,
+                ownerId,
+                sellerAvt
+                );
             return simplifiedCommodity;
         }
 
