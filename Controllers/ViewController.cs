@@ -61,11 +61,11 @@ namespace Mercury_Backend.Controllers
                 context.Views.Add(NewView);
 
                 context.SaveChanges();
-                msg["Status"] = "Success";
+                msg["Code"] = "Success";
             }
             catch (Exception e)
             {
-                msg["Status"] = "Fail";
+                msg["Code"] = "Fail";
                 Console.WriteLine(e.ToString());
             }
             return JsonConvert.SerializeObject(msg);
@@ -84,7 +84,7 @@ namespace Mercury_Backend.Controllers
                 {
                     context.Views.Remove(view);
                     context.SaveChanges();
-                    msg["Status"] = "Success";
+                    msg["Code"] = "Success";
                 }
 
 

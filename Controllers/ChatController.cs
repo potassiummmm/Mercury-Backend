@@ -42,11 +42,11 @@ namespace Mercury_Backend.Controllers
             {
                 context.ChatRecords.Add(record);
                 context.SaveChanges();
-                msg["Status"] = "Success";
+                msg["Code"] = "Success";
             }
             catch (Exception e)
             {
-                msg["Status"] = "Fail";
+                msg["Code"] = "Fail";
                 Console.WriteLine(e.ToString());
             }
             return JsonConvert.SerializeObject(msg);

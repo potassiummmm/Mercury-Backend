@@ -51,7 +51,7 @@ namespace Mercury_Backend.Controllers
             catch (Exception e)
             {
                 Console.WriteLine(e.ToString());
-                msg["Status"] = "Fail";
+                msg["Code"] = "Fail";
             }
             return JsonConvert.SerializeObject(msg);
         }
@@ -67,11 +67,11 @@ namespace Mercury_Backend.Controllers
                 context.ShoppingCarts.Add(ShoppingCartItem);
 
                 context.SaveChanges();
-                msg["Status"] = "Success";
+                msg["Code"] = "Success";
             }
             catch (Exception e)
             {
-                msg["Status"] = "Fail";
+                msg["Code"] = "Fail";
                 Console.WriteLine(e.ToString());
             }
             return JsonConvert.SerializeObject(msg);
@@ -86,7 +86,7 @@ namespace Mercury_Backend.Controllers
 
             if (ShoppingCartItem == null)
             {
-                msg["Status"] = "Fail";
+                msg["Code"] = "Fail";
                 return JsonConvert.SerializeObject(msg);
             }
             try
@@ -101,14 +101,14 @@ namespace Mercury_Backend.Controllers
                         context.SaveChanges();
 
                     }
-                    msg["Status"] = "Success";
+                    msg["Code"] = "Success";
                 }
 
-                // msg["status"] = "success";
+                // msg["Code"] = "success";
             }
             catch (Exception e)
             {
-                msg["status"] = "Fail";
+                msg["Code"] = "Fail";
                 Console.WriteLine(e.ToString());
             }
             return JsonConvert.SerializeObject(msg);
@@ -122,11 +122,11 @@ namespace Mercury_Backend.Controllers
 
             if (ShoppingCartItem == null)
             {
-                msg["Status"] = "fail";
+                msg["Code"] = "fail";
                 return JsonConvert.SerializeObject(msg);
             }
             // return JsonSerializer.Serialize(ShoppingCartItem);
-            msg["Status"] = "Not Found";
+            msg["Code"] = "Not Found";
             foreach (var item in ShoppingCartItem)
             {
                 if (item.CommodityId == commodityId)
@@ -135,7 +135,7 @@ namespace Mercury_Backend.Controllers
                         context.SaveChanges();
 
                     
-                        msg["Status"] = "Success";
+                        msg["Code"] = "Success";
                 }
             }
 
