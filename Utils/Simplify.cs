@@ -24,5 +24,12 @@ namespace Mercury_Backend.Utils
                 post.Sender.Avatar.Path);
             return simplifiedPost;
         }
+
+        public static SimplifiedUser SimplifyUser(SchoolUser user)
+        {
+            var simplifiedUser = new SimplifiedUser(true, user.SchoolId, user.Nickname,
+                user.Avatar.Path, user.RealName, user.Role);
+            return simplifiedUser;
+        }
     }
 }

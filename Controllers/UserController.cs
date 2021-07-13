@@ -11,6 +11,8 @@ using JWT.Algorithms;
 using JWT.Serializers;
 using JWT;
 using JWT.Exceptions;
+using Mercury_Backend.Utils;
+using Microsoft.EntityFrameworkCore;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -46,8 +48,12 @@ namespace Mercury_Backend.Controllers
 
             try
             {
-                var user = context.SchoolUsers.Find(schoolId);
-                msg["User"] = JToken.FromObject(user);
+                var user = context.SchoolUsers.Where(u => u.SchoolId == schoolId)
+                    .Include(u => u.Avatar).Single();
+                var userInformation = new UserInformation(user.SchoolId, user.Nickname,
+                    user.RealName, user.Phone, user.Major, user.Credit, user.Role, user.Grade,
+                    user.Brief, user.Avatar.Path);
+                msg["User"] = JToken.FromObject(userInformation);
 
             }
             catch (Exception e)
@@ -185,11 +191,12 @@ namespace Mercury_Backend.Controllers
         public string Login([FromForm] string userId, [FromForm] string password)
         {
             JObject msg = new JObject();
-            var user = context.SchoolUsers.Find(userId);
+            var user = context.SchoolUsers.Where(u => u.SchoolId == userId)
+                .Include(u => u.Avatar).Single();
             if(user == null)
             {
-                msg["status"] = "fail";
-                msg["failReason"] = "User doesn't exist";
+                msg["Status"] = "Fail";
+                msg["FailReason"] = "User doesn't exist";
             }
             else
             {
@@ -215,14 +222,14 @@ namespace Mercury_Backend.Controllers
                     IJwtEncoder encoder = new JwtEncoder(algorithm, serializer, urlEncoder);
                     var token = encoder.Encode(loginInformation, secretKey);
 
-                    msg["_token"] = token;
-                    msg["user"] = JToken.FromObject(user);
-                    msg["status"] = "success";
+                    msg["Token"] = token;
+                    msg["User"] = JToken.FromObject(Simplify.SimplifyUser(user));
+                    msg["Status"] = "Success";
                 }
                 else
                 {
-                    msg["status"] = "fail";
-                    msg["failReason"] = "Incorrect password";
+                    msg["Status"] = "Fail";
+                    msg["FailReason"] = "Incorrect password";
                 }
             }
             return JsonConvert.SerializeObject(msg);
@@ -244,19 +251,20 @@ namespace Mercury_Backend.Controllers
                 IJwtDecoder decoder = new JwtDecoder(serializer, validator, urlEncoder, algorithm);
 
                 var loginInformation = decoder.DecodeToObject<IDictionary<string, object>>(token, secretKey, verify: true);
-                var user = context.SchoolUsers.Where(u => u.SchoolId == (string)loginInformation["userId"]).ToList();
-                msg["user"] = JToken.FromObject(user);
-                msg["status"] = "success";
+                var user = context.SchoolUsers.Where(u => u.SchoolId == (string) loginInformation["userId"])
+                    .Include(u => u.Avatar).Single();
+                msg["User"] = JToken.FromObject(Simplify.SimplifyUser(user));
+                msg["Status"] = "Success";
             }
             catch (TokenExpiredException)
             {
-                msg["status"] = "fail";
-                msg["failReason"] = "Token has expired";
+                msg["Status"] = "Fail";
+                msg["FailReason"] = "Token has expired";
             }
             catch (SignatureVerificationException)
             {
-                msg["status"] = "fail";
-                msg["failReason"] = "Token has invalid signature";
+                msg["Status"] = "Fail";
+                msg["FailReason"] = "Token has invalid signature";
             }
             return JsonConvert.SerializeObject(msg);
         }
