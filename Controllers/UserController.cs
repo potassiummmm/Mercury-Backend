@@ -146,7 +146,7 @@ namespace Mercury_Backend.Controllers
                 if (value.Password != null) user.Password = value.Password; 
                 if (value.Major != null) user.Major = value.Major;
                 if (value.Credit != null) user.Credit = value.Credit;
-                if (value.Role != null) user.Nickname = value.Nickname;
+                if (value.Role != null) user.Role = value.Role;
                 if (value.Brief != null) user.Brief = value.Brief;
                 context.SaveChanges();
                 msg["Status"] = "Success";

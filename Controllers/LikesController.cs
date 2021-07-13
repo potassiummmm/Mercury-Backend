@@ -37,7 +37,7 @@ namespace Mercury_Backend.Controllers
             {
                 var userList = context.Likes.Where(b => b.UserId == userId).ToList<Like>();
                 msg["UserList"] = JToken.FromObject(userList);
-                msg["User"] = JToken.FromObject(userList[0].User);
+                //msg["User"] = JToken.FromObject(userList[0].User);
                 msg["Status"] = "Success";
             }
             catch(Exception e)
@@ -55,7 +55,20 @@ namespace Mercury_Backend.Controllers
             JObject msg = new JObject();
             try
             {
-                context.Likes.Add(like);
+                var item = context.Likes.Find(like.CommodityId, like.UserId);
+                if (item != null)
+                {
+
+                    context.Commodities.Find(item.CommodityId).Likes--;
+                    context.Likes.Remove(item);
+                }
+                else
+                {
+                    context.Likes.Add(like);
+                    context.Commodities.Find(like.CommodityId).Likes++;
+
+                }
+                
                 context.SaveChanges();
                 msg["Status"] = "Success";
             }
