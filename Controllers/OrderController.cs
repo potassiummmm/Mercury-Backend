@@ -79,8 +79,22 @@ namespace Mercury_Backend.Controllers
             JObject msg = new JObject();
             try
             {
-                var orderList = context.Orders.Where(order => order.Id == id).ToList<Order>();
-                msg["order"] = JToken.FromObject(orderList);
+                var order = context.Orders.Where(o => o.Id == id).Select(o => new
+                {
+                    OrderId = o.Id,
+                    BuyerId = o.BuyerId,
+                    Commodity = o.Commodity,
+                    Count = o.Count,
+                    Time = o.Time,
+                    Location = o.Location,
+                    ReturnTime = o.ReturnTime,
+                    ReturnLocation = o.ReturnLocation,
+                    Status = o.Status,
+                }).Single();
+                msg["order"] = JToken.FromObject(order, new JsonSerializer()
+                {
+                    ReferenceLoopHandling = ReferenceLoopHandling.Ignore //忽略循环引用，默认是throw exception
+                });
                 msg["Code"] = "200";
             }
             catch (ArgumentNullException e)
@@ -112,6 +126,7 @@ namespace Mercury_Backend.Controllers
                 context.Orders.Add(order);
                 context.SaveChanges();
                 msg["Code"] = "201";
+                msg["OrderId"] = order.Id;
             }
             catch (Exception e)
             {
