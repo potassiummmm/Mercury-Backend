@@ -8,12 +8,9 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Security.Cryptography;
 using System.Threading.Tasks;
 using Mercury_Backend.Utils;
 using Microsoft.AspNetCore.Http;
-using Microsoft.Azure.Cosmos.Linq;
 using Microsoft.EntityFrameworkCore;
 
 
@@ -180,7 +177,7 @@ namespace Mercury_Backend.Controllers
             try
             {
                 Console.WriteLine(files.Count());
-                if (files.Count() == 0)
+                if (files.Any())
                 {
                     Console.WriteLine("No files uploaded.");
                 }
@@ -297,34 +294,34 @@ namespace Mercury_Backend.Controllers
             
            
             
-            if (Request.Form["id"].ToString() != "" == true)
+            if (Request.Form["id"].ToString() != "")
             {
                 // commodityToChange.OwnerId = Request.Form["owner_id"].ToString();
                 // context.SaveChanges();
                 msg["Code"] = "fail";
                 detailMsg += " id ";
             }   
-            if (Request.Form["owner_id"].ToString() != "" == true)
+            if (Request.Form["owner_id"].ToString() != "")
             {
                 detailMsg += " owner_id ";
                 
             }
 
-            if (Request.Form["video_id"].ToString() != "" == true)
+            if (Request.Form["video_id"].ToString() != "")
             {
                 // commodityToChange.VideoId = Request.Form["video_id"].ToString();
                 msg["Code"] = "fail";
                 detailMsg += " video_id ";
                 
             }
-            if (Request.Form["condition"].ToString() != "" == true)
+            if (Request.Form["condition"].ToString() != "")
             {
                 commodityToChange.Condition = Request.Form["condition"].ToString();
                 detailMsg += " owner_id ";
                 
             }
 
-            if (Request.Form["price"].ToString() != "" == true)
+            if (Request.Form["price"].ToString() != "")
             {
                 try
                 {
@@ -337,7 +334,7 @@ namespace Mercury_Backend.Controllers
                 }
             }
             
-            if (Request.Form["stock"].ToString() != "" == true)
+            if (Request.Form["stock"].ToString() != "")
             {
                 try
                 {
@@ -350,7 +347,7 @@ namespace Mercury_Backend.Controllers
                 }
             }
             
-            if (Request.Form["forRent"].ToString() != "" == true)
+            if (Request.Form["forRent"].ToString() != "")
             {
                 try
                 {
@@ -362,7 +359,7 @@ namespace Mercury_Backend.Controllers
                     detailMsg += " forRent ";
                 }
             }
-            if (Request.Form["clicks"].ToString() != "" == true)
+            if (Request.Form["clicks"].ToString() != "")
             {
                 try
                 {
@@ -375,7 +372,7 @@ namespace Mercury_Backend.Controllers
                 }
             }
             
-            if (Request.Form["likes"].ToString() != "" == true)
+            if (Request.Form["likes"].ToString() != "")
             {
                 try
                 {
@@ -387,7 +384,7 @@ namespace Mercury_Backend.Controllers
                     detailMsg += " likes ";
                 }
             }
-            if (Request.Form["popularity"].ToString() != "" == true)
+            if (Request.Form["popularity"].ToString() != "")
             {
                 try
                 {
@@ -400,7 +397,7 @@ namespace Mercury_Backend.Controllers
                 }
             }
             
-            if (Request.Form["popularity"].ToString() != "" == true)
+            if (Request.Form["popularity"].ToString() != "")
             {
                 try
                 {
@@ -412,14 +409,14 @@ namespace Mercury_Backend.Controllers
                     detailMsg += " popularity ";
                 }
             }
-            if (Request.Form["classification"].ToString() != "" == true)
+            if (Request.Form["classification"].ToString() != "")
             {
                 
                 msg["Code"] = "fail";
                 detailMsg += " classification ";
                 
             }
-            if (Request.Form["unit"].ToString() != "" == true)
+            if (Request.Form["unit"].ToString() != "")
             {
                 try
                 {
@@ -431,7 +428,7 @@ namespace Mercury_Backend.Controllers
                     detailMsg += " unit ";
                 }
             }
-            if (Request.Form["name"].ToString() != "" == true)
+            if (Request.Form["name"].ToString() != "")
             {
                 try
                 {
