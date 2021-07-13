@@ -43,7 +43,7 @@ namespace Mercury_Backend.Utils
 
         public static SimplifiedUser SimplifyUser(SchoolUser user)
         {
-            var simplifiedUser = new SimplifiedUser(true, user.SchoolId, user.Nickname,
+            var simplifiedUser = new SimplifiedUser(user.SchoolId, user.Nickname,
                 user.Avatar.Path, user.RealName, user.Role);
             return simplifiedUser;
         }
