@@ -23,9 +23,22 @@ namespace Mercury_Backend.Controllers
         }
         // GET: api/<LikesController>
         [HttpGet]
-        public IEnumerable<string> Get()
+        public string Get()
         {
-            return new string[] { "value1", "value2" };
+            JObject msg = new JObject();
+            try
+            {
+                var userList = context.Likes.ToList<Like>();
+                msg["UserList"] = JToken.FromObject(userList);
+                //msg["User"] = JToken.FromObject(userList[0].User);
+                msg["Status"] = "Success";
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.ToString());
+                msg["Status"] = "Fail";
+            }
+            return JsonConvert.SerializeObject(msg);
         }
 
         // GET api/<LikesController>/5
@@ -39,11 +52,12 @@ namespace Mercury_Backend.Controllers
                 msg["UserList"] = JToken.FromObject(userList);
                 msg["User"] = JToken.FromObject(userList[0].User);
                 msg["Status"] = "Success";
+
             }
             catch(Exception e)
             {
                 Console.WriteLine(e.ToString());
-                msg["Status"] = "Fail";
+                msg["Code"] = "Fail";
             }
             return JsonConvert.SerializeObject(msg);
         }
@@ -55,13 +69,26 @@ namespace Mercury_Backend.Controllers
             JObject msg = new JObject();
             try
             {
-                context.Likes.Add(like);
+                var item = context.Likes.Find(like.CommodityId, like.UserId);
+                if (item != null)
+                {
+
+                    context.Commodities.Find(item.CommodityId).Likes--;
+                    context.Likes.Remove(item);
+                }
+                else
+                {
+                    context.Likes.Add(like);
+                    context.Commodities.Find(like.CommodityId).Likes++;
+
+                }
+                
                 context.SaveChanges();
-                msg["Status"] = "Success";
+                msg["Code"] = "Success";
             }
             catch(Exception e)
             {
-                msg["Status"] = "Fail";
+                msg["Code"] = "Fail";
                 Console.WriteLine(e.ToString());
             }
             return JsonConvert.SerializeObject(msg);

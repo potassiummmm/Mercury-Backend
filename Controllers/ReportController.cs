@@ -42,12 +42,12 @@ namespace Mercury_Backend.Controllers
             {
                 context.ReportUsers.Add(report);
                 context.SaveChanges();
-                msg["status"] = "success";
+                msg["Code"] = "success";
                 msg["information"] = "Reported successfully";
             }
             catch (Exception e)
             {
-                msg["status"] = "fail";
+                msg["Code"] = "fail";
                 msg["information"] = "Fail to modify database";
                 Console.WriteLine(e.ToString());
             }

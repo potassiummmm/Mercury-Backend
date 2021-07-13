@@ -40,5 +40,19 @@ namespace Mercury_Backend.Utils
                 post.Sender.Avatar.Path);
             return simplifiedPost;
         }
+
+        public static SimplifiedUser SimplifyUser(SchoolUser user)
+        {
+            var simplifiedUser = new SimplifiedUser(user.SchoolId, user.Nickname,
+                user.Avatar.Path, user.RealName, user.Role);
+            return simplifiedUser;
+        }
+
+        public static SimplifiedComment SimplifyComment(PostComment comment)
+        {
+            var simplifiedComment = new SimplifiedComment(comment.Id, comment.SenderId, comment.Sender.Nickname,
+                comment.Sender.Avatar.Path, (DateTime)comment.Time, comment.Content);
+            return simplifiedComment;
+        }
     }
 }

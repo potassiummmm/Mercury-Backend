@@ -7,7 +7,9 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Mercury_Backend.Utils;
 using Microsoft.EntityFrameworkCore;
@@ -21,11 +23,9 @@ namespace Mercury_Backend.Controllers
     public class PostController : ControllerBase
     {
         private readonly ModelContext context;
-        private static Random random;
         public PostController(ModelContext modelContext)
         {
             context = modelContext;
-            random = new Random();
         }
         // GET: api/<PostController>
         [HttpGet]
@@ -53,12 +53,19 @@ namespace Mercury_Backend.Controllers
                 }
 
                 msg["PostList"] = JToken.FromObject(result);
-                msg["Status"] = "Success";
+                msg["Code"] = "200";
+            }
+            catch (ArgumentNullException e)
+            {
+                Console.WriteLine(e.ToString());
+                msg["Code"] = "500";
+                msg["Description"] = "Internal exception happens";
             }
             catch(Exception e)
             {
                 Console.WriteLine(e.ToString());
-                msg["Status"] = "Fail";
+                msg["Code"] = "400";
+                msg["Description"] = "Unknown exception happens";
             }
             return JsonConvert.SerializeObject(msg);
         }
@@ -70,26 +77,47 @@ namespace Mercury_Backend.Controllers
             JObject msg = new JObject();
             try
             {
-                var post = context.NeedPosts.Where(post => post.Id == postId)
-                    .Include(post => post.PostComments).Include(post => post.PostImages).Single();
+                var post = context.NeedPosts.Where(p => p.Id == postId)
+                    .Include(p => p.PostComments)
+                    .ThenInclude(c => c.Sender)
+                    .ThenInclude(s => s.Avatar)
+                    .Include(p => p.PostImages)
+                    .ThenInclude(pi => pi.Image)
+                    .Include(p => p.Sender)
+                    .ThenInclude(s => s.Avatar)
+                    .Single();
+
                 var imageList = new List<string>();
-                for (int i = 0; i < post.PostImages.Count(); ++i)
+                foreach (var pi in post.PostImages)
                 {
-                    var image = context.Media.Where(image => image.Id == post.PostImages.ElementAt(i).ImageId).ToList();
-                    imageList.Add(image[0].Path);
+                    imageList.Add(pi.Image.Path);
                 }
-                // var imageList = context.Media.Where(image => post.PostImages);
-                msg["ImagePaths"] = JToken.FromObject(imageList);
-                msg["Post"] = JToken.FromObject(post, new JsonSerializer()
+
+                var commmentList = new List<SimplifiedComment>();
+                foreach (var c in post.PostComments)
+                {
+                    commmentList.Add(Simplify.SimplifyComment(c));
+                }
+
+                var postDetail = new PostDetail(post.Id, post.SenderId, post.Sender.Nickname, post.Title, post.Content, (DateTime)post.Time,
+                    post.Sender.Avatar.Path, commmentList, imageList);
+                msg["Post"] = JToken.FromObject(postDetail, new JsonSerializer()
                 {
                     ReferenceLoopHandling = ReferenceLoopHandling.Ignore
                 });
-                msg["Status"] = "Success";
+                msg["Code"] = "200";
+            }
+            catch (ArgumentNullException e)
+            {
+                Console.WriteLine(e.ToString());
+                msg["Code"] = "500";
+                msg["Description"] = "Internal exception happens";
             }
             catch (Exception e)
             {
                 Console.WriteLine(e.ToString());
-                msg["Status"] = "Fail";
+                msg["Code"] = "400";
+                msg["Description"] = "Unknown exception happens";
             }
             return JsonConvert.SerializeObject(msg);
         }
@@ -102,11 +130,7 @@ namespace Mercury_Backend.Controllers
             try
             {
                 post.Id = Generator.GenerateId(12);
-                if (photos == null)
-                {
-                    Console.WriteLine("GG");
-                }
-                else
+                if (photos != null)
                 {
                     for (int i = 0; i < photos.Count(); ++i)
                     {
@@ -130,14 +154,26 @@ namespace Mercury_Backend.Controllers
                         post.PostImages.Add(postImage);
                     }
                 }
+
                 post.Time = DateTime.Now;
                 context.NeedPosts.Add(post);
                 context.SaveChanges();
-                msg["Status"] = "Success";
+                msg["Code"] = "201";
+            }
+            catch (ExternalException)
+            {
+                msg["Code"] = "500";
+                msg["Description"] = "The image was saved with the wrong image format. Or the image was saved to the same file it was created from.";
+            }
+            catch (ArgumentException)
+            {
+                msg["Code"] = "415";
+                msg["Description"] = "Unsupported media";
             }
             catch(Exception e)
             {
-                msg["Status"] = "Fail";
+                msg["Code"] = "400";
+                msg["Code"] = "Unknown exception happens";
                 Console.WriteLine(e.ToString());
             }
             return JsonConvert.SerializeObject(msg);
@@ -156,15 +192,16 @@ namespace Mercury_Backend.Controllers
             JObject msg = new JObject();
             try
             {
-                var post = context.NeedPosts.Where(post => post.Id == postId).ToList();
-                context.NeedPosts.Remove(post[0]);
+                var post = context.NeedPosts.Single(p => p.Id == postId);
+                context.NeedPosts.Remove(post);
                 context.SaveChanges();
-                msg["Status"] = "Success";
+                msg["Code"] = "200";
             }
             catch (Exception e)
             {
                 Console.WriteLine(e.ToString());
-                msg["Status"] = "Fail";
+                msg["Code"] = "400";
+                msg["Description"] = "Unknown exception happens";
             }
             return JsonConvert.SerializeObject(msg);
         }
@@ -176,14 +213,15 @@ namespace Mercury_Backend.Controllers
             JObject msg = new JObject();
             try
             {
-                var commentList = context.PostComments.Where(comment => comment.PostId == postId).ToList<PostComment>();
+                var commentList = context.PostComments.Where(comment => comment.PostId == postId).ToList();
                 msg["CommentList"] = JToken.FromObject(commentList);
-                msg["Status"] = "Success";
+                msg["Code"] = "200";
             }
             catch (Exception e)
             {
                 Console.WriteLine(e.ToString());
-                msg["Status"] = "Fail";
+                msg["Code"] = "400";
+                msg["Description"] = "Unknown exception happens";
             }
             return JsonConvert.SerializeObject(msg);
         }
@@ -200,12 +238,25 @@ namespace Mercury_Backend.Controllers
                 comment.PostId = postId;
                 context.PostComments.Add(comment);
                 context.SaveChanges();
-                msg["Status"] = "Success";
+                msg["Code"] = "201";
+            }
+            catch (DbUpdateException e)
+            {
+                Console.WriteLine(e.ToString());
+                msg["Code"] = "403";
+                msg["Description"] = "Cannot update database";
+            }
+            catch (DBConcurrencyException e)
+            {
+                Console.WriteLine(e.ToString());
+                msg["Code"] = "500";
+                msg["Description"] = "Fail to update database because of concurrent requests";
             }
             catch (Exception e)
             {
                 Console.WriteLine(e.ToString());
-                msg["Status"] = "Fail";
+                msg["Code"] = "400";
+                msg["Description"] = "Unknown exception happens";
             }
             return JsonConvert.SerializeObject(msg);
         }
@@ -217,15 +268,28 @@ namespace Mercury_Backend.Controllers
             JObject msg = new JObject();
             try
             {
-                var comment = context.PostComments.Where(comment => comment.Id == commentId).ToList<PostComment>();
+                var comment = context.PostComments.Where(c => c.Id == commentId).ToList();
                 context.PostComments.Remove(comment[0]);
                 context.SaveChanges();
-                msg["Status"] = "Success";
+                msg["Code"] = "Success";
+            }
+            catch (DbUpdateException e)
+            {
+                Console.WriteLine(e.ToString());
+                msg["Code"] = "403";
+                msg["Description"] = "Cannot update database";
+            }
+            catch (DBConcurrencyException e)
+            {
+                Console.WriteLine(e.ToString());
+                msg["Code"] = "500";
+                msg["Description"] = "Fail to update database because of concurrent requests";
             }
             catch (Exception e)
             {
                 Console.WriteLine(e.ToString());
-                msg["Status"] = "Fail";
+                msg["Code"] = "400";
+                msg["Description"] = "Unknown exception happens";
             }
             return JsonConvert.SerializeObject(msg);
         }

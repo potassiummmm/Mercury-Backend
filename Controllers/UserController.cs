@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using Mercury_Backend.Contexts;
 using Mercury_Backend.Models;
@@ -11,6 +12,8 @@ using JWT.Algorithms;
 using JWT.Serializers;
 using JWT;
 using JWT.Exceptions;
+using Mercury_Backend.Utils;
+using Microsoft.EntityFrameworkCore;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -33,8 +36,21 @@ namespace Mercury_Backend.Controllers
         public string Get()
         {
             JObject msg = new JObject();
-            var list = context.SchoolUsers.OrderBy(b => b.SchoolId).ToList<SchoolUser>();
-            msg["UserList"] = JToken.FromObject(list);
+            try
+            {
+                var list = context.SchoolUsers.OrderBy(b => b.SchoolId).ToList();
+                msg["UserList"] = JToken.FromObject(list);
+            }
+            catch (ArgumentNullException e)
+            {
+                Console.WriteLine(e.ToString());
+                msg["Status"] = "500";
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.ToString());
+                msg["Status"] = "400";
+            }
             return JsonConvert.SerializeObject(msg);
         }
 
@@ -43,38 +59,25 @@ namespace Mercury_Backend.Controllers
         public string Get(string schoolId)
         {
             JObject msg = new JObject();
-
             try
             {
-                var user = context.SchoolUsers.Find(schoolId);
-                msg["User"] = JToken.FromObject(user);
+                var user = context.SchoolUsers.Where(u => u.SchoolId == schoolId)
+                    .Include(u => u.Avatar).Single();
+                var userInformation = new UserInformation(user.SchoolId, user.Nickname,
+                    user.RealName, user.Phone, user.Major, user.Credit, user.Role, user.Grade,
+                    user.Brief, user.Avatar.Path);
+                msg["User"] = JToken.FromObject(userInformation);
 
+            }
+            catch (ArgumentNullException e)
+            {
+                Console.WriteLine(e.ToString());
+                msg["Status"] = "500";
             }
             catch (Exception e)
             {
                 Console.WriteLine(e.ToString());
-                msg["Status"] = "Fail";
-            }
-            return JsonConvert.SerializeObject(msg);
-        }
-
-        // POST api/<UserController>
-        [HttpPost]
-        public String Post([FromForm] SchoolUser NewUser)
-
-        {
-            JObject msg = new JObject();
-            try
-            {
-                context.SchoolUsers.Add(NewUser);
-                Console.WriteLine("haha");
-                context.SaveChanges();
-                msg["status"] = "success";
-            }
-            catch (Exception e)
-            {
-                msg["status"] = "fail";
-                Console.WriteLine(e.ToString());
+                msg["Status"] = "400";
             }
             return JsonConvert.SerializeObject(msg);
         }
@@ -86,6 +89,8 @@ namespace Mercury_Backend.Controllers
             public string RealName { get; set; }
             public string Phone { get; set; }
             public string Password { get; set; }
+            public string Major { get; set; }
+            public byte Grade { get; set; }
         }
         
         // POST api/<UserController>/register
@@ -96,8 +101,8 @@ namespace Mercury_Backend.Controllers
             JObject msg = new JObject();
             if (context.SchoolUsers.Find(request.SchoolId) != null)
             {
-                msg["status"] = "fail";
-                msg["information"] = "User already exists.";
+                msg["Code"] = "403";
+                msg["Description"] = "User already exists.";
             }
             else
             {
@@ -109,9 +114,9 @@ namespace Mercury_Backend.Controllers
                     Phone = request.Phone,
                     Password = request.Password,
                     Brief = "该用户很懒，还没有写简介。",
-                    Major = "SE",
+                    Major = (request.Major == null)?"SE":request.Major,
+                    Grade = (request.Grade == 0)?(byte)1:request.Grade,
                     Role = "Student",
-                    Grade = 1,
                     AvatarId = "1",
                     Credit = 60
                 };
@@ -119,13 +124,46 @@ namespace Mercury_Backend.Controllers
                 {
                     context.SchoolUsers.Add(newUser);
                     context.SaveChanges();
-                    msg["status"] = "success";
-                    msg["information"] = "Registered successfully";
+                    var provider = new UtcDateTimeProvider();
+                    var now = provider.GetNow();
+                    var secondsSinceEpoch = UnixEpoch.GetSecondsSince(now);
+
+                    //add information to dictionary
+                    var loginInformation = new Dictionary<string, object>
+                    {
+                        {"userId", request.SchoolId},
+                        {"password", request.Password},
+                        {"exp", secondsSinceEpoch + 300}
+                    };
+
+                    //encode
+                    var secretKey = config["TokenKey"];
+                    IJwtAlgorithm algorithm = new HMACSHA256Algorithm(); // symmetric
+                    IJsonSerializer serializer = new JsonNetSerializer();
+                    IBase64UrlEncoder urlEncoder = new JwtBase64UrlEncoder();
+                    IJwtEncoder encoder = new JwtEncoder(algorithm, serializer, urlEncoder);
+                    var token = encoder.Encode(loginInformation, secretKey);
+
+                    msg["Token"] = token;
+                    msg["Code"] = "200";
+                    msg["Description"] = "Registered successfully";
+                }
+                catch (DbUpdateException e)
+                {
+                    Console.WriteLine(e.ToString());
+                    msg["Code"] = "403";
+                    msg["Description"] = "Cannot update database";
+                }
+                catch (DBConcurrencyException e)
+                {
+                    Console.WriteLine(e.ToString());
+                    msg["Code"] = "403";
+                    msg["Description"] = "Fail to update database because of concurrent requests";
                 }
                 catch (Exception e)
                 {
-                    msg["status"] = "fail";
-                    msg["information"] = "Fail to modify database";
+                    Console.WriteLine(e.ToString());
+                    msg["Code"] = "400";
                 }
             }
             return JsonConvert.SerializeObject(msg);
@@ -146,10 +184,10 @@ namespace Mercury_Backend.Controllers
                 if (value.Password != null) user.Password = value.Password; 
                 if (value.Major != null) user.Major = value.Major;
                 if (value.Credit != null) user.Credit = value.Credit;
-                if (value.Role != null) user.Nickname = value.Nickname;
+                if (value.Role != null) user.Role = value.Role;
                 if (value.Brief != null) user.Brief = value.Brief;
                 context.SaveChanges();
-                msg["Status"] = "Success";
+                msg["Code"] = "200";
             }
             /*
             foreach(var p in value.GetType().GetProperties())
@@ -185,11 +223,12 @@ namespace Mercury_Backend.Controllers
         public string Login([FromForm] string userId, [FromForm] string password)
         {
             JObject msg = new JObject();
-            var user = context.SchoolUsers.Find(userId);
+            var user = context.SchoolUsers.Where(u => u.SchoolId == userId)
+                .Include(u => u.Avatar).Single();
             if(user == null)
             {
-                msg["status"] = "fail";
-                msg["failReason"] = "User doesn't exist";
+                msg["Code"] = "404";
+                msg["Description"] = "User doesn't exist.";
             }
             else
             {
@@ -215,14 +254,14 @@ namespace Mercury_Backend.Controllers
                     IJwtEncoder encoder = new JwtEncoder(algorithm, serializer, urlEncoder);
                     var token = encoder.Encode(loginInformation, secretKey);
 
-                    msg["_token"] = token;
-                    msg["user"] = JToken.FromObject(user);
-                    msg["status"] = "success";
+                    msg["Token"] = token;
+                    msg["User"] = JToken.FromObject(Simplify.SimplifyUser(user));
+                    msg["Code"] = "200";
                 }
                 else
                 {
-                    msg["status"] = "fail";
-                    msg["failReason"] = "Incorrect password";
+                    msg["Code"] = "403";
+                    msg["Description"] = "Incorrect password.";
                 }
             }
             return JsonConvert.SerializeObject(msg);
@@ -244,19 +283,20 @@ namespace Mercury_Backend.Controllers
                 IJwtDecoder decoder = new JwtDecoder(serializer, validator, urlEncoder, algorithm);
 
                 var loginInformation = decoder.DecodeToObject<IDictionary<string, object>>(token, secretKey, verify: true);
-                var user = context.SchoolUsers.Where(u => u.SchoolId == (string)loginInformation["userId"]).ToList();
-                msg["user"] = JToken.FromObject(user);
-                msg["status"] = "success";
+                var user = context.SchoolUsers.Where(u => u.SchoolId == (string) loginInformation["userId"])
+                    .Include(u => u.Avatar).Single();
+                msg["User"] = JToken.FromObject(Simplify.SimplifyUser(user));
+                msg["Code"] = "200";
             }
             catch (TokenExpiredException)
             {
-                msg["status"] = "fail";
-                msg["failReason"] = "Token has expired";
+                msg["Code"] = "403";
+                msg["Description"] = "Token has expired.";
             }
             catch (SignatureVerificationException)
             {
-                msg["status"] = "fail";
-                msg["failReason"] = "Token has invalid signature";
+                msg["Code"] = "403";
+                msg["Description"] = "Token has invalid signature.";
             }
             return JsonConvert.SerializeObject(msg);
         }
