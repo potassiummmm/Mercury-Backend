@@ -25,7 +25,6 @@ namespace Mercury_Backend.Models
         [Column("ID")]
         [StringLength(12)]
         public string Id { get; set; }
-        // [Key]
         [Column("OWNER_ID")]
         [StringLength(10)]
         public string OwnerId { get; set; }
@@ -55,6 +54,10 @@ namespace Mercury_Backend.Models
         [Column("NAME")]
         [StringLength(60)]
         public string Name { get; set; }
+        [Required]
+        [Column("COVER")]
+        [StringLength(100)]
+        public string Cover { get; set; }
 
         [ForeignKey(nameof(Classification))]
         [InverseProperty("Commodities")]
@@ -77,16 +80,5 @@ namespace Mercury_Backend.Models
         public virtual ICollection<ShoppingCart> ShoppingCarts { get; set; }
         [InverseProperty(nameof(View.Commodity))]
         public virtual ICollection<View> Views { get; set; }
-        public SimplifiedCommodity Simplify()
-        {
-            var commodity = new SimplifiedCommodity();
-            commodity.Id = Id;
-            commodity.Name = Name;
-            commodity.Price = (decimal)Price;
-            commodity.Likes = (int)Likes;
-            commodity.SellerId = OwnerId;
-            commodity.SellerAvatar = Owner.AvatarId;
-            return commodity;
-        }
     }
 }

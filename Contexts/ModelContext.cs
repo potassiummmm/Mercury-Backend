@@ -109,6 +109,8 @@ namespace Mercury_Backend.Contexts
 
                 entity.Property(e => e.Condition).IsUnicode(false);
 
+                entity.Property(e => e.Cover).IsUnicode(false);
+
                 entity.Property(e => e.ForRent).HasPrecision(1);
 
                 entity.Property(e => e.Name).IsUnicode(false);

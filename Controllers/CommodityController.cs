@@ -14,6 +14,8 @@ using System.Threading.Tasks;
 using Mercury_Backend.Utils;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Azure.Cosmos.Linq;
+using Microsoft.EntityFrameworkCore;
+
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -71,7 +73,7 @@ namespace Mercury_Backend.Controllers
             {
                 var strKeyWord = Request.Form["keyword"].ToString();
                 
-                var tmpList = context.Commodities.Where(b => b.Name.Contains(strKeyWord)).ToList<Commodity>();
+                var tmpList = context.Commodities.Where(b => b.Name.Contains(strKeyWord)).Include(commodity => commodity.Owner).ThenInclude(owner => owner.Avatar).ToList<Commodity>();
                 // entering searching by keyword.
                 var idList = tmpList.Select(s => new {s.Id});
                 commodityList = tmpList;
@@ -102,7 +104,7 @@ namespace Mercury_Backend.Controllers
                 
                 for (int i = 0; i < idList.Count; i++)
                 {
-                    var tmpList = context.Commodities.Where(b => b.OwnerId== idList[i].SchoolId).ToList<Commodity>();
+                    var tmpList = context.Commodities.Where(b => b.OwnerId== idList[i].SchoolId).Include(commodity => commodity.Owner).ThenInclude(owner => owner.Avatar).ToList<Commodity>();
                     commodityList = commodityList.Concat(tmpList).ToList<Commodity>();
                 }
             }
@@ -115,7 +117,7 @@ namespace Mercury_Backend.Controllers
                 var idList = tagList.Select(s => new {s.CommodityId}).ToList();
                 for (int i = 0; i < idList.Count; i++)
                 {
-                    var tmpList = context.Commodities.Where(b => idList[i].CommodityId == b.Id).ToList<Commodity>();
+                    var tmpList = context.Commodities.Where(b => idList[i].CommodityId == b.Id).Include(commodity => commodity.Owner).ThenInclude(owner => owner.Avatar).ToList<Commodity>();
                     commodityList = commodityList.Concat(tmpList).ToList<Commodity>();
                 }
             }
@@ -127,8 +129,14 @@ namespace Mercury_Backend.Controllers
             }
             try
             {
-
-                msg["commodityList"] = JToken.FromObject(commodityList, new JsonSerializer()
+                var simplifiedList = new List<SimplifiedCommodity>();
+                
+                for (int i = 0; i < commodityList.Count; i++)
+                {
+                    
+                    simplifiedList.Add(Simplify.SimplifyCommodity(commodityList[i]));
+                }
+                msg["commodityList"] = JToken.FromObject(simplifiedList, new JsonSerializer()
                 {
                     ReferenceLoopHandling = ReferenceLoopHandling.Ignore //忽略循环引用，默认是throw exception
                 });
@@ -153,6 +161,7 @@ namespace Mercury_Backend.Controllers
             }
             catch (Exception e)
             {
+                Console.WriteLine(e);
                 msg["Status"] = "fail";
             }
             return JsonConvert.SerializeObject(msg);
