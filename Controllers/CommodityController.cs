@@ -64,7 +64,8 @@ namespace Mercury_Backend.Controllers
             catch (Exception e)
             {
 
-                msg["Status"] = 400;
+                msg["Code"] = "400";
+                msg["Description"] = "You have not submitted any form data."; 
                 return JsonConvert.SerializeObject(msg);
             }
 
@@ -117,7 +118,8 @@ namespace Mercury_Backend.Controllers
 
             else
             {
-                msg["Status"] = 400;
+                msg["Code"] = "400";
+                msg["Description"] = "You have not submitted any effective form data.";
                 return JsonConvert.SerializeObject(msg);
             }
             try
@@ -149,13 +151,14 @@ namespace Mercury_Backend.Controllers
                 msg["tags"] = JToken.FromObject(tagSet);
                 
                     
-                msg["Status"] = 200;
+                msg["Code"] = "200";
                 msg["totalPage"] = commodityList.Count;
             }
             catch (Exception e)
             {
                 Console.WriteLine(e);
-                msg["Status"] = 403;
+                msg["Code"] = "403";
+                msg["Description"] = "Error occured when getting data from model.";
             }
             return JsonConvert.SerializeObject(msg);
         }
@@ -251,11 +254,12 @@ namespace Mercury_Backend.Controllers
                 context.Commodities.Add(newCommodity);
                 // Console.WriteLine("haha");
                 context.SaveChanges();
-                msg["Status"] = 201;
+                msg["Code"] = "201";
             }
             catch (Exception e)
             {
-                msg["Status"] = 403;
+                msg["Code"] = "403";
+                msg["Description"] = "Internal error occured when posting";
                 Console.WriteLine(e.ToString());
             }
             return JsonConvert.SerializeObject(msg);
@@ -266,7 +270,7 @@ namespace Mercury_Backend.Controllers
         public string Put(string id)
         {
             JObject msg = new JObject();
-            msg["Status"] = 200;
+            msg["Code"] = "200";
             try
             {
                 var test = Request.Form["test"].ToString();
@@ -274,15 +278,16 @@ namespace Mercury_Backend.Controllers
             catch (Exception e)
             {
                 Console.WriteLine(e);
-                msg["Status"] = "fail";
+                msg["Code"] = "400";
+                msg["Description"] = "You have not submitted any form data.";
                 msg["Detail"] = "No form data";
                 return JsonConvert.SerializeObject(msg);
             }
             var commodityToChange = context.Commodities.Find(id);
             if (commodityToChange == null)
             {
-                msg["Status"] = "fail";
-                msg["Detail"] = "No such Id.";
+                msg["Code"] = "404";
+                msg["Description"] = "The ID does not exist in database.";
                  return JsonConvert.SerializeObject(msg);
             }
             var detailMsg = "Integrity constraint invoked by";
@@ -294,7 +299,7 @@ namespace Mercury_Backend.Controllers
             {
                 // commodityToChange.OwnerId = Request.Form["owner_id"].ToString();
                 // context.SaveChanges();
-                msg["Status"] = "fail";
+                msg["Code"] = "403";
                 detailMsg += " id ";
             }   
             if (Request.Form["owner_id"].ToString() != "" == true)
@@ -306,7 +311,7 @@ namespace Mercury_Backend.Controllers
             if (Request.Form["video_id"].ToString() != "" == true)
             {
                 // commodityToChange.VideoId = Request.Form["video_id"].ToString();
-                msg["Status"] = 403;
+                msg["Code"] = "403";
                 detailMsg += " video_id ";
                 
             }
@@ -325,7 +330,7 @@ namespace Mercury_Backend.Controllers
                 }
                 catch (Exception e)
                 {
-                    msg["Status"] = 403;
+                    msg["Code"] = "403";
                     detailMsg += " price ";
                 }
             }
@@ -338,7 +343,7 @@ namespace Mercury_Backend.Controllers
                 }
                 catch (Exception e)
                 {
-                    msg["Status"] = 403;
+                    msg["Code"] = "403";
                     detailMsg += " stock ";
                 }
             }
@@ -351,7 +356,7 @@ namespace Mercury_Backend.Controllers
                 }
                 catch (Exception e)
                 {
-                    msg["Status"] = 403;
+                    msg["Code"] = "403";
                     detailMsg += " forRent ";
                 }
             }
@@ -363,7 +368,7 @@ namespace Mercury_Backend.Controllers
                 }
                 catch (Exception e)
                 {
-                    msg["Status"] = 403;
+                    msg["Code"] = "403";
                     detailMsg += " clicks ";
                 }
             }
@@ -376,7 +381,7 @@ namespace Mercury_Backend.Controllers
                 }
                 catch (Exception e)
                 {
-                    msg["Status"] = 403;
+                    msg["Code"] = "403";
                     detailMsg += " likes ";
                 }
             }
@@ -388,7 +393,7 @@ namespace Mercury_Backend.Controllers
                 }
                 catch (Exception e)
                 {
-                    msg["Status"] = 403;
+                    msg["Code"] = "403";
                     detailMsg += " popularity ";
                 }
             }
@@ -401,14 +406,14 @@ namespace Mercury_Backend.Controllers
                 }
                 catch (Exception e)
                 {
-                    msg["Status"] = 403;
+                    msg["Code"] = "403";
                     detailMsg += " popularity ";
                 }
             }
             if (Request.Form["classification"].ToString() != "" == true)
             {
                 
-                msg["Status"] = 403;
+                msg["Code"] = "403";
                 detailMsg += " classification ";
                 
             }
@@ -420,7 +425,7 @@ namespace Mercury_Backend.Controllers
                 }
                 catch (Exception e)
                 {
-                    msg["Status"] = 403;
+                    msg["Code"] = "403";
                     detailMsg += " unit ";
                 }
             }
@@ -432,12 +437,12 @@ namespace Mercury_Backend.Controllers
                 }
                 catch (Exception e)
                 {
-                    msg["Status"] = 403;
+                    msg["Code"] = "403";
                     detailMsg += " name ";
                 }
             }
 
-            if (msg["Status"].ToString() == "200")
+            if (msg["Code"].ToString() == "200")
             {
                 context.SaveChanges();
                 msg["changedCommodity"] = JToken.FromObject(commodityToChange);
@@ -449,10 +454,11 @@ namespace Mercury_Backend.Controllers
             }
             else
             {
-                detailMsg += ".";
+                msg["Description"] = detailMsg;
+                // detailMsg += ".";
             }
 
-            msg["detailMessage"] = detailMsg;
+            // msg["detailMessage"] = detailMsg;
             return JsonConvert.SerializeObject(msg);
         }
 
@@ -467,19 +473,20 @@ namespace Mercury_Backend.Controllers
                 var commodityToDelete = context.Commodities.Find(id);
                 if (commodityToDelete == null)
                 {
-                    msg["Status"] = 404;
-                    msg["detailMessage"] = "No such id.";
+                    msg["Code"] = "404";
+                    msg["Description"] = "No such id.";
                     return JsonConvert.SerializeObject(msg);
                 }
 
                 context.Commodities.Remove(commodityToDelete);
                 context.SaveChanges();
-                msg["Status"] = 200;
+                msg["Code"] = "200";
             }
             catch (Exception e)
             {
                 Console.WriteLine(e.ToString());
-                msg["Status"] = 403;
+                msg["Code"] = "403";
+                msg["Description"] = "Error occured when putting data into model.";
             }
             return JsonConvert.SerializeObject(msg);
         }
