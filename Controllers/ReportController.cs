@@ -37,11 +37,18 @@ namespace Mercury_Backend.Controllers
         
         // POST api/<ReportController>
         [HttpPost]
-        public String Post([FromForm]ReportUser report)
+        public String Post([FromForm] string reporterId,[FromForm] string informantId)
         {
             JObject msg = new JObject();
             try
             {
+                var report = new ReportUser()
+                {
+                    ReporterId = reporterId,
+                    InformantId = informantId,
+                    Time = DateTime.Now,
+                    Status = "Y"
+                };
                 context.ReportUsers.Add(report);
                 context.SaveChanges();
                 msg["Code"] = "200";

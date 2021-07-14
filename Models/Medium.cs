@@ -13,7 +13,6 @@ namespace Mercury_Backend.Models
     {
         public Medium()
         {
-            ChatRecords = new HashSet<ChatRecord>();
             Commodities = new HashSet<Commodity>();
             CommodityImages = new HashSet<CommodityImage>();
             PostImages = new HashSet<PostImage>();
@@ -31,8 +30,6 @@ namespace Mercury_Backend.Models
         [StringLength(100)]
         public string Path { get; set; }
 
-        [InverseProperty(nameof(ChatRecord.Media))]
-        public virtual ICollection<ChatRecord> ChatRecords { get; set; }
         [InverseProperty(nameof(Commodity.Video))]
         public virtual ICollection<Commodity> Commodities { get; set; }
         [InverseProperty(nameof(CommodityImage.Image))]
