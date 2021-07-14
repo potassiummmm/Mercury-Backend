@@ -31,12 +31,12 @@ namespace Mercury_Backend.Controllers
                 var userList = context.Likes.ToList<Like>();
                 msg["UserList"] = JToken.FromObject(userList);
                 //msg["User"] = JToken.FromObject(userList[0].User);
-                msg["Status"] = "Success";
+                msg["Code"] = "200";
             }
             catch (Exception e)
             {
                 Console.WriteLine(e.ToString());
-                msg["Status"] = "Fail";
+                msg["Code"] = "400";
             }
             return JsonConvert.SerializeObject(msg);
         }
@@ -51,13 +51,13 @@ namespace Mercury_Backend.Controllers
                 var userList = context.Likes.Where(b => b.UserId == userId).ToList<Like>();
                 msg["UserList"] = JToken.FromObject(userList);
                 msg["User"] = JToken.FromObject(userList[0].User);
-                msg["Status"] = "Success";
+                msg["Code"] = "200";
 
             }
             catch(Exception e)
             {
                 Console.WriteLine(e.ToString());
-                msg["Code"] = "Fail";
+                msg["Code"] = "400";
             }
             return JsonConvert.SerializeObject(msg);
         }
@@ -84,11 +84,11 @@ namespace Mercury_Backend.Controllers
                 }
                 
                 context.SaveChanges();
-                msg["Code"] = "Success";
+                msg["Code"] = "200";
             }
             catch(Exception e)
             {
-                msg["Code"] = "Fail";
+                msg["Code"] = "400";
                 Console.WriteLine(e.ToString());
             }
             return JsonConvert.SerializeObject(msg);

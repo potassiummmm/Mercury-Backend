@@ -40,16 +40,17 @@ namespace Mercury_Backend.Controllers
             {
                 var list = context.SchoolUsers.OrderBy(b => b.SchoolId).ToList();
                 msg["UserList"] = JToken.FromObject(list);
+                msg["Code"] = "200";
             }
             catch (ArgumentNullException e)
             {
                 Console.WriteLine(e.ToString());
-                msg["Status"] = "500";
+                msg["Code"] = "500";
             }
             catch (Exception e)
             {
                 Console.WriteLine(e.ToString());
-                msg["Status"] = "400";
+                msg["Code"] = "400";
             }
             return JsonConvert.SerializeObject(msg);
         }
@@ -189,25 +190,6 @@ namespace Mercury_Backend.Controllers
                 context.SaveChanges();
                 msg["Code"] = "200";
             }
-            /*
-            foreach(var p in value.GetType().GetProperties())
-            {
-                if (p.GetValue(value) != null && p.Name != "SchoolId")
-                {
-                    context.Entry(value).Property(p.Name).IsModified = true;
-                }
-
-            }
-            try
-            {
-                context.SaveChanges();
-            }
-            catch (Exception e)
-            {
-                msg["status"] = "fail";
-                return;
-            }
-            */
             return JsonConvert.SerializeObject(msg);
 
         }

@@ -121,7 +121,7 @@ namespace Mercury_Backend.Controllers
             {
                 order.Id = Generator.GenerateId(20);
                 order.Time = DateTime.Now;
-                order.ReturnTime = Convert.ToDateTime(order.ReturnTime);
+                // order.ReturnTime = Convert.ToDateTime(order.ReturnTime);
                 order.Status = "UNPAID";
                 context.Orders.Add(order);
                 context.SaveChanges();
