@@ -113,7 +113,7 @@ namespace Mercury_Backend.Controllers
             {
                 var strKeyWord = Request.Form["keyword"].ToString();
                 
-                var tmpList = context.Commodities.Where(b => b.Name.Contains(strKeyWord)).Include(commodity => commodity.Owner).ThenInclude(owner => owner.Avatar).ToList<Commodity>();
+                var tmpList = context.Commodities.Where(b => b.Name.Contains(strKeyWord)).Include(commodity => commodity.CommodityTags).Include(commodity => commodity.Owner).ThenInclude(owner => owner.Avatar).ToList<Commodity>();
                 // entering searching by keyword.
                 var idList = tmpList.Select(s => new {s.Id});
                 commodityList = tmpList;
