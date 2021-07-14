@@ -58,6 +58,7 @@ namespace Mercury_Backend.Controllers
             JObject msg = new JObject();
             try
             {
+                NewView.Time = DateTime.Now;
                 context.Views.Add(NewView);
 
                 context.SaveChanges();
