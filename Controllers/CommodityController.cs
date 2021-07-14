@@ -56,16 +56,56 @@ namespace Mercury_Backend.Controllers
             {
 
                 var judge = Request.Form["keyword"].ToString();
-
+                
             }
             catch (Exception e)
             {
 
+                try
+                {
+                    var simplifiedList = new List<SimplifiedCommodity>();
+                    commodityList = context.Commodities.Include(commodity => commodity.Owner).ThenInclude(owner => owner.Avatar).ToList<Commodity>();
+                    for (int i = 0; i < commodityList.Count; i++)
+                    {
+                    
+                        simplifiedList.Add(Simplify.SimplifyCommodity(commodityList[i]));
+                    }
+                    msg["commodityList"] = JToken.FromObject(simplifiedList, new JsonSerializer()
+                    {
+                        ReferenceLoopHandling = ReferenceLoopHandling.Ignore //忽略循环引用，默认是throw exception
+                    });
+                    var idList = commodityList.Select(s => s.Id).ToList();
+                    var tags = new List<CommodityTag>();
+                    for (int i = 0; i < idList.Count; i++)
+                    {
+                        var tmpTag = context.CommodityTags.Where(tag => tag.CommodityId == idList[i])
+                            .ToList();
 
-                msg["Code"] = "400";
-                msg["Description"] = "You have not submitted any form data."; 
+                        tags = tags.Concat(tmpTag).ToList();
+                    
+                    }
 
+                    var tagSet = tags.Select(s => s.Tag).ToList();
+                    tagSet = tagSet.Distinct().ToList();
+                    msg["tags"] = JToken.FromObject(tagSet);
+                
+                    
+
+                    msg["Code"] = "200";
+
+
+                    msg["totalPage"] = commodityList.Count;
+                }
+                catch (Exception e1)
+                {
+                    Console.WriteLine(e1);
+
+                    msg["Code"] = "403";
+                    msg["Description"] = "Error occured when getting data from model.";
+
+                }
                 return JsonConvert.SerializeObject(msg);
+            
             }
 
             
