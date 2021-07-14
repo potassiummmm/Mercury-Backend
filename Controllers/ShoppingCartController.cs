@@ -31,7 +31,7 @@ namespace Mercury_Backend.Controllers
         {
             JObject msg = new JObject();
             var list = context.ShoppingCarts.OrderBy(b => b.UserId);
-            msg["UserList"] = JToken.FromObject(list);
+            msg["ItemList"] = JToken.FromObject(list);
             msg["Code"] = "200";
             return JsonConvert.SerializeObject(msg);
 
@@ -45,9 +45,22 @@ namespace Mercury_Backend.Controllers
             JObject msg = new JObject();
             try
             {
-                var userList = context.ShoppingCarts.Where(b => b.UserId == userId).ToList<ShoppingCart>();
-                msg["UserList"] = JToken.FromObject(userList);
+                var itemList = context.ShoppingCarts.Where(b => b.UserId == userId).ToList<ShoppingCart>();
+                msg["ItemList"] = JToken.FromObject(itemList);
                 msg["Code"] = "200";
+                //var k = context.Commodities.Find(userId).Price.GetType();
+                var imageList = new List<string>();
+                var priceList = new List<decimal?>();
+                var nameList = new List<string>();
+                foreach(var item in itemList)
+                {
+                    imageList.Add(context.Commodities.Find(item.CommodityId).Cover);
+                    priceList.Add(context.Commodities.Find(item.CommodityId).Price);
+                    nameList.Add(context.Commodities.Find(item.CommodityId).Name);
+                }
+                msg["ImageList"] = JToken.FromObject(imageList);
+                msg["PriceList"] = JToken.FromObject(priceList);
+                msg["NameList"] =  JToken.FromObject(nameList);
 
             }
             catch (Exception e)
@@ -70,6 +83,8 @@ namespace Mercury_Backend.Controllers
                 {
                     if (ShoppingCartItem.Count == null) ShoppingCartItem.Count = 1;
                     if (ShoppingCartItem.AddTime == null) ShoppingCartItem.AddTime= DateTime.Now;
+                    //ShoppingCartItem.User = context.SchoolUsers.Find(ShoppingCartItem.UserId);
+                    //ShoppingCartItem.Commodity = context.Commodities.Find(ShoppingCartItem.CommodityId);
                     context.ShoppingCarts.Add(ShoppingCartItem);
 
                     
