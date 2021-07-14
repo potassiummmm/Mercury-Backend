@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Mercury_Backend.Models;
 
 namespace Mercury_Backend.Utils
@@ -14,23 +15,22 @@ namespace Mercury_Backend.Utils
 
         public static SimplifiedCommodity SimplifyCommodity(Commodity commodity)
         {
-            var id = commodity.Id;
-            var name = commodity.Name;
-            var price = (decimal)commodity.Price;
-            var likes = (int)commodity.Likes;
-            var cover = commodity.Cover;
-            var ownerId = commodity.OwnerId;
-            var sellerAvt = commodity.Owner.Avatar.Path;
-            
+            var commodityTag = new List<string>();
+            foreach (var t in commodity.CommodityTags)
+            {
+                commodityTag.Add(t.Tag);
+            }
             var simplifiedCommodity = new SimplifiedCommodity(
-                id,
-                name,
-                price,
-                likes,
-                cover,
-                ownerId,
-                sellerAvt
-                );
+                commodity.Id,
+                commodity.Name,
+                (decimal)commodity.Price,
+                (int)commodity.Likes,
+                commodity.Cover,
+                commodity.OwnerId,
+                commodity.Owner.Nickname,
+                commodity.Owner.Avatar.Path,
+                commodityTag
+                    );
             return simplifiedCommodity;
         }
 
@@ -46,6 +46,13 @@ namespace Mercury_Backend.Utils
             var simplifiedUser = new SimplifiedUser(user.SchoolId, user.Nickname,
                 user.Avatar.Path, user.RealName, user.Role);
             return simplifiedUser;
+        }
+
+        public static SimplifiedComment SimplifyComment(PostComment comment)
+        {
+            var simplifiedComment = new SimplifiedComment(comment.Id, comment.SenderId, comment.Sender.Nickname,
+                comment.Sender.Avatar.Path, (DateTime)comment.Time, comment.Content);
+            return simplifiedComment;
         }
     }
 }

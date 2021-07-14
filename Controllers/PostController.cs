@@ -78,15 +78,30 @@ namespace Mercury_Backend.Controllers
             try
             {
                 var post = context.NeedPosts.Where(p => p.Id == postId)
-                    .Include(p => p.PostComments).Include(p => p.PostImages).Single();
+                    .Include(p => p.PostComments)
+                    .ThenInclude(c => c.Sender)
+                    .ThenInclude(s => s.Avatar)
+                    .Include(p => p.PostImages)
+                    .ThenInclude(pi => pi.Image)
+                    .Include(p => p.Sender)
+                    .ThenInclude(s => s.Avatar)
+                    .Single();
+
                 var imageList = new List<string>();
-                for (int i = 0; i < post.PostImages.Count; ++i)
+                foreach (var pi in post.PostImages)
                 {
-                    var image = context.Media.Where(img => img.Id == post.PostImages.ElementAt(i).ImageId).ToList();
-                    imageList.Add(image[0].Path);
+                    imageList.Add(pi.Image.Path);
                 }
-                msg["ImagePaths"] = JToken.FromObject(imageList);
-                msg["Post"] = JToken.FromObject(post, new JsonSerializer()
+
+                var commmentList = new List<SimplifiedComment>();
+                foreach (var c in post.PostComments)
+                {
+                    commmentList.Add(Simplify.SimplifyComment(c));
+                }
+
+                var postDetail = new PostDetail(post.Id, post.SenderId, post.Sender.Nickname, post.Title, post.Content, (DateTime)post.Time,
+                    post.Sender.Avatar.Path, commmentList, imageList);
+                msg["Post"] = JToken.FromObject(postDetail, new JsonSerializer()
                 {
                     ReferenceLoopHandling = ReferenceLoopHandling.Ignore
                 });
@@ -144,6 +159,7 @@ namespace Mercury_Backend.Controllers
                 context.NeedPosts.Add(post);
                 context.SaveChanges();
                 msg["Code"] = "201";
+                msg["PostId"] = post.Id;
             }
             catch (ExternalException)
             {
@@ -275,6 +291,32 @@ namespace Mercury_Backend.Controllers
                 Console.WriteLine(e.ToString());
                 msg["Code"] = "400";
                 msg["Description"] = "Unknown exception happens";
+            }
+            return JsonConvert.SerializeObject(msg);
+        }
+        
+        // GET api/post/postNumber
+        [HttpGet("postNumber")]
+        public string GetPostNumber([FromForm] string userId)
+        {
+            JObject msg = new JObject();
+            try
+            {
+                int number;
+                if (userId != null)
+                {
+                    number = context.NeedPosts.Count(p => p.SenderId == userId);
+                }
+                else
+                {
+                    number = context.NeedPosts.Count();
+                }
+                msg["Code"] = "200";
+                msg["PostNumber"] = number;
+            }
+            catch (Exception e)
+            {
+                msg["Code"] = "400";
             }
             return JsonConvert.SerializeObject(msg);
         }

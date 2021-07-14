@@ -54,7 +54,6 @@ namespace Mercury_Backend.Models
         [Column("NAME")]
         [StringLength(60)]
         public string Name { get; set; }
-        [Required]
         [Column("COVER")]
         [StringLength(100)]
         public string Cover { get; set; }

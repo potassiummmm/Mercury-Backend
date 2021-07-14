@@ -26,26 +26,54 @@ namespace Mercury_Backend.Controllers
         }
         // GET: api/<OrderController>
         [HttpGet]
-        public string Get([FromForm] string userId, [FromForm] int maxNumber = 10, [FromForm] int pageNumber = 1)
+        public string Get([FromForm] string userId, [FromForm] string status, [FromForm] int maxNumber = 10, [FromForm] int pageNumber = 1)
         {
             JObject msg = new JObject();
+            if (status != null && status != "PAID" && status != "UNPAID")
+            {
+                msg["Code"] = "403";
+                msg["Description"] = "Invalid status";
+                return JsonConvert.SerializeObject(msg);
+            }
             try
             {
                 List<Order> orderList = new List<Order>();
                 if (userId != null)
                 {
-                    orderList = context.Orders.Where(order => order.BuyerId == userId)
-                        .Include(order => order.Commodity)
-                        .ThenInclude(commodity => commodity.CommodityImages)
-                        .ThenInclude(commodityImages => commodityImages.Image)
-                        .OrderByDescending(order => order.Time).ToList();
+                    if (status != null)
+                    {
+                        orderList = context.Orders.Where(order => order.BuyerId == userId && order.Status == status)
+                            .Include(order => order.Commodity)
+                            .ThenInclude(commodity => commodity.CommodityImages)
+                            .ThenInclude(commodityImages => commodityImages.Image)
+                            .OrderByDescending(order => order.Time).ToList();
+                    }
+                    else
+                    {
+                        orderList = context.Orders.Where(order => order.BuyerId == userId)
+                            .Include(order => order.Commodity)
+                            .ThenInclude(commodity => commodity.CommodityImages)
+                            .ThenInclude(commodityImages => commodityImages.Image)
+                            .OrderByDescending(order => order.Time).ToList();
+                    }
                 }
                 else
                 {
-                    orderList = context.Orders.Include(order => order.Commodity)
-                        .ThenInclude(commodity => commodity.CommodityImages)
-                        .ThenInclude(commodityImages => commodityImages.Image)
-                        .OrderByDescending(order => order.Time).ToList();
+                    if (status != null)
+                    {
+                        orderList = context.Orders.Where(order => order.Status == status)
+                            .Include(order => order.Commodity)
+                            .ThenInclude(commodity => commodity.CommodityImages)
+                            .ThenInclude(commodityImages => commodityImages.Image)
+                            .OrderByDescending(order => order.Time).ToList();
+                    }
+                    else
+                    {
+                        orderList = context.Orders.Include(order => order.Commodity)
+                            .ThenInclude(commodity => commodity.CommodityImages)
+                            .ThenInclude(commodityImages => commodityImages.Image)
+                            .OrderByDescending(order => order.Time).ToList();
+                    }
                 }
 
                 var simplifiedOrderList = new List<SimplifiedOrder>();
@@ -121,7 +149,7 @@ namespace Mercury_Backend.Controllers
             {
                 order.Id = Generator.GenerateId(20);
                 order.Time = DateTime.Now;
-                order.ReturnTime = Convert.ToDateTime(order.ReturnTime);
+                // order.ReturnTime = Convert.ToDateTime(order.ReturnTime);
                 order.Status = "UNPAID";
                 context.Orders.Add(order);
                 context.SaveChanges();
@@ -273,6 +301,29 @@ namespace Mercury_Backend.Controllers
             catch (Exception e)
             {
                 Console.WriteLine(e.ToString());
+                msg["Code"] = "400";
+            }
+            return JsonConvert.SerializeObject(msg);
+        }
+        
+        // GET api/order/orderNumber
+        [HttpGet("orderNumber")]
+        public string GetOrderNumber([FromForm] string userId)
+        {
+            JObject msg = new JObject();
+            try
+            {
+                int number;
+                if (userId != null)
+                {
+                    number = context.Orders.Count(o => o.BuyerId == userId);
+                }
+                number = context.Orders.Count();
+                msg["Code"] = "200";
+                msg["PostNumber"] = number;
+            }
+            catch (Exception e)
+            {
                 msg["Code"] = "400";
             }
             return JsonConvert.SerializeObject(msg);

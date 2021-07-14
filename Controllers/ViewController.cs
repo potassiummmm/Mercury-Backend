@@ -32,11 +32,17 @@ namespace Mercury_Backend.Controllers
         public String Get()
         {
             JObject msg = new JObject();
-            var list = context.Views.OrderBy(b => b.UserId);
-            msg["ViewList"] = JToken.FromObject(list);
-            msg["Code"] = "200";
+            try
+            {
+                var list = context.Views.OrderBy(b => b.UserId);
+                msg["ViewList"] = JToken.FromObject(list);
+                msg["Code"] = "200";
+            }
+            catch (Exception e)
+            {
+                msg["Code"] = "400";
+            }
             return JsonConvert.SerializeObject(msg);
-
         }
 
 
@@ -44,14 +50,20 @@ namespace Mercury_Backend.Controllers
         public string Get(string userId)
         {
             JObject msg = new JObject();
-            var list = context.Views
-                .Where(e => e.UserId == userId)
-                .OrderBy(e => e.CommodityId);
-            msg["ViewList"] = JToken.FromObject(list);
-            msg["Code"] = "200";
+            try
+            {
+                var list = context.Views
+                    .Where(e => e.UserId == userId)
+                    .OrderBy(e => e.Time);
+                msg["ViewList"] = JToken.FromObject(list);
+                msg["Code"] = "200";
+            }
+            catch (Exception e)
+            {
+                msg["Code"] = "400";
+                Console.WriteLine(e.ToString());
+            }
             return JsonConvert.SerializeObject(msg);
-
-
         }
 
         [HttpPost]
@@ -60,14 +72,14 @@ namespace Mercury_Backend.Controllers
             JObject msg = new JObject();
             try
             {
+                NewView.Time = DateTime.Now;
                 context.Views.Add(NewView);
-
                 context.SaveChanges();
-                msg["Code"] = "201";
+                msg["Code"] = "200";
             }
             catch (Exception e)
             {
-                msg["Code"] = "405";
+                msg["Code"] = "400";
                 Console.WriteLine(e.ToString());
             }
             return JsonConvert.SerializeObject(msg);
@@ -99,8 +111,6 @@ namespace Mercury_Backend.Controllers
             }
             return JsonConvert.SerializeObject(msg);
         }
-
-
     }
 
 
