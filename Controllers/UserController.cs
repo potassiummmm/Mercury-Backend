@@ -136,7 +136,7 @@ namespace Mercury_Backend.Controllers
                     {
                         {"userId", request.SchoolId},
                         {"password", request.Password},
-                        {"exp", secondsSinceEpoch + 300}
+                        {"exp", secondsSinceEpoch + 3600}
                     };
 
                     //encode
@@ -273,7 +273,7 @@ namespace Mercury_Backend.Controllers
                     {
                         {"userId", userId},
                         {"password", password},
-                        {"exp", secondsSinceEpoch + 300}
+                        {"exp", secondsSinceEpoch + 3600}
                     };
 
                     //encode
