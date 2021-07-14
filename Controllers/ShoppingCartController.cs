@@ -46,12 +46,12 @@ namespace Mercury_Backend.Controllers
             {
                 var userList = context.ShoppingCarts.Where(b => b.UserId == userId).ToList<ShoppingCart>();
                 msg["UserList"] = JToken.FromObject(userList);
-
+                msg["Code"] = "200";
             }
             catch (Exception e)
             {
                 Console.WriteLine(e.ToString());
-                msg["Code"] = "Fail";
+                msg["Code"] = "400";
             }
             return JsonConvert.SerializeObject(msg);
         }
@@ -65,13 +65,12 @@ namespace Mercury_Backend.Controllers
             try
             {
                 context.ShoppingCarts.Add(ShoppingCartItem);
-
                 context.SaveChanges();
-                msg["Code"] = "Success";
+                msg["Code"] = "200";
             }
             catch (Exception e)
             {
-                msg["Code"] = "Fail";
+                msg["Code"] = "400";
                 Console.WriteLine(e.ToString());
             }
             return JsonConvert.SerializeObject(msg);
@@ -83,32 +82,21 @@ namespace Mercury_Backend.Controllers
         {
             JObject msg = new JObject();
             var ShoppingCartItem = context.ShoppingCarts.Where(e => e.UserId == userId);
-
-            if (ShoppingCartItem == null)
-            {
-                msg["Code"] = "Fail";
-                return JsonConvert.SerializeObject(msg);
-            }
             try
             {
-                // return JsonSerializer.Serialize(ShoppingCartItem);
                 foreach (var item in ShoppingCartItem)
                 {
                     if (item.CommodityId == commodityId)
                     {
                         context.ShoppingCarts.Remove(item);
-
                         context.SaveChanges();
-
                     }
-                    msg["Code"] = "Success";
+                    msg["Code"] = "200";
                 }
-
-                // msg["Code"] = "success";
             }
             catch (Exception e)
             {
-                msg["Code"] = "Fail";
+                msg["Code"] = "400";
                 Console.WriteLine(e.ToString());
             }
             return JsonConvert.SerializeObject(msg);
@@ -119,14 +107,7 @@ namespace Mercury_Backend.Controllers
         {
             JObject msg = new JObject();
             var ShoppingCartItem = context.ShoppingCarts.Where(e => e.UserId == userId);
-
-            if (ShoppingCartItem == null)
-            {
-                msg["Code"] = "fail";
-                return JsonConvert.SerializeObject(msg);
-            }
-            // return JsonSerializer.Serialize(ShoppingCartItem);
-            msg["Code"] = "Not Found";
+            msg["Code"] = "400";
             foreach (var item in ShoppingCartItem)
             {
                 if (item.CommodityId == commodityId)
@@ -135,17 +116,11 @@ namespace Mercury_Backend.Controllers
                         context.SaveChanges();
 
                     
-                        msg["Code"] = "Success";
+                        msg["Code"] = "200";
                 }
             }
-
             return JsonConvert.SerializeObject(msg);
-
         }
-
-
-
-
     }
 }
 

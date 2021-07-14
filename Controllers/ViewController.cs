@@ -32,10 +32,17 @@ namespace Mercury_Backend.Controllers
         public String Get()
         {
             JObject msg = new JObject();
-            var list = context.Views.OrderBy(b => b.UserId);
-            msg["ViewList"] = JToken.FromObject(list);
+            try
+            {
+                var list = context.Views.OrderBy(b => b.UserId);
+                msg["ViewList"] = JToken.FromObject(list);
+                msg["Code"] = "200";
+            }
+            catch (Exception e)
+            {
+                msg["Code"] = "400";
+            }
             return JsonConvert.SerializeObject(msg);
-
         }
 
 
@@ -43,13 +50,20 @@ namespace Mercury_Backend.Controllers
         public string Get(string userId)
         {
             JObject msg = new JObject();
-            var list = context.Views
-                .Where(e => e.UserId == userId)
-                .OrderBy(e => e.CommodityId);
-            msg["ViewList"] = JToken.FromObject(list);
+            try
+            {
+                var list = context.Views
+                    .Where(e => e.UserId == userId)
+                    .OrderBy(e => e.Time);
+                msg["ViewList"] = JToken.FromObject(list);
+                msg["Code"] = "200";
+            }
+            catch (Exception e)
+            {
+                msg["Code"] = "400";
+                Console.WriteLine(e.ToString());
+            }
             return JsonConvert.SerializeObject(msg);
-
-
         }
 
         [HttpPost]
@@ -60,13 +74,12 @@ namespace Mercury_Backend.Controllers
             {
                 NewView.Time = DateTime.Now;
                 context.Views.Add(NewView);
-
                 context.SaveChanges();
-                msg["Code"] = "Success";
+                msg["Code"] = "200";
             }
             catch (Exception e)
             {
-                msg["Code"] = "Fail";
+                msg["Code"] = "400";
                 Console.WriteLine(e.ToString());
             }
             return JsonConvert.SerializeObject(msg);
@@ -76,24 +89,23 @@ namespace Mercury_Backend.Controllers
         public string delete(string userId)
         {
             JObject msg = new JObject();
-
-            var views = context.Views.Where(e => e.UserId == userId);
-
-            if (views != null)
+            try
             {
+                var views = context.Views.Where(e => e.UserId == userId);
                 foreach (var view in views)
                 {
                     context.Views.Remove(view);
                     context.SaveChanges();
-                    msg["Code"] = "Success";
+                    msg["Code"] = "200";
                 }
-
-
+            }
+            catch (Exception e)
+            {
+                msg["Code"] = "400";
+                Console.WriteLine(e.ToString());
             }
             return JsonConvert.SerializeObject(msg);
         }
-
-
     }
 
 

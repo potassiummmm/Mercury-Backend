@@ -159,6 +159,7 @@ namespace Mercury_Backend.Controllers
                 context.NeedPosts.Add(post);
                 context.SaveChanges();
                 msg["Code"] = "201";
+                msg["PostId"] = post.Id;
             }
             catch (ExternalException)
             {
