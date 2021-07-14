@@ -31,7 +31,7 @@ namespace Mercury_Backend.Controllers
             var list = context.ReportUsers
                 .Where(report => report.ReporterId == userId || report.InformantId == userId)
                 .OrderBy(report => report.Time);
-            msg["charRecord"] = JToken.FromObject(list);
+            msg["Report"] = JToken.FromObject(list);
             return JsonConvert.SerializeObject(msg);
         }
         
@@ -52,12 +52,12 @@ namespace Mercury_Backend.Controllers
                 context.ReportUsers.Add(report);
                 context.SaveChanges();
                 msg["Code"] = "200";
-                msg["information"] = "Reported successfully.";
+                msg["Description"] = "Reported successfully.";
             }
             catch (DbUpdateException e)
             {
                 msg["Code"] = "403";
-                msg["information"] = "Failed to update database.";
+                msg["Description"] = "Failed to update database.";
                 Console.WriteLine(e.ToString());
             }
             catch (DBConcurrencyException e)
