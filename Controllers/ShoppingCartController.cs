@@ -32,6 +32,7 @@ namespace Mercury_Backend.Controllers
             JObject msg = new JObject();
             var list = context.ShoppingCarts.OrderBy(b => b.UserId);
             msg["UserList"] = JToken.FromObject(list);
+            msg["Code"] = "200";
             return JsonConvert.SerializeObject(msg);
 
         }
@@ -46,12 +47,13 @@ namespace Mercury_Backend.Controllers
             {
                 var userList = context.ShoppingCarts.Where(b => b.UserId == userId).ToList<ShoppingCart>();
                 msg["UserList"] = JToken.FromObject(userList);
+                msg["Code"] = "200";
 
             }
             catch (Exception e)
             {
                 Console.WriteLine(e.ToString());
-                msg["Code"] = "Fail";
+                msg["Code"] = "405";
             }
             return JsonConvert.SerializeObject(msg);
         }
@@ -64,14 +66,25 @@ namespace Mercury_Backend.Controllers
             JObject msg = new JObject();
             try
             {
-                context.ShoppingCarts.Add(ShoppingCartItem);
+                if (context.ShoppingCarts.Find(ShoppingCartItem.CommodityId, ShoppingCartItem.UserId) == null)
+                {
+                    if (ShoppingCartItem.Count == null) ShoppingCartItem.Count = 1;
+                    if (ShoppingCartItem.AddTime == null) ShoppingCartItem.AddTime= DateTime.Now;
+                    context.ShoppingCarts.Add(ShoppingCartItem);
 
+                    
+                }
+                else
+                {
+                    var item = context.ShoppingCarts.Find(ShoppingCartItem.CommodityId, ShoppingCartItem.UserId);
+                    item.Count += ShoppingCartItem.Count== null?1: ShoppingCartItem.Count;
+                }
                 context.SaveChanges();
-                msg["Code"] = "Success";
+                msg["Code"] = "200";
             }
             catch (Exception e)
             {
-                msg["Code"] = "Fail";
+                msg["Code"] = "405";
                 Console.WriteLine(e.ToString());
             }
             return JsonConvert.SerializeObject(msg);
@@ -82,33 +95,22 @@ namespace Mercury_Backend.Controllers
         public string delete([FromForm]string commodityId, [FromForm]string userId)
         {
             JObject msg = new JObject();
-            var ShoppingCartItem = context.ShoppingCarts.Where(e => e.UserId == userId);
+            var ShoppingCartItem = context.ShoppingCarts.Find(commodityId, userId);
 
             if (ShoppingCartItem == null)
             {
-                msg["Code"] = "Fail";
+                msg["Code"] = "404";
                 return JsonConvert.SerializeObject(msg);
             }
             try
             {
-                // return JsonSerializer.Serialize(ShoppingCartItem);
-                foreach (var item in ShoppingCartItem)
-                {
-                    if (item.CommodityId == commodityId)
-                    {
-                        context.ShoppingCarts.Remove(item);
-
-                        context.SaveChanges();
-
-                    }
-                    msg["Code"] = "Success";
-                }
-
-                // msg["Code"] = "success";
+                context.ShoppingCarts.Remove(ShoppingCartItem);
+                context.SaveChanges();
+                msg["Code"] = "200";
             }
             catch (Exception e)
             {
-                msg["Code"] = "Fail";
+                msg["Code"] = "405";
                 Console.WriteLine(e.ToString());
             }
             return JsonConvert.SerializeObject(msg);
@@ -122,11 +124,10 @@ namespace Mercury_Backend.Controllers
 
             if (ShoppingCartItem == null)
             {
-                msg["Code"] = "fail";
+                msg["Code"] = "404";
                 return JsonConvert.SerializeObject(msg);
             }
             // return JsonSerializer.Serialize(ShoppingCartItem);
-            msg["Code"] = "Not Found";
             foreach (var item in ShoppingCartItem)
             {
                 if (item.CommodityId == commodityId)
@@ -135,7 +136,7 @@ namespace Mercury_Backend.Controllers
                         context.SaveChanges();
 
                     
-                        msg["Code"] = "Success";
+                        msg["Code"] = "200";
                 }
             }
 

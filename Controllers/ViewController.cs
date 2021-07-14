@@ -34,6 +34,7 @@ namespace Mercury_Backend.Controllers
             JObject msg = new JObject();
             var list = context.Views.OrderBy(b => b.UserId);
             msg["ViewList"] = JToken.FromObject(list);
+            msg["Code"] = "200";
             return JsonConvert.SerializeObject(msg);
 
         }
@@ -47,6 +48,7 @@ namespace Mercury_Backend.Controllers
                 .Where(e => e.UserId == userId)
                 .OrderBy(e => e.CommodityId);
             msg["ViewList"] = JToken.FromObject(list);
+            msg["Code"] = "200";
             return JsonConvert.SerializeObject(msg);
 
 
@@ -61,11 +63,11 @@ namespace Mercury_Backend.Controllers
                 context.Views.Add(NewView);
 
                 context.SaveChanges();
-                msg["Code"] = "Success";
+                msg["Code"] = "201";
             }
             catch (Exception e)
             {
-                msg["Code"] = "Fail";
+                msg["Code"] = "405";
                 Console.WriteLine(e.ToString());
             }
             return JsonConvert.SerializeObject(msg);
@@ -75,19 +77,25 @@ namespace Mercury_Backend.Controllers
         public string delete(string userId)
         {
             JObject msg = new JObject();
-
-            var views = context.Views.Where(e => e.UserId == userId);
-
-            if (views != null)
+            try
             {
-                foreach (var view in views)
+                var views = context.Views.Where(e => e.UserId == userId);
+                if (views != null)
                 {
-                    context.Views.Remove(view);
-                    context.SaveChanges();
-                    msg["Code"] = "Success";
+                    foreach (var view in views)
+                    {
+                        context.Views.Remove(view);
+                        context.SaveChanges();
+                        msg["Code"] = "200";
+                    }
+
+
                 }
-
-
+            }
+            catch (Exception e)
+            {
+                msg["Code"] = "405";
+                Console.WriteLine(e.ToString());
             }
             return JsonConvert.SerializeObject(msg);
         }

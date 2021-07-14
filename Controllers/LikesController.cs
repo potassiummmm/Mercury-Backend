@@ -31,12 +31,12 @@ namespace Mercury_Backend.Controllers
                 var userList = context.Likes.ToList<Like>();
                 msg["UserList"] = JToken.FromObject(userList);
                 //msg["User"] = JToken.FromObject(userList[0].User);
-                msg["Status"] = "Success";
+                msg["Code"] = "200";
             }
             catch (Exception e)
             {
                 Console.WriteLine(e.ToString());
-                msg["Status"] = "Fail";
+                msg["Code"] = "405";
             }
             return JsonConvert.SerializeObject(msg);
         }
@@ -51,13 +51,34 @@ namespace Mercury_Backend.Controllers
                 var userList = context.Likes.Where(b => b.UserId == userId).ToList<Like>();
                 msg["UserList"] = JToken.FromObject(userList);
                 msg["User"] = JToken.FromObject(userList[0].User);
-                msg["Status"] = "Success";
+                msg["Code"] = "200";
 
             }
             catch(Exception e)
             {
                 Console.WriteLine(e.ToString());
-                msg["Code"] = "Fail";
+                msg["Code"] = "405";
+            }
+            return JsonConvert.SerializeObject(msg);
+        }
+
+        [HttpPost("{id}")]
+        public string GetResult([FromForm]string userId,[FromForm]string commodityId)
+        {
+            JObject msg = new JObject();
+            try
+            {
+                var item = context.Likes.Find(commodityId, userId);
+                if (item != null) msg["Result"] = "True";
+                else msg["Result"] = "False";
+
+                msg["Code"] = "200";
+
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.ToString());
+                msg["Code"] = "405";
             }
             return JsonConvert.SerializeObject(msg);
         }
@@ -77,18 +98,18 @@ namespace Mercury_Backend.Controllers
                     context.Likes.Remove(item);
                 }
                 else
-                {
+                {   
                     context.Likes.Add(like);
                     context.Commodities.Find(like.CommodityId).Likes++;
 
                 }
                 
                 context.SaveChanges();
-                msg["Code"] = "Success";
+                msg["Code"] = "200";
             }
             catch(Exception e)
             {
-                msg["Code"] = "Fail";
+                msg["Code"] = "405";
                 Console.WriteLine(e.ToString());
             }
             return JsonConvert.SerializeObject(msg);
