@@ -64,7 +64,7 @@ namespace Mercury_Backend.Controllers
                 try
                 {
                     var simplifiedList = new List<SimplifiedCommodity>();
-                    commodityList = context.Commodities.Include(commodity => commodity.Owner).ThenInclude(owner => owner.Avatar).ToList<Commodity>();
+                    commodityList = context.Commodities.Include(commodity => commodity.CommodityTags).Include(commodity => commodity.Owner).ThenInclude(owner => owner.Avatar).ToList<Commodity>();
                     for (int i = 0; i < commodityList.Count; i++)
                     {
                     
@@ -137,7 +137,7 @@ namespace Mercury_Backend.Controllers
                 
                 for (int i = 0; i < idList.Count; i++)
                 {
-                    var tmpList = context.Commodities.Where(b => b.OwnerId== idList[i].SchoolId).Include(commodity => commodity.Owner).ThenInclude(owner => owner.Avatar).ToList<Commodity>();
+                    var tmpList = context.Commodities.Where(b => b.OwnerId== idList[i].SchoolId).Include(commodity => commodity.CommodityTags).Include(commodity => commodity.Owner).ThenInclude(owner => owner.Avatar).ToList<Commodity>();
                     commodityList = commodityList.Concat(tmpList).ToList<Commodity>();
                 }
             }
@@ -150,7 +150,7 @@ namespace Mercury_Backend.Controllers
                 var idList = tagList.Select(s => new {s.CommodityId}).ToList();
                 for (int i = 0; i < idList.Count; i++)
                 {
-                    var tmpList = context.Commodities.Where(b => idList[i].CommodityId == b.Id).Include(commodity => commodity.Owner).ThenInclude(owner => owner.Avatar).ToList<Commodity>();
+                    var tmpList = context.Commodities.Where(b => idList[i].CommodityId == b.Id).Include(commodity => commodity.CommodityTags).Include(commodity => commodity.Owner).ThenInclude(owner => owner.Avatar).ToList<Commodity>();
                     commodityList = commodityList.Concat(tmpList).ToList<Commodity>();
                 }
             }
