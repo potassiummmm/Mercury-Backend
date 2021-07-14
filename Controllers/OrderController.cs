@@ -75,7 +75,6 @@ namespace Mercury_Backend.Controllers
                             .OrderByDescending(order => order.Time).ToList();
                     }
                 }
-
                 var simplifiedOrderList = new List<SimplifiedOrder>();
                 for (int i = 0; i + (pageNumber - 1) * maxNumber < orderList.Count() && i < maxNumber; ++i)
                 {

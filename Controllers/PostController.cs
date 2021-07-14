@@ -174,7 +174,7 @@ namespace Mercury_Backend.Controllers
             catch(Exception e)
             {
                 msg["Code"] = "400";
-                msg["Code"] = "Unknown exception happens";
+                msg["Description"] = "Unknown exception happens";
                 Console.WriteLine(e.ToString());
             }
             return JsonConvert.SerializeObject(msg);
@@ -272,7 +272,7 @@ namespace Mercury_Backend.Controllers
                 var comment = context.PostComments.Where(c => c.Id == commentId).ToList();
                 context.PostComments.Remove(comment[0]);
                 context.SaveChanges();
-                msg["Code"] = "Success";
+                msg["Code"] = "200";
             }
             catch (DbUpdateException e)
             {
