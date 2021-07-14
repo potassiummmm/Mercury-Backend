@@ -61,6 +61,27 @@ namespace Mercury_Backend.Controllers
             return JsonConvert.SerializeObject(msg);
         }
 
+        [HttpPost("{id}")]
+        public string GetResult([FromForm]string userId,[FromForm]string commodityId)
+        {
+            JObject msg = new JObject();
+            try
+            {
+                var item = context.Likes.Find(commodityId, userId);
+                if (item != null) msg["Result"] = "True";
+                else msg["Result"] = "False";
+
+                msg["Code"] = "200";
+
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.ToString());
+                msg["Code"] = "400";
+            }
+            return JsonConvert.SerializeObject(msg);
+        }
+
         // POST api/<LikesController>
         [HttpPost]
         public string Post([FromForm] Like like)
@@ -76,7 +97,7 @@ namespace Mercury_Backend.Controllers
                     context.Likes.Remove(item);
                 }
                 else
-                {
+                {   
                     context.Likes.Add(like);
                     context.Commodities.Find(like.CommodityId).Likes++;
 

@@ -92,11 +92,16 @@ namespace Mercury_Backend.Controllers
             try
             {
                 var views = context.Views.Where(e => e.UserId == userId);
-                foreach (var view in views)
+                if (views != null)
                 {
-                    context.Views.Remove(view);
-                    context.SaveChanges();
-                    msg["Code"] = "200";
+                    foreach (var view in views)
+                    {
+                        context.Views.Remove(view);
+                        context.SaveChanges();
+                        msg["Code"] = "200";
+                    }
+
+
                 }
             }
             catch (Exception e)
