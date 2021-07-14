@@ -26,26 +26,54 @@ namespace Mercury_Backend.Controllers
         }
         // GET: api/<OrderController>
         [HttpGet]
-        public string Get([FromForm] string userId, [FromForm] int maxNumber = 10, [FromForm] int pageNumber = 1)
+        public string Get([FromForm] string userId, [FromForm] string status, [FromForm] int maxNumber = 10, [FromForm] int pageNumber = 1)
         {
             JObject msg = new JObject();
+            if (status != null && status != "PAID" && status != "UNPAID")
+            {
+                msg["Code"] = "403";
+                msg["Description"] = "Invalid status";
+                return JsonConvert.SerializeObject(msg);
+            }
             try
             {
                 List<Order> orderList = new List<Order>();
                 if (userId != null)
                 {
-                    orderList = context.Orders.Where(order => order.BuyerId == userId)
-                        .Include(order => order.Commodity)
-                        .ThenInclude(commodity => commodity.CommodityImages)
-                        .ThenInclude(commodityImages => commodityImages.Image)
-                        .OrderByDescending(order => order.Time).ToList();
+                    if (status != null)
+                    {
+                        orderList = context.Orders.Where(order => order.BuyerId == userId && order.Status == status)
+                            .Include(order => order.Commodity)
+                            .ThenInclude(commodity => commodity.CommodityImages)
+                            .ThenInclude(commodityImages => commodityImages.Image)
+                            .OrderByDescending(order => order.Time).ToList();
+                    }
+                    else
+                    {
+                        orderList = context.Orders.Where(order => order.BuyerId == userId)
+                            .Include(order => order.Commodity)
+                            .ThenInclude(commodity => commodity.CommodityImages)
+                            .ThenInclude(commodityImages => commodityImages.Image)
+                            .OrderByDescending(order => order.Time).ToList();
+                    }
                 }
                 else
                 {
-                    orderList = context.Orders.Include(order => order.Commodity)
-                        .ThenInclude(commodity => commodity.CommodityImages)
-                        .ThenInclude(commodityImages => commodityImages.Image)
-                        .OrderByDescending(order => order.Time).ToList();
+                    if (status != null)
+                    {
+                        orderList = context.Orders.Where(order => order.Status == status)
+                            .Include(order => order.Commodity)
+                            .ThenInclude(commodity => commodity.CommodityImages)
+                            .ThenInclude(commodityImages => commodityImages.Image)
+                            .OrderByDescending(order => order.Time).ToList();
+                    }
+                    else
+                    {
+                        orderList = context.Orders.Include(order => order.Commodity)
+                            .ThenInclude(commodity => commodity.CommodityImages)
+                            .ThenInclude(commodityImages => commodityImages.Image)
+                            .OrderByDescending(order => order.Time).ToList();
+                    }
                 }
 
                 var simplifiedOrderList = new List<SimplifiedOrder>();
