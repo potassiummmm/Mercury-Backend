@@ -277,5 +277,28 @@ namespace Mercury_Backend.Controllers
             }
             return JsonConvert.SerializeObject(msg);
         }
+        
+        // GET api/order/orderNumber
+        [HttpGet("orderNumber")]
+        public string GetOrderNumber([FromForm] string userId)
+        {
+            JObject msg = new JObject();
+            try
+            {
+                int number;
+                if (userId != null)
+                {
+                    number = context.Orders.Count(o => o.BuyerId == userId);
+                }
+                number = context.Orders.Count();
+                msg["Code"] = "200";
+                msg["PostNumber"] = number;
+            }
+            catch (Exception e)
+            {
+                msg["Code"] = "400";
+            }
+            return JsonConvert.SerializeObject(msg);
+        }
     }
 }

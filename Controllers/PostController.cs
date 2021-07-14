@@ -294,5 +294,31 @@ namespace Mercury_Backend.Controllers
             }
             return JsonConvert.SerializeObject(msg);
         }
+        
+        // GET api/post/postNumber
+        [HttpGet("postNumber")]
+        public string GetPostNumber([FromForm] string userId)
+        {
+            JObject msg = new JObject();
+            try
+            {
+                int number;
+                if (userId != null)
+                {
+                    number = context.NeedPosts.Count(p => p.SenderId == userId);
+                }
+                else
+                {
+                    number = context.NeedPosts.Count();
+                }
+                msg["Code"] = "200";
+                msg["PostNumber"] = number;
+            }
+            catch (Exception e)
+            {
+                msg["Code"] = "400";
+            }
+            return JsonConvert.SerializeObject(msg);
+        }
     }
 }
