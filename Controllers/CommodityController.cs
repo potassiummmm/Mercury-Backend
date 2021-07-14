@@ -49,7 +49,7 @@ namespace Mercury_Backend.Controllers
         [HttpGet]
         public string Get()
         {
-            var flag = 0;
+            // var flag = 0;
             JObject msg = new JObject();
             var commodityList = new List<Commodity>();
             try
@@ -58,7 +58,7 @@ namespace Mercury_Backend.Controllers
                 var judge = Request.Form["keyword"].ToString();
                 
             }
-            catch (Exception e)
+            catch 
             {
 
                 try
@@ -118,16 +118,16 @@ namespace Mercury_Backend.Controllers
                 var idList = tmpList.Select(s => new {s.Id});
                 commodityList = tmpList;
                 
-                flag = 1;
+                // flag = 1;
 
                 // 
                 // todo: 用关键词搜索
             }
             
             
-            else if (Request.Form["owner_name"].ToString() == "" != true)
+            else if (Request.Form["ownerName"].ToString() == "" != true)
             {
-                var ownerName = Request.Form["owner_name"];
+                var ownerName = Request.Form["ownerName"];
                 var strOwnerName = ownerName.ToString();
                 
                 // msg["commodityList"] = JToken.FromObject(commodityList);
@@ -385,7 +385,7 @@ namespace Mercury_Backend.Controllers
                 {
                     commodityToChange.Price = Decimal.ToInt32(int.Parse(Request.Form["price"].ToString()));
                 }
-                catch (Exception e)
+                catch 
                 {
 
                     msg["Code"] = "403";
@@ -400,7 +400,7 @@ namespace Mercury_Backend.Controllers
                 {
                     commodityToChange.Stock = Decimal.ToByte(int.Parse(Request.Form["stock"].ToString()));
                 }
-                catch (Exception e)
+                catch
                 {
 
                     msg["Code"] = "403";
@@ -415,7 +415,7 @@ namespace Mercury_Backend.Controllers
                 {
                     commodityToChange.ForRent = Request.Form["forRent"].ToString() != "0";
                 }
-                catch (Exception e)
+                catch 
                 {
 
                     msg["Code"] = "403";
@@ -429,7 +429,7 @@ namespace Mercury_Backend.Controllers
                 {
                     commodityToChange.Clicks = int.Parse(Request.Form["clicks"].ToString());
                 }
-                catch (Exception e)
+                catch 
                 {
 
                     msg["Code"] = "403";
@@ -444,7 +444,7 @@ namespace Mercury_Backend.Controllers
                 {
                     commodityToChange.Likes = int.Parse(Request.Form["likes"].ToString());
                 }
-                catch (Exception e)
+                catch 
                 {
 
                     msg["Code"] = "403";
@@ -458,7 +458,7 @@ namespace Mercury_Backend.Controllers
                 {
                     commodityToChange.Popularity = byte.Parse(Request.Form["popularity"].ToString());
                 }
-                catch (Exception e)
+                catch 
                 {
 
                     msg["Code"] = "403";
@@ -474,7 +474,7 @@ namespace Mercury_Backend.Controllers
                 {
                     commodityToChange.Likes = int.Parse(Request.Form["popularity"].ToString());
                 }
-                catch (Exception e)
+                catch 
                 {
 
                     msg["Code"] = "403";
@@ -497,7 +497,7 @@ namespace Mercury_Backend.Controllers
                 {
                     commodityToChange.Unit = Request.Form["unit"].ToString();
                 }
-                catch (Exception e)
+                catch 
                 {
 
                     msg["Code"] = "403";
@@ -511,7 +511,7 @@ namespace Mercury_Backend.Controllers
                 {
                     commodityToChange.Name = Request.Form["name"].ToString();
                 }
-                catch (Exception e)
+                catch 
                 {
 
                     msg["Code"] = "403";
