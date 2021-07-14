@@ -106,7 +106,7 @@ namespace Mercury_Backend.Controllers
             }
             catch (Exception e)
             {
-                msg["Code"] = "405";
+                msg["Code"] = "400";
                 Console.WriteLine(e.ToString());
             }
             return JsonConvert.SerializeObject(msg);
