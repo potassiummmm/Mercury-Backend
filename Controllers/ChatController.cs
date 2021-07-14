@@ -27,8 +27,9 @@ namespace Mercury_Backend.Controllers
         {
             JObject msg = new JObject();
             var list = context.ChatRecords
-                .Where(record => record.SenderId == userId && record.ReceiverId == targetId || record.SenderId == targetId && record.ReceiverId == userId)
+                .Where(record => record.SenderId == userId && record.ReceiverId == targetId)
                 .OrderBy(record => record.Time);
+            msg["Code"] = 200;
             msg["CharRecord"] = JToken.FromObject(list);
             return JsonConvert.SerializeObject(msg);
         }
