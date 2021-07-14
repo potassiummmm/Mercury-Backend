@@ -54,7 +54,7 @@ namespace Mercury_Backend.Controllers
                     ReceiverId = receiverId,
                     SenderId = senderId,
                     Time = DateTime.Now,
-                    Index = list.Count(),
+                    Index = list.Count() + 1,
                     Status = "N"
                 };
                 context.ChatRecords.Add(chatRecord);
