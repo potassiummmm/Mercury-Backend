@@ -52,7 +52,6 @@ namespace Mercury_Backend.Controllers
                 msg["UserList"] = JToken.FromObject(userList);
                 msg["User"] = JToken.FromObject(userList[0].User);
                 msg["Code"] = "200";
-
             }
             catch(Exception e)
             {
@@ -82,7 +81,6 @@ namespace Mercury_Backend.Controllers
                     context.Commodities.Find(like.CommodityId).Likes++;
 
                 }
-                
                 context.SaveChanges();
                 msg["Code"] = "200";
             }

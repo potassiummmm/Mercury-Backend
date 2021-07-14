@@ -1,8 +1,10 @@
 using Microsoft.AspNetCore.Mvc;
 using System;
+using System.Data;
 using System.Linq;
 using Mercury_Backend.Contexts;
 using Mercury_Backend.Models;
+using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Microsoft.Extensions.Configuration;
@@ -42,14 +44,25 @@ namespace Mercury_Backend.Controllers
             {
                 context.ReportUsers.Add(report);
                 context.SaveChanges();
-                msg["Code"] = "success";
-                msg["information"] = "Reported successfully";
+                msg["Code"] = "200";
+                msg["information"] = "Reported successfully.";
+            }
+            catch (DbUpdateException e)
+            {
+                msg["Code"] = "403";
+                msg["information"] = "Failed to update database.";
+                Console.WriteLine(e.ToString());
+            }
+            catch (DBConcurrencyException e)
+            {
+                Console.WriteLine(e.ToString());
+                msg["Code"] = "403";
+                msg["Description"] = "Failed to update database because of concurrent requests.";
             }
             catch (Exception e)
             {
-                msg["Code"] = "fail";
-                msg["information"] = "Fail to modify database";
                 Console.WriteLine(e.ToString());
+                msg["Code"] = "400";
             }
             return JsonConvert.SerializeObject(msg);
         }
