@@ -68,7 +68,7 @@ namespace Mercury_Backend.Controllers
                     user.RealName, user.Phone, user.Major, user.Credit, user.Role, user.Grade,
                     user.Brief, user.Avatar.Path);
                 msg["User"] = JToken.FromObject(userInformation);
-
+                msg["Code"] = "200";
             }
             catch (ArgumentNullException e)
             {
