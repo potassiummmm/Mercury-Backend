@@ -154,7 +154,50 @@ namespace Mercury_Backend.Controllers
                     commodityList = commodityList.Concat(tmpList).ToList<Commodity>();
                 }
             }
+            else if (Request.Form["id"].ToString() == "" != true)
+            {
+                
+                try
+                {
+                    var strId = Request.Form["id"].ToString();
+                    commodityList = context.Commodities.Where(s=>s.Id == strId).Include(commodity => commodity.CommodityTags).Include(commodity => commodity.Owner).ThenInclude(owner => owner.Avatar).ToList<Commodity>();;
+                    if (commodityList.Count == 0)
+                    {
+                        msg["Code"] = "404";
+                        msg["Description"] = "No such id";
+                        return JsonConvert.SerializeObject(msg);
+                    }
+                    // commodityList.Add(targetComm);
+                    var targetComm = commodityList[0];
+                    commodityList[0].Clicks++;
+                    if (Request.Form["userId"].ToString() == "" != true)
+                    {
+                        var vw = new View();
+                        vw.Time = DateTime.Now;
+                        vw.Commodity = targetComm;
+                        vw.CommodityId = targetComm.Id;
+                        vw.User = context.SchoolUsers.Find(Request.Form["userId"].ToString());
+                        vw.UserId = vw.User.SchoolId;
+                        
+                        targetComm.Views.Add(vw);
+                    }
+                    try
+                    {
+                        context.SaveChanges();
+                    }
+                    catch
+                    {
+                        msg["Code"] = "403";
+                        msg["Description"] = "Error occured when changing data from model.";
 
+                    }
+                }
+                catch
+                {
+                    msg["Code"] = "403";
+                    msg["Description"] = "Error occured when getting data from model.";
+                }
+            }
             else
             {
 
@@ -176,13 +219,15 @@ namespace Mercury_Backend.Controllers
                 {
                     ReferenceLoopHandling = ReferenceLoopHandling.Ignore //忽略循环引用，默认是throw exception
                 });
+                
+
                 var idList = commodityList.Select(s => s.Id).ToList();
                 var tags = new List<CommodityTag>();
                 for (int i = 0; i < idList.Count; i++)
                 {
                     var tmpTag = context.CommodityTags.Where(tag => tag.CommodityId == idList[i])
                         .ToList();
-
+                    
                     tags = tags.Concat(tmpTag).ToList();
                     
                 }
@@ -194,8 +239,6 @@ namespace Mercury_Backend.Controllers
                     
 
                 msg["Code"] = "200";
-
-
                 msg["totalPage"] = commodityList.Count;
             }
             catch (Exception e)
@@ -446,9 +489,7 @@ namespace Mercury_Backend.Controllers
                 }
                 catch 
                 {
-
                     msg["Code"] = "403";
-
                     detailMsg += " likes ";
                 }
             }
