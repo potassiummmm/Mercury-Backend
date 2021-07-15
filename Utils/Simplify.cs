@@ -35,7 +35,7 @@ namespace Mercury_Backend.Utils
                 commodity.Owner.Avatar.Path,
                 commodityTag,
                 commodity.Classification,
-                commodity.Clicks,
+                commodity.Clicks == null ? 0: commodity.Clicks,
                 commodity.Stock,
                 commodity.Video == null? "": commodity.Video.Path,
                 commodity.Condition == null ? "good": commodity.Condition ,

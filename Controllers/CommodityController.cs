@@ -134,8 +134,6 @@ namespace Mercury_Backend.Controllers
                     Include(commodity => commodity.Owner).ThenInclude(owner => owner.Avatar).ToList<Commodity>();
                 
                 commodityList = tmpList;
-                
-                // todo: 用关键词搜索
             }
             
             
@@ -156,7 +154,7 @@ namespace Mercury_Backend.Controllers
                     commodityList = commodityList.Concat(tmpList).ToList<Commodity>();
                 }
             }
-            
+            // 按类别搜索
             else if (intClass != -1)
             {
                 
@@ -166,7 +164,7 @@ namespace Mercury_Backend.Controllers
                    Include(commodity => commodity.Owner).
                    ThenInclude(owner => owner.Avatar).ToList<Commodity>();
             }
-            
+            // 按学号搜索
             else if (strUserId != null && strUserId != "")
             {
                 
@@ -187,6 +185,7 @@ namespace Mercury_Backend.Controllers
                 }
                 
             }
+            // 按标签搜索
             else if (strTag != "" && strTag != null)
             {
                 
@@ -198,6 +197,8 @@ namespace Mercury_Backend.Controllers
                     commodityList = commodityList.Concat(tmpList).ToList<Commodity>();
                 }
             }
+            
+            
             else if (strId != "" && strId != null) 
             {
                 try
@@ -216,7 +217,15 @@ namespace Mercury_Backend.Controllers
                     }
                     // commodityList.Add(targetComm);
                     var targetComm = commodityList[0];
-                    commodityList[0].Clicks++;
+                    if (commodityList[0].Clicks == null)
+                    {
+                        commodityList[0].Clicks = 1;
+                    }
+                    else
+                    {
+                        commodityList[0].Clicks++;
+                    }
+
                     if (userId != null && userId != "")
                     {
                         var vw = new View();
