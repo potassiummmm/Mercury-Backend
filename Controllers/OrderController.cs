@@ -349,7 +349,7 @@ namespace Mercury_Backend.Controllers
                 msg["Code"] = "200";
                 msg["PostNumber"] = number;
             }
-            catch (Exception e)
+            catch 
             {
                 msg["Code"] = "400";
             }

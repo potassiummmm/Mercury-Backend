@@ -37,10 +37,10 @@ namespace Mercury_Backend.Utils
                 commodity.Classification,
                 commodity.Clicks,
                 commodity.Stock,
-                commodity.Video.Path,
-                commodity.Condition,
-                commodity.ForRent
-                    );
+                commodity.Video == null? "": commodity.Video.Path,
+                commodity.Condition == null ? "good": commodity.Condition ,
+                commodity.ForRent == null ? false: commodity.ForRent
+                );
             return simplifiedCommodity;
         }
 
