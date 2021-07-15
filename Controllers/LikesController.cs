@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Mercury_Backend.Contexts;
+using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
 
@@ -48,9 +49,16 @@ namespace Mercury_Backend.Controllers
             JObject msg = new JObject();
             try
             {
-                var userList = context.Likes.Where(b => b.UserId == userId).ToList<Like>();
-                msg["UserList"] = JToken.FromObject(userList);
-                msg["User"] = JToken.FromObject(userList[0].User);
+                var itemList = context.Likes.Where(b => b.UserId == userId)
+                    .Include(l => l.Commodity).Select(l => new
+                    {
+                        CommodityName = l.Commodity.Name,
+                        CommodityPrice = l.Commodity.Price,
+                        CommodityCover = l.Commodity.Cover,
+                        CommodityId = l.CommodityId
+                    }).ToList();
+                
+                msg["ItemList"] = JToken.FromObject(itemList);
                 msg["Code"] = "200";
             }
             catch(Exception e)
