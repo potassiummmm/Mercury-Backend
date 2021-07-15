@@ -27,25 +27,8 @@ namespace Mercury_Backend.Controllers
         {
             context = modelContext;
         }
-        // GET: api/<CommodityController>
-        // [HttpGet]
-        // public string Get()
-        // {
-        //     JObject msg = new JObject();
-        //     try
-        //     {
-        //         var commodityList = context.Commodities.OrderBy(b => b.Id).ToList<Commodity>();
-        //         msg["commodityList"] = JToken.FromObject(commodityList);
-        //         msg["Code"] = "success";
-        //     }
-        //     catch(Exception e)
-        //     {
-        //         msg["Code"] = "fail";
-        //     }
-        //     return JsonConvert.SerializeObject(msg);
-        // }
 
-        // GET api/<CommodityController>/5
+        // GET api/<CommodityController>
         [HttpGet]
         public string Get(string id, string classification, string keyword, string ownerName, string userId, string tag)
         {

@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Query.SqlExpressions;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -116,6 +117,7 @@ namespace Mercury_Backend.Controllers
                     BuyerId = o.BuyerId,
                     CommodityName = o.Commodity.Name,
                     CommodityPrice = o.Commodity.Price,
+                    CommodityCover = o.Commodity.Cover,
                     Count = o.Count,
                     Time = o.Time,
                     Location = o.Location,
@@ -154,9 +156,15 @@ namespace Mercury_Backend.Controllers
             JObject msg = new JObject();
             try
             {
+                var commodity = context.Commodities.Single(c => c.Id == order.CommodityId);
+                if (commodity.Stock <= 0)
+                {
+                    msg["Code"] = "403";
+                    msg["Description"] = "The commodity is sold out, cannot generate order";
+                    return JsonConvert.SerializeObject(msg);
+                }
                 order.Id = Generator.GenerateId(20);
                 order.Time = DateTime.Now;
-                // order.ReturnTime = Convert.ToDateTime(order.ReturnTime);
                 order.Status = "UNPAID";
                 context.Orders.Add(order);
                 context.SaveChanges();
@@ -185,11 +193,23 @@ namespace Mercury_Backend.Controllers
             try
             {
                 var order = context.Orders.Single(o => o.Id == id);
-                if(order.Status != "UNPAID")
+                if (order.Status != "UNPAID")
                 {
                     msg["Code"] = "403";
                     msg["Description"] = "Cannot update a paid or cancelled order";
                     return JsonConvert.SerializeObject(msg);
+                }
+                if (newStatus == "PAID")
+                {
+                    var commodity = context.Commodities.Single(c => c.Id == order.CommodityId);
+                    if (commodity.Stock <= 0)
+                    {
+                        msg["Code"] = "403";
+                        msg["Description"] = "The commodity is sold out, the order is cancelled";
+                        order.Status = "CANCELLED";
+                        return JsonConvert.SerializeObject(msg);
+                    }
+                    commodity.Stock--;
                 }
                 order.Status = newStatus;
                 context.SaveChanges();
