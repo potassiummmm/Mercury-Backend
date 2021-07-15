@@ -107,6 +107,16 @@ namespace Mercury_Backend.Controllers
                 msg["Code"] = "403";
                 msg["Description"] = "User already exists.";
             }
+            else if (context.SchoolUsers.Find(request.Nickname) != null)
+            {
+                msg["Code"] = "403";
+                msg["Description"] = "The nickname has been taken.";
+            }
+            else if (context.SchoolUsers.Find(request.Phone) != null)
+            {
+                msg["Code"] = "403";
+                msg["Description"] = "The phone number has been registered.";
+            }
             else
             {
                 var newUser = new SchoolUser()
