@@ -193,7 +193,23 @@ namespace Mercury_Backend.Controllers
             JObject msg = new JObject();
             try
             {
-                var post = context.NeedPosts.Single(p => p.Id == postId);
+                var post = context.NeedPosts.Where(p => p.Id == postId)
+                    .Include(p => p.PostImages)
+                    .ThenInclude(i => i.Image).Single();
+                foreach (var pi in post.PostImages)
+                {
+                    if(System.IO.File.Exists(pi.Image.Path) && pi.Image.Path != "Media/Image/Default.png")
+                    {
+                        try
+                        {
+                            System.IO.File.Delete(pi.Image.Path);
+                        }
+                        catch (System.IO.IOException e)
+                        {
+                            Console.WriteLine(e.Message);
+                        }
+                    }
+                }
                 context.NeedPosts.Remove(post);
                 context.SaveChanges();
                 msg["Code"] = "200";
