@@ -152,13 +152,11 @@ namespace Mercury_Backend.Contexts
                 entity.HasOne(d => d.Commodity)
                     .WithMany(p => p.CommodityImages)
                     .HasForeignKey(d => d.CommodityId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("COM_IMAGE_COMMODITY_ID_FK");
 
                 entity.HasOne(d => d.Image)
                     .WithMany(p => p.CommodityImages)
                     .HasForeignKey(d => d.ImageId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("COM_IMAGE_MEDIA_ID_FK");
             });
 
