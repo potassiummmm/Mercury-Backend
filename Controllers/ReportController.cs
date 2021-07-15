@@ -37,7 +37,7 @@ namespace Mercury_Backend.Controllers
         
         // POST api/<ReportController>
         [HttpPost]
-        public String Post([FromForm] string reporterId,[FromForm] string informantId)
+        public String Post([FromForm] string reporterId,[FromForm] string informantId,[FromForm] string comment)
         {
             JObject msg = new JObject();
             try
@@ -46,6 +46,7 @@ namespace Mercury_Backend.Controllers
                 {
                     ReporterId = reporterId,
                     InformantId = informantId,
+                    Comment = comment,
                     Time = DateTime.Now,
                     Status = "Y"
                 };
