@@ -618,7 +618,6 @@ namespace Mercury_Backend.Controllers
             JObject msg = new JObject();
             try
             {
-
                 var commodityToDelete = context.Commodities.Find(id);
                 if (commodityToDelete == null)
                 {
@@ -628,8 +627,29 @@ namespace Mercury_Backend.Controllers
 
                     return JsonConvert.SerializeObject(msg);
                 }
+                if (commodityToDelete.Orders.Count != 0)
+                {
+                    msg["Code"] = "403";
+                    msg["Description"] = "Cannot delete a commodity which appears in an order";
 
+                    return JsonConvert.SerializeObject(msg);
+                }
+                foreach (var ci in commodityToDelete.CommodityImages)
+                {
+                    if(System.IO.File.Exists(ci.Image.Path) && ci.Image.Path != "Media/Image/Default.png")
+                    {
+                        try
+                        {
+                            System.IO.File.Delete(ci.Image.Path);
+                        }
+                        catch (System.IO.IOException e)
+                        {
+                            Console.WriteLine(e.Message);
+                        }
+                    }
+                }
                 context.Commodities.Remove(commodityToDelete);
+                
                 context.SaveChanges();
 
                 msg["Code"] = "200";
