@@ -21,14 +21,6 @@ namespace Mercury_Backend.Utils
                 commodityTag.Add(t.Tag);
             }
 
-            var a = commodity.Id;
-            a = commodity.Name;
-            // var b = (decimal) commodity.Price;
-            // var c = (int) commodity.Likes;
-            a = commodity.Cover;
-            a = commodity.OwnerId;
-            a = commodity.Owner.Nickname;
-            a = commodity.Owner.Avatar.Path;
             var tag = commodityTag;
             var simplifiedCommodity = new SimplifiedCommodity(
                 commodity.Id,
@@ -39,7 +31,8 @@ namespace Mercury_Backend.Utils
                 commodity.OwnerId,
                 commodity.Owner.Nickname,
                 commodity.Owner.Avatar.Path,
-                commodityTag
+                commodityTag,
+                commodity.Classification
                     );
             return simplifiedCommodity;
         }
