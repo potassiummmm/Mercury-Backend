@@ -149,7 +149,6 @@ namespace Mercury_Backend.Controllers
             {
                 var ownerName = Request.Form["userId"];
                 var strOwnerName = ownerName.ToString();
-                
                 // msg["commodityList"] = JToken.FromObject(commodityList);
                 
                 var usrs = context.SchoolUsers.Where(b => b.Nickname.Contains(strOwnerName)).ToList();
@@ -157,9 +156,15 @@ namespace Mercury_Backend.Controllers
                 idList.Add(ownerName);
                 for (int i = 0; i < idList.Count; i++)
                 {
-                    var tmpList = context.Commodities.Where(b => b.OwnerId== idList[i]).Include(commodity => commodity.CommodityTags).Include(commodity => commodity.Owner).ThenInclude(owner => owner.Avatar).ToList<Commodity>();
-                    commodityList = commodityList.Concat(tmpList).ToList<Commodity>();
-                }}
+                    var tmpList = context.Commodities.Where(b => b.OwnerId == idList[i]);
+                    var tmpList1 = tmpList.Include(commodity => commodity.CommodityTags);
+                    var tmpList2 = tmpList1.Include(commodity => commodity.Owner);
+                    var tmpList3 = tmpList2.ThenInclude(owner => owner.Avatar).ToList<Commodity>();
+                    
+                    commodityList = commodityList.Concat(tmpList3).ToList<Commodity>();
+                }
+                
+            }
             else if (Request.Form["tag"].ToString() == "" != true)
             {
                 var strTagName = Request.Form["tag"].ToString();
