@@ -64,7 +64,10 @@ namespace Mercury_Backend.Controllers
                 try
                 {
                     var simplifiedList = new List<SimplifiedCommodity>();
-                    commodityList = context.Commodities.Include(commodity => commodity.CommodityTags).Include(commodity => commodity.Owner).ThenInclude(owner => owner.Avatar).ToList<Commodity>();
+                    var tmpList = context.Commodities.Where(s=>true).Include(commodity => commodity.CommodityTags)
+                        .Include(commodity => commodity.Owner).ThenInclude(owner => owner.Avatar);
+                    
+                    commodityList = tmpList.ToList<Commodity>();
                     for (int i = 0; i < commodityList.Count; i++)
                     {
                     
@@ -115,7 +118,7 @@ namespace Mercury_Backend.Controllers
                 
                 var tmpList = context.Commodities.Where(b => b.Name.Contains(strKeyWord)).Include(commodity => commodity.CommodityTags).Include(commodity => commodity.Owner).ThenInclude(owner => owner.Avatar).ToList<Commodity>();
                 // entering searching by keyword.
-                var idList = tmpList.Select(s => new {s.Id});
+                // var idList = tmpList.Select(s => new {s.Id});
                 commodityList = tmpList;
                 
                 // flag = 1;
@@ -142,7 +145,26 @@ namespace Mercury_Backend.Controllers
                 }
             }
             
-
+            else if (Request.Form["userId"].ToString() == "" != true)
+            {
+                var ownerName = Request.Form["userId"];
+                var strOwnerName = ownerName.ToString();
+                // msg["commodityList"] = JToken.FromObject(commodityList);
+                
+                var usrs = context.SchoolUsers.Where(b => b.Nickname.Contains(strOwnerName)).ToList();
+                var idList = new List<string>();
+                idList.Add(ownerName);
+                for (int i = 0; i < idList.Count; i++)
+                {
+                    var tmpList = context.Commodities.Where(b => b.OwnerId == idList[i]);
+                    var tmpList1 = tmpList.Include(commodity => commodity.CommodityTags);
+                    var tmpList2 = tmpList1.Include(commodity => commodity.Owner);
+                    var tmpList3 = tmpList2.ThenInclude(owner => owner.Avatar).ToList<Commodity>();
+                    
+                    commodityList = commodityList.Concat(tmpList3).ToList<Commodity>();
+                }
+                
+            }
             else if (Request.Form["tag"].ToString() == "" != true)
             {
                 var strTagName = Request.Form["tag"].ToString();
@@ -212,8 +234,15 @@ namespace Mercury_Backend.Controllers
                 
                 for (int i = 0; i < commodityList.Count; i++)
                 {
-                    
-                    simplifiedList.Add(Simplify.SimplifyCommodity(commodityList[i]));
+                    try
+                    {
+                        simplifiedList.Add(Simplify.SimplifyCommodity(commodityList[i]));
+                    }
+                    catch
+                    {
+                        continue;
+                    }
+
                 }
                 msg["commodityList"] = JToken.FromObject(simplifiedList, new JsonSerializer()
                 {
