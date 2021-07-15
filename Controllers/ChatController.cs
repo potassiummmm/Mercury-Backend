@@ -26,9 +26,10 @@ namespace Mercury_Backend.Controllers
             context = modelContext;
             config = configuration;
         }
+        
         // GET: api/<ChatController>/1/2
         [HttpGet("{userId}/{targetId}")]
-        public String Get(string userId, string targetId)
+        public string Get(string userId, string targetId)
         {
             JObject msg = new JObject();
             var list = context.ChatRecords
@@ -38,10 +39,33 @@ namespace Mercury_Backend.Controllers
             msg["ChatRecord"] = JToken.FromObject(list);
             return JsonConvert.SerializeObject(msg);
         }
+        
+        // GET: api/<ChatController>/1
+        [HttpGet("{userId}")]
+        public string GetChatList(string userId)
+        {
+            JObject msg = new JObject();
+            var list = context.ChatRecords
+                    .Where(record => record.SenderId == userId || record.ReceiverId == userId)
+                .Distinct()
+                .OrderBy(record => record.Time)
+                .Select(a => new {ReceiverId = a.ReceiverId, SenderId = a.SenderId});
+            var chatList = new HashSet<string>();
+            foreach (var pair in list)
+            {
+                chatList.Add(pair.ReceiverId);
+                chatList.Add(pair.SenderId);
+            }
+            chatList.Remove(userId);
+            msg["Code"] = 200;
+            msg["ChatRecord"] = JToken.FromObject(chatList);
+            return JsonConvert.SerializeObject(msg);
+        }
+        
 
         // POST api/<ChatController>
         [HttpPost]
-        public String Post([FromForm] string senderId, [FromForm] string receiverId, [FromForm] string content)
+        public string Post([FromForm] string senderId, [FromForm] string receiverId, [FromForm] string content)
         {
             var list = context.ChatRecords
                 .Where(record => record.SenderId == senderId && record.ReceiverId == receiverId);
