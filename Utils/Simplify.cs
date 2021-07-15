@@ -32,7 +32,9 @@ namespace Mercury_Backend.Utils
                 commodity.Owner.Nickname,
                 commodity.Owner.Avatar.Path,
                 commodityTag,
-                commodity.Classification
+                commodity.Classification,
+                commodity.Clicks,
+                commodity.Stock
                     );
             return simplifiedCommodity;
         }
