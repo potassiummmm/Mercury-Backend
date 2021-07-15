@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Mercury_Backend.Contexts;
+using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
 
@@ -48,13 +49,40 @@ namespace Mercury_Backend.Controllers
             JObject msg = new JObject();
             try
             {
-                var userList = context.Likes.Where(b => b.UserId == userId).ToList<Like>();
-                msg["UserList"] = JToken.FromObject(userList);
-                msg["User"] = JToken.FromObject(userList[0].User);
+                var itemList = context.Likes.Where(b => b.UserId == userId)
+                    .Include(l => l.Commodity).Select(l => new
+                    {
+                        CommodityName = l.Commodity.Name,
+                        CommodityPrice = l.Commodity.Price,
+                        CommodityCover = l.Commodity.Cover,
+                        CommodityId = l.CommodityId
+                    }).ToList();
+                
+                msg["ItemList"] = JToken.FromObject(itemList);
+                msg["Code"] = "200";
+            }
+            catch(Exception e)
+            {
+                Console.WriteLine(e.ToString());
+                msg["Code"] = "400";
+            }
+            return JsonConvert.SerializeObject(msg);
+        }
+
+        [HttpPost("{id}")]
+        public string GetResult([FromForm]string userId,[FromForm]string commodityId)
+        {
+            JObject msg = new JObject();
+            try
+            {
+                var item = context.Likes.Find(commodityId, userId);
+                if (item != null) msg["Result"] = "True";
+                else msg["Result"] = "False";
+
                 msg["Code"] = "200";
 
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 Console.WriteLine(e.ToString());
                 msg["Code"] = "400";
@@ -77,12 +105,11 @@ namespace Mercury_Backend.Controllers
                     context.Likes.Remove(item);
                 }
                 else
-                {
+                {   
                     context.Likes.Add(like);
                     context.Commodities.Find(like.CommodityId).Likes++;
 
                 }
-                
                 context.SaveChanges();
                 msg["Code"] = "200";
             }

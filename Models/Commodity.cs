@@ -27,9 +27,10 @@ namespace Mercury_Backend.Models
         
         
         public string Id { get; set; }
+        [Required]
         [Column("OWNER_ID")]
         [StringLength(10)]
-        [Required]
+        
         public string OwnerId { get; set; }
         [Column("VIDEO_ID")]
         [StringLength(20)]
@@ -38,7 +39,7 @@ namespace Mercury_Backend.Models
         [StringLength(20)]
         public string Condition { get; set; }
         [Column("PRICE", TypeName = "NUMBER(5,2)")]
-        public decimal? Price { get; set; }
+        public decimal Price { get; set; }
         [Column("STOCK")]
         public byte? Stock { get; set; }
         [Column("FOR_RENT")]
@@ -57,7 +58,7 @@ namespace Mercury_Backend.Models
         [Column("NAME")]
         [StringLength(60)]
         public string Name { get; set; }
-        
+
         [Column("COVER")]
         [StringLength(100)]
         public string Cover { get; set; }

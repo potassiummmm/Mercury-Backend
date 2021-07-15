@@ -1,8 +1,10 @@
 using Microsoft.AspNetCore.Mvc;
 using System;
+using System.Data;
 using System.Linq;
 using Mercury_Backend.Contexts;
 using Mercury_Backend.Models;
+using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Microsoft.Extensions.Configuration;
@@ -29,27 +31,46 @@ namespace Mercury_Backend.Controllers
             var list = context.ReportUsers
                 .Where(report => report.ReporterId == userId || report.InformantId == userId)
                 .OrderBy(report => report.Time);
-            msg["charRecord"] = JToken.FromObject(list);
+            msg["Report"] = JToken.FromObject(list);
             return JsonConvert.SerializeObject(msg);
         }
         
         // POST api/<ReportController>
         [HttpPost]
-        public String Post([FromForm]ReportUser report)
+        public String Post([FromForm] string reporterId,[FromForm] string informantId,[FromForm] string comment)
         {
             JObject msg = new JObject();
             try
             {
+                var report = new ReportUser()
+                {
+                    ReporterId = reporterId,
+                    InformantId = informantId,
+                    Comment = comment,
+                    Time = DateTime.Now,
+                    Status = "Y"
+                };
                 context.ReportUsers.Add(report);
                 context.SaveChanges();
-                msg["Code"] = "success";
-                msg["information"] = "Reported successfully";
+                msg["Code"] = "200";
+                msg["Description"] = "Reported successfully.";
+            }
+            catch (DbUpdateException e)
+            {
+                msg["Code"] = "403";
+                msg["Description"] = "Failed to update database.";
+                Console.WriteLine(e.ToString());
+            }
+            catch (DBConcurrencyException e)
+            {
+                Console.WriteLine(e.ToString());
+                msg["Code"] = "403";
+                msg["Description"] = "Failed to update database because of concurrent requests.";
             }
             catch (Exception e)
             {
-                msg["Code"] = "fail";
-                msg["information"] = "Fail to modify database";
                 Console.WriteLine(e.ToString());
+                msg["Code"] = "400";
             }
             return JsonConvert.SerializeObject(msg);
         }

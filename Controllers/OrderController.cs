@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore.Query.SqlExpressions;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -26,28 +27,55 @@ namespace Mercury_Backend.Controllers
         }
         // GET: api/<OrderController>
         [HttpGet]
-        public string Get([FromForm] string userId, [FromForm] int maxNumber = 10, [FromForm] int pageNumber = 1)
+        public string Get(string userId, string status, int maxNumber = 10, int pageNumber = 1)
         {
             JObject msg = new JObject();
+            if (status != null && status != "PAID" && status != "UNPAID")
+            {
+                msg["Code"] = "403";
+                msg["Description"] = "Invalid status";
+                return JsonConvert.SerializeObject(msg);
+            }
             try
             {
                 List<Order> orderList = new List<Order>();
                 if (userId != null)
                 {
-                    orderList = context.Orders.Where(order => order.BuyerId == userId)
-                        .Include(order => order.Commodity)
-                        .ThenInclude(commodity => commodity.CommodityImages)
-                        .ThenInclude(commodityImages => commodityImages.Image)
-                        .OrderByDescending(order => order.Time).ToList();
+                    if (status != null)
+                    {
+                        orderList = context.Orders.Where(order => order.BuyerId == userId && order.Status == status)
+                            .Include(order => order.Commodity)
+                            .ThenInclude(commodity => commodity.CommodityImages)
+                            .ThenInclude(commodityImages => commodityImages.Image)
+                            .OrderByDescending(order => order.Time).ToList();
+                    }
+                    else
+                    {
+                        orderList = context.Orders.Where(order => order.BuyerId == userId)
+                            .Include(order => order.Commodity)
+                            .ThenInclude(commodity => commodity.CommodityImages)
+                            .ThenInclude(commodityImages => commodityImages.Image)
+                            .OrderByDescending(order => order.Time).ToList();
+                    }
                 }
                 else
                 {
-                    orderList = context.Orders.Include(order => order.Commodity)
-                        .ThenInclude(commodity => commodity.CommodityImages)
-                        .ThenInclude(commodityImages => commodityImages.Image)
-                        .OrderByDescending(order => order.Time).ToList();
+                    if (status != null)
+                    {
+                        orderList = context.Orders.Where(order => order.Status == status)
+                            .Include(order => order.Commodity)
+                            .ThenInclude(commodity => commodity.CommodityImages)
+                            .ThenInclude(commodityImages => commodityImages.Image)
+                            .OrderByDescending(order => order.Time).ToList();
+                    }
+                    else
+                    {
+                        orderList = context.Orders.Include(order => order.Commodity)
+                            .ThenInclude(commodity => commodity.CommodityImages)
+                            .ThenInclude(commodityImages => commodityImages.Image)
+                            .OrderByDescending(order => order.Time).ToList();
+                    }
                 }
-
                 var simplifiedOrderList = new List<SimplifiedOrder>();
                 for (int i = 0; i + (pageNumber - 1) * maxNumber < orderList.Count() && i < maxNumber; ++i)
                 {
@@ -82,15 +110,22 @@ namespace Mercury_Backend.Controllers
                 var order = context.Orders.Where(o => o.Id == id).Select(o => new
                 {
                     OrderId = o.Id,
+                    OwnerName = o.Commodity.Owner.Nickname,
+                    OwnerPhone = o.Commodity.Owner.Phone,
+                    OwnerRealName = o.Commodity.Owner.RealName,
                     BuyerId = o.BuyerId,
-                    Commodity = o.Commodity,
+                    CommodityName = o.Commodity.Name,
+                    CommodityPrice = o.Commodity.Price,
                     Count = o.Count,
                     Time = o.Time,
                     Location = o.Location,
                     ReturnTime = o.ReturnTime,
                     ReturnLocation = o.ReturnLocation,
                     Status = o.Status,
-                }).Single();
+                });
+                // var order = context.Orders.Where(o=>o.Id == id)
+                //     .Include(o => o.Commodity)
+                //     .ThenInclude(c => c.Owner).Single();
                 msg["order"] = JToken.FromObject(order, new JsonSerializer()
                 {
                     ReferenceLoopHandling = ReferenceLoopHandling.Ignore //忽略循环引用，默认是throw exception
@@ -273,6 +308,29 @@ namespace Mercury_Backend.Controllers
             catch (Exception e)
             {
                 Console.WriteLine(e.ToString());
+                msg["Code"] = "400";
+            }
+            return JsonConvert.SerializeObject(msg);
+        }
+        
+        // GET api/order/orderNumber
+        [HttpGet("orderNumber")]
+        public string GetOrderNumber([FromForm] string userId)
+        {
+            JObject msg = new JObject();
+            try
+            {
+                int number;
+                if (userId != null)
+                {
+                    number = context.Orders.Count(o => o.BuyerId == userId);
+                }
+                number = context.Orders.Count();
+                msg["Code"] = "200";
+                msg["PostNumber"] = number;
+            }
+            catch (Exception e)
+            {
                 msg["Code"] = "400";
             }
             return JsonConvert.SerializeObject(msg);

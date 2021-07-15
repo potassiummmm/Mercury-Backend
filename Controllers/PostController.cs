@@ -29,7 +29,7 @@ namespace Mercury_Backend.Controllers
         }
         // GET: api/<PostController>
         [HttpGet]
-        public string Get([FromForm] string userId, [FromForm] int maxNumber=10, [FromForm] int pageNumber=1)
+        public string Get(string userId, int maxNumber=10, int pageNumber=1)
         {
             JObject msg = new JObject();
             try
@@ -174,7 +174,7 @@ namespace Mercury_Backend.Controllers
             catch(Exception e)
             {
                 msg["Code"] = "400";
-                msg["Code"] = "Unknown exception happens";
+                msg["Description"] = "Unknown exception happens";
                 Console.WriteLine(e.ToString());
             }
             return JsonConvert.SerializeObject(msg);
@@ -272,7 +272,7 @@ namespace Mercury_Backend.Controllers
                 var comment = context.PostComments.Where(c => c.Id == commentId).ToList();
                 context.PostComments.Remove(comment[0]);
                 context.SaveChanges();
-                msg["Code"] = "Success";
+                msg["Code"] = "200";
             }
             catch (DbUpdateException e)
             {
@@ -291,6 +291,32 @@ namespace Mercury_Backend.Controllers
                 Console.WriteLine(e.ToString());
                 msg["Code"] = "400";
                 msg["Description"] = "Unknown exception happens";
+            }
+            return JsonConvert.SerializeObject(msg);
+        }
+        
+        // GET api/post/postNumber
+        [HttpGet("postNumber")]
+        public string GetPostNumber([FromForm] string userId)
+        {
+            JObject msg = new JObject();
+            try
+            {
+                int number;
+                if (userId != null)
+                {
+                    number = context.NeedPosts.Count(p => p.SenderId == userId);
+                }
+                else
+                {
+                    number = context.NeedPosts.Count();
+                }
+                msg["Code"] = "200";
+                msg["PostNumber"] = number;
+            }
+            catch (Exception e)
+            {
+                msg["Code"] = "400";
             }
             return JsonConvert.SerializeObject(msg);
         }

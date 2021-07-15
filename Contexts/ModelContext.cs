@@ -63,21 +63,11 @@ namespace Mercury_Backend.Contexts
 
                 entity.Property(e => e.Content).IsUnicode(false);
 
-                entity.Property(e => e.MediaId)
-                    .IsUnicode(false)
-                    .IsFixedLength(true);
-
                 entity.Property(e => e.Status)
                     .IsUnicode(false)
                     .IsFixedLength(true);
 
                 entity.Property(e => e.Time).HasPrecision(6);
-
-                entity.HasOne(d => d.Media)
-                    .WithMany(p => p.ChatRecords)
-                    .HasForeignKey(d => d.MediaId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("CHAT_RECORD_MEDIA_ID_FK");
 
                 entity.HasOne(d => d.Receiver)
                     .WithMany(p => p.ChatRecordReceivers)
@@ -135,6 +125,7 @@ namespace Mercury_Backend.Contexts
                 entity.HasOne(d => d.Owner)
                     .WithMany(p => p.Commodities)
                     .HasForeignKey(d => d.OwnerId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("COMMODITY_USER_SCHOOL_ID_FK");
 
                 entity.HasOne(d => d.Video)
@@ -380,6 +371,8 @@ namespace Mercury_Backend.Contexts
                 entity.Property(e => e.ReporterId).IsUnicode(false);
 
                 entity.Property(e => e.InformantId).IsUnicode(false);
+
+                entity.Property(e => e.Comment).IsUnicode(false);
 
                 entity.Property(e => e.Status)
                     .IsUnicode(false)
