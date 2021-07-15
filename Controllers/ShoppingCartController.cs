@@ -71,8 +71,7 @@ namespace Mercury_Backend.Controllers
             return JsonConvert.SerializeObject(msg);
         }
 
-
-
+        
         [HttpPost]
         public String Post([FromForm] ShoppingCart ShoppingCartItem)
         {
@@ -83,11 +82,7 @@ namespace Mercury_Backend.Controllers
                 {
                     if (ShoppingCartItem.Count == null) ShoppingCartItem.Count = 1;
                     if (ShoppingCartItem.AddTime == null) ShoppingCartItem.AddTime= DateTime.Now;
-                    //ShoppingCartItem.User = context.SchoolUsers.Find(ShoppingCartItem.UserId);
-                    //ShoppingCartItem.Commodity = context.Commodities.Find(ShoppingCartItem.CommodityId);
                     context.ShoppingCarts.Add(ShoppingCartItem);
-
-                    
                 }
                 else
                 {
@@ -136,7 +131,6 @@ namespace Mercury_Backend.Controllers
         {
             JObject msg = new JObject();
             var ShoppingCartItem = context.ShoppingCarts.Where(e => e.UserId == userId);
-
             if (ShoppingCartItem == null)
             {
                 msg["Code"] = "404";
@@ -149,8 +143,6 @@ namespace Mercury_Backend.Controllers
                 {
                         item.Count=count;
                         context.SaveChanges();
-
-                    
                         msg["Code"] = "200";
                 }
             }

@@ -20,9 +20,10 @@ namespace Mercury_Backend.Models
         public byte? Classification { get; set; }
         public decimal? Clicks { get; set; }
         public byte? Stock{ get; set; }
+        public string Description { get; set; }
         public SimplifiedCommodity(string id, string name, decimal price, int likes, string cover, string sellerId,
            string sellerName,  string sellerAvatar, List<string> commodityTag, 
-           byte? classification, decimal? clicks, byte? stock)
+           byte? classification, decimal? clicks, byte? stock, string description)
         {
             Id = id;
             Name = name;
@@ -36,6 +37,7 @@ namespace Mercury_Backend.Models
             Classification = classification;
             Clicks = clicks;
             Stock = stock;
+            Description = description;
         }
     }
 }

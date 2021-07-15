@@ -101,6 +101,8 @@ namespace Mercury_Backend.Contexts
 
                 entity.Property(e => e.Cover).IsUnicode(false);
 
+                entity.Property(e => e.Description).IsUnicode(false);
+
                 entity.Property(e => e.ForRent).HasPrecision(1);
 
                 entity.Property(e => e.Name).IsUnicode(false);
@@ -174,7 +176,6 @@ namespace Mercury_Backend.Contexts
                 entity.HasOne(d => d.Commodity)
                     .WithMany(p => p.CommodityTags)
                     .HasForeignKey(d => d.CommodityId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("COMMODITY_TAG_COMMODITY_ID_FK");
             });
 

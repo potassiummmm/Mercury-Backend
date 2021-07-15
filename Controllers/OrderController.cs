@@ -125,9 +125,6 @@ namespace Mercury_Backend.Controllers
                     ReturnLocation = o.ReturnLocation,
                     Status = o.Status,
                 });
-                // var order = context.Orders.Where(o=>o.Id == id)
-                //     .Include(o => o.Commodity)
-                //     .ThenInclude(c => c.Owner).Single();
                 msg["order"] = JToken.FromObject(order, new JsonSerializer()
                 {
                     ReferenceLoopHandling = ReferenceLoopHandling.Ignore //忽略循环引用，默认是throw exception

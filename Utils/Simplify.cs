@@ -34,7 +34,8 @@ namespace Mercury_Backend.Utils
                 commodityTag,
                 commodity.Classification,
                 commodity.Clicks,
-                commodity.Stock
+                commodity.Stock,
+                commodity.Description
                     );
             return simplifiedCommodity;
         }

@@ -249,7 +249,6 @@ namespace Mercury_Backend.Controllers
                 msg["Description"] = "Unknown exception happens";
             }
             return JsonConvert.SerializeObject(msg);
-
         }
 
         // DELETE api/<UserController>/5
