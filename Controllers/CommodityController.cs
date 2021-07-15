@@ -47,87 +47,111 @@ namespace Mercury_Backend.Controllers
 
         // GET api/<CommodityController>/5
         [HttpGet]
-        public string Get()
+        public string Get(string id, string classification, string keyword, string ownerName, string userId, string tag)
         {
-            // var flag = 0;
+            Console.WriteLine("id:" + id);
+            Console.WriteLine("classification:" + classification);
+            var flag = 0;
             JObject msg = new JObject();
             var commodityList = new List<Commodity>();
-            try
+            if (id == null && classification == null && keyword == null && ownerName == null && userId == null && tag == null)
             {
-                var judge = Request.Form["keyword"].ToString();
-            }
-            catch 
-            {
+                flag = 1;
                 try
                 {
-                    var simplifiedList = new List<SimplifiedCommodity>();
-                    var tmpList = context.Commodities.Where(s=>true).Include(commodity => commodity.CommodityTags)
-                        .Include(commodity => commodity.Owner).ThenInclude(owner => owner.Avatar);
-                    commodityList = tmpList.ToList<Commodity>();
-                    for (int i = 0; i < commodityList.Count; i++)
-                    {
-                    
-                        simplifiedList.Add(Simplify.SimplifyCommodity(commodityList[i]));
-                    }
-                    msg["commodityList"] = JToken.FromObject(simplifiedList, new JsonSerializer()
-                    {
-                        ReferenceLoopHandling = ReferenceLoopHandling.Ignore //忽略循环引用，默认是throw exception
-                    });
-                    var idList = commodityList.Select(s => s.Id).ToList();
-                    var tags = new List<CommodityTag>();
-                    for (int i = 0; i < idList.Count; i++)
-                    {
-                        var tmpTag = context.CommodityTags.Where(tag => tag.CommodityId == idList[i])
-                            .ToList();
-
-                        tags = tags.Concat(tmpTag).ToList();
-                    
-                    }
-
-                    var tagSet = tags.Select(s => s.Tag).ToList();
-                    tagSet = tagSet.Distinct().ToList();
-                    msg["tags"] = JToken.FromObject(tagSet);
-                
-                    
-
-                    msg["Code"] = "200";
-
-
-                    msg["totalPage"] = commodityList.Count;
+                    var judge = Request.Form["keyword"].ToString();
                 }
-                catch (Exception e1)
+                catch // No constraints.
                 {
-                    Console.WriteLine(e1);
+                    try
+                    {
+                        var simplifiedList = new List<SimplifiedCommodity>();
+                        var tmpList = context.Commodities.Where(s=>true).Include(commodity => commodity.CommodityTags)
+                            .Include(commodity => commodity.Owner).ThenInclude(owner => owner.Avatar);
+                        commodityList = tmpList.ToList<Commodity>();
+                        for (int i = 0; i < commodityList.Count; i++)
+                        {
+                        
+                            simplifiedList.Add(Simplify.SimplifyCommodity(commodityList[i]));
+                        }
+                        msg["commodityList"] = JToken.FromObject(simplifiedList, new JsonSerializer()
+                        {
+                            ReferenceLoopHandling = ReferenceLoopHandling.Ignore //忽略循环引用，默认是throw exception
+                        });
+                        var idList = commodityList.Select(s => s.Id).ToList();
+                        var tags = new List<CommodityTag>();
+                        for (int i = 0; i < idList.Count; i++)
+                        {
+                            var tmpTag = context.CommodityTags.Where(tag => tag.CommodityId == idList[i])
+                                .ToList();
 
-                    msg["Code"] = "403";
-                    msg["Description"] = "Error occured when getting data from model.";
+                            tags = tags.Concat(tmpTag).ToList();
+                        
+                        }
 
+                        var tagSet = tags.Select(s => s.Tag).ToList();
+                        tagSet = tagSet.Distinct().ToList();
+                        msg["tags"] = JToken.FromObject(tagSet);
+                    
+                        
+
+                        msg["Code"] = "200";
+
+
+                        msg["totalPage"] = commodityList.Count;
+                    }
+                    catch (Exception e1)
+                    {
+                        Console.WriteLine(e1);
+
+                        msg["Code"] = "403";
+                        msg["Description"] = "Error occured when getting data from model.";
+
+                    }
+                    return JsonConvert.SerializeObject(msg);
+                
                 }
-                return JsonConvert.SerializeObject(msg);
-            
+                
             }
 
-            
-            if (Request.Form["keyword"].ToString() == "" != true)
+            var strKeyWord = "";
+            var strId = "";
+            var intClass = -1;
+            var strOwnerName = "";
+            var strUserId = "";
+            var strTag = "";
+            if (flag == 1) // No query but exist form
             {
-                var strKeyWord = Request.Form["keyword"].ToString();
-                
+                strKeyWord = Request.Form["keyword"].ToString();
+                strId = Request.Form["id"].ToString();
+                intClass = Request.Form["classification"].ToString() == ""? -1 : Byte.Parse(Request.Form["classification"]);
+                strOwnerName = Request.Form["ownerName"].ToString();
+                strUserId = Request.Form["userId"].ToString();
+                strTag = Request.Form["tag"].ToString();
+            }
+            else
+            {
+                strKeyWord = keyword;
+                strId = id;
+                intClass = classification == null ? -1 : Byte.Parse(classification);
+                strOwnerName = ownerName;
+                strUserId = userId;
+                strTag = tag;
+            }
+            
+
+            if (strKeyWord != null && strKeyWord != "") {
                 var tmpList = context.Commodities.Where(b => b.Name.Contains(strKeyWord)).Include(commodity => commodity.CommodityTags).Include(commodity => commodity.Owner).ThenInclude(owner => owner.Avatar).ToList<Commodity>();
-                // entering searching by keyword.
-                // var idList = tmpList.Select(s => new {s.Id});
+                
                 commodityList = tmpList;
                 
-                // flag = 1;
-
-                // 
                 // todo: 用关键词搜索
             }
             
             
-            else if (Request.Form["ownerName"].ToString() == "" != true)
+            else if (strOwnerName != null && strOwnerName != "")
             {
-                var ownerName = Request.Form["ownerName"];
-                var strOwnerName = ownerName.ToString();
+                
                 
                 // msg["commodityList"] = JToken.FromObject(commodityList);
                 
@@ -140,26 +164,24 @@ namespace Mercury_Backend.Controllers
                     commodityList = commodityList.Concat(tmpList).ToList<Commodity>();
                 }
             }
-            else if (Request.Form["classification"].ToString() == "" != true)
+            
+            else if (intClass != -1)
             {
-                var ownerName = Request.Form["classification"];
-                var strOwnerName = byte.Parse(ownerName);
                 
-                // msg["commodityList"] = JToken.FromObject(commodityList);
-                
-                
-               commodityList = context.Commodities.Where(b => b.Classification == strOwnerName).Include(commodity => commodity.CommodityTags).Include(commodity => commodity.Owner).ThenInclude(owner => owner.Avatar).ToList<Commodity>();
-              
+               commodityList = context.Commodities.Where(b => b.Classification == intClass).
+                   Include(commodity => commodity.CommodityTags).
+                   Include(commodity => commodity.Owner).
+                   ThenInclude(owner => owner.Avatar).ToList<Commodity>();
             }
-            else if (Request.Form["userId"].ToString() == "" != true)
+            
+            else if (strUserId != null && strUserId != "")
             {
-                var ownerName = Request.Form["userId"];
-                var strOwnerName = ownerName.ToString();
+                
                 // msg["commodityList"] = JToken.FromObject(commodityList);
                 
-                var usrs = context.SchoolUsers.Where(b => b.Nickname.Contains(strOwnerName)).ToList();
+                var usrs = context.SchoolUsers.Where(b => b.SchoolId == strUserId).ToList();
                 var idList = new List<string>();
-                idList.Add(ownerName);
+                idList.Add(strUserId);
                 for (int i = 0; i < idList.Count; i++)
                 {
                     var tmpList = context.Commodities.Where(b => b.OwnerId == idList[i]);
@@ -171,10 +193,10 @@ namespace Mercury_Backend.Controllers
                 }
                 
             }
-            else if (Request.Form["tag"].ToString() == "" != true)
+            else if (strTag != "" && strTag != null)
             {
-                var strTagName = Request.Form["tag"].ToString();
-                var tagList = context.CommodityTags.Where(b => b.Tag == strTagName);
+                
+                var tagList = context.CommodityTags.Where(b => b.Tag == strTag);
                 var idList = tagList.Select(s => new {s.CommodityId}).ToList();
                 for (int i = 0; i < idList.Count; i++)
                 {
@@ -182,12 +204,12 @@ namespace Mercury_Backend.Controllers
                     commodityList = commodityList.Concat(tmpList).ToList<Commodity>();
                 }
             }
-            else if (Request.Form["id"].ToString() == "" != true)
+            else if (strId != "" && strId != null) 
             {
                 
                 try
                 {
-                    var strId = Request.Form["id"].ToString();
+                    
                     commodityList = context.Commodities.Where(s=>s.Id == strId).Include(commodity => commodity.CommodityTags).Include(commodity => commodity.Owner).ThenInclude(owner => owner.Avatar).ToList<Commodity>();;
                     if (commodityList.Count == 0)
                     {
