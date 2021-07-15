@@ -297,7 +297,7 @@ namespace Mercury_Backend.Controllers
         
         // GET api/post/postNumber
         [HttpGet("postNumber")]
-        public string GetPostNumber([FromForm] string userId)
+        public string GetPostNumber(string userId)
         {
             JObject msg = new JObject();
             try
