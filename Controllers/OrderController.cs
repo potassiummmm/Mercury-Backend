@@ -116,6 +116,7 @@ namespace Mercury_Backend.Controllers
                     BuyerId = o.BuyerId,
                     CommodityName = o.Commodity.Name,
                     CommodityPrice = o.Commodity.Price,
+                    CommodityCover = o.Commodity.Cover,
                     Count = o.Count,
                     Time = o.Time,
                     Location = o.Location,
