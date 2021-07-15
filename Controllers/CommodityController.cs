@@ -54,19 +54,15 @@ namespace Mercury_Backend.Controllers
             var commodityList = new List<Commodity>();
             try
             {
-
                 var judge = Request.Form["keyword"].ToString();
-                
             }
             catch 
             {
-
                 try
                 {
                     var simplifiedList = new List<SimplifiedCommodity>();
                     var tmpList = context.Commodities.Where(s=>true).Include(commodity => commodity.CommodityTags)
                         .Include(commodity => commodity.Owner).ThenInclude(owner => owner.Avatar);
-                    
                     commodityList = tmpList.ToList<Commodity>();
                     for (int i = 0; i < commodityList.Count; i++)
                     {
@@ -144,7 +140,17 @@ namespace Mercury_Backend.Controllers
                     commodityList = commodityList.Concat(tmpList).ToList<Commodity>();
                 }
             }
-            
+            else if (Request.Form["classification"].ToString() == "" != true)
+            {
+                var ownerName = Request.Form["classification"];
+                var strOwnerName = byte.Parse(ownerName);
+                
+                // msg["commodityList"] = JToken.FromObject(commodityList);
+                
+                
+               commodityList = context.Commodities.Where(b => b.Classification == strOwnerName).Include(commodity => commodity.CommodityTags).Include(commodity => commodity.Owner).ThenInclude(owner => owner.Avatar).ToList<Commodity>();
+              
+            }
             else if (Request.Form["userId"].ToString() == "" != true)
             {
                 var ownerName = Request.Form["userId"];
@@ -256,15 +262,17 @@ namespace Mercury_Backend.Controllers
                 {
                     var tmpTag = context.CommodityTags.Where(tag => tag.CommodityId == idList[i])
                         .ToList();
-                    
+                   
                     tags = tags.Concat(tmpTag).ToList();
-                    
                 }
-
+                
                 var tagSet = tags.Select(s => s.Tag).ToList();
+                
+                
                 tagSet = tagSet.Distinct().ToList();
                 msg["tags"] = JToken.FromObject(tagSet);
-                
+                var classSet = commodityList.Select(s => s.Classification).ToList().Distinct().ToList();
+                msg["classifications"] = JToken.FromObject(classSet);
                     
 
                 msg["Code"] = "200";
