@@ -285,9 +285,10 @@ namespace Mercury_Backend.Controllers
 
         // POST api/<CommodityController>
         [HttpPost]
-        public async Task<string> Post([FromForm]Commodity newCommodity, [FromForm] List<IFormFile> files)
+        public async Task<string> Post([FromForm]Commodity newCommodity, [FromForm] List<IFormFile> files, [FromForm] List<string> tags)
         {
             JObject msg = new JObject();
+            
             var id = Generator.GenerateId(12);
             newCommodity.Id = id;
             Console.WriteLine(newCommodity.Price);
@@ -380,6 +381,14 @@ namespace Mercury_Backend.Controllers
                     {
                         newCommodity.Cover = "Media/Image/Default.png";
                     }
+                }
+
+                foreach (var t in tags)
+                {
+                    var tmpTag = new CommodityTag();
+                    tmpTag.CommodityId = id;
+                    tmpTag.Tag = t;
+                    context.CommodityTags.Add(tmpTag);
                 }
                 context.Commodities.Add(newCommodity);
                 // Console.WriteLine("haha")
@@ -569,8 +578,6 @@ namespace Mercury_Backend.Controllers
             }
             if (Request.Form["classification"].ToString() != "")
             {
-                
-
                 msg["Code"] = "403";
 
                 detailMsg += " classification ";
