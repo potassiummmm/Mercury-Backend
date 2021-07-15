@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -17,8 +18,11 @@ namespace Mercury_Backend.Models
         public string SellerAvatar { get; set; }
         public List<string> CommodityTag { get; set; }
         public byte? Classification { get; set; }
+        public decimal? Clicks { get; set; }
+        public byte? Stock{ get; set; }
         public SimplifiedCommodity(string id, string name, decimal price, int likes, string cover, string sellerId,
-           string sellerName,  string sellerAvatar, List<string> commodityTag, byte? classification)
+           string sellerName,  string sellerAvatar, List<string> commodityTag, 
+           byte? classification, decimal? clicks, byte? stock)
         {
             Id = id;
             Name = name;
@@ -30,6 +34,8 @@ namespace Mercury_Backend.Models
             SellerAvatar = sellerAvatar;
             CommodityTag = commodityTag;
             Classification = classification;
+            Clicks = clicks;
+            Stock = stock;
         }
     }
 }
