@@ -371,6 +371,8 @@ namespace Mercury_Backend.Contexts
 
                 entity.Property(e => e.InformantId).IsUnicode(false);
 
+                entity.Property(e => e.Comment).IsUnicode(false);
+
                 entity.Property(e => e.Status)
                     .IsUnicode(false)
                     .IsFixedLength(true);

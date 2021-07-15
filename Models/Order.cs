@@ -34,9 +34,8 @@ namespace Mercury_Backend.Models
         [Column("LOCATION")]
         [StringLength(100)]
         public string Location { get; set; }
-
-        [Column("RETURN_TIME")] public DateTime ReturnTime { get; set; }
-
+        [Column("RETURN_TIME")]
+        public DateTime ReturnTime { get; set; }
         [Column("RETURN_LOCATION")]
         [StringLength(100)]
         public string ReturnLocation { get; set; }

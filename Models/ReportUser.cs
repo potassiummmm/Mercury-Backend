@@ -24,6 +24,9 @@ namespace Mercury_Backend.Models
         [Column("STATUS")]
         [StringLength(1)]
         public string Status { get; set; }
+        [Column("COMMENT")]
+        [StringLength(2000)]
+        public string Comment { get; set; }
 
         [ForeignKey(nameof(InformantId))]
         [InverseProperty(nameof(SchoolUser.ReportUserInformants))]

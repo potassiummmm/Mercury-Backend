@@ -30,6 +30,7 @@ namespace Mercury_Backend.Models
         [Column("STATUS")]
         [StringLength(1)]
         public string Status { get; set; }
+
         [ForeignKey(nameof(ReceiverId))]
         [InverseProperty(nameof(SchoolUser.ChatRecordReceivers))]
         public virtual SchoolUser Receiver { get; set; }
