@@ -304,6 +304,9 @@ namespace Mercury_Backend.Controllers
             
             var id = Generator.GenerateId(12);
             newCommodity.Id = id;
+            newCommodity.Likes = 0;
+            newCommodity.Clicks = 0;
+            newCommodity.Popularity = 0;
             Console.WriteLine(newCommodity.Price);
             var pathList = new List<string>();
             try
