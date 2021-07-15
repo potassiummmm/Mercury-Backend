@@ -29,7 +29,7 @@ namespace Mercury_Backend.Controllers
         }
         // GET: api/<PostController>
         [HttpGet]
-        public string Get([FromForm] string userId, [FromForm] int maxNumber=10, [FromForm] int pageNumber=1)
+        public string Get(string userId, int maxNumber=10, int pageNumber=1)
         {
             JObject msg = new JObject();
             try

@@ -25,6 +25,7 @@ namespace Mercury_Backend.Models
         [Column("ID")]
         [StringLength(12)]
         public string Id { get; set; }
+        [Required]
         [Column("OWNER_ID")]
         [StringLength(10)]
         public string OwnerId { get; set; }
@@ -35,7 +36,7 @@ namespace Mercury_Backend.Models
         [StringLength(20)]
         public string Condition { get; set; }
         [Column("PRICE", TypeName = "NUMBER(5,2)")]
-        public decimal? Price { get; set; }
+        public decimal Price { get; set; }
         [Column("STOCK")]
         public byte? Stock { get; set; }
         [Column("FOR_RENT")]

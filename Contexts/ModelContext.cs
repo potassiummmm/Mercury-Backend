@@ -125,6 +125,7 @@ namespace Mercury_Backend.Contexts
                 entity.HasOne(d => d.Owner)
                     .WithMany(p => p.Commodities)
                     .HasForeignKey(d => d.OwnerId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("COMMODITY_USER_SCHOOL_ID_FK");
 
                 entity.HasOne(d => d.Video)

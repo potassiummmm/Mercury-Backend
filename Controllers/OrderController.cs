@@ -27,7 +27,7 @@ namespace Mercury_Backend.Controllers
         }
         // GET: api/<OrderController>
         [HttpGet]
-        public string Get([FromForm] string userId, [FromForm] string status, [FromForm] int maxNumber = 10, [FromForm] int pageNumber = 1)
+        public string Get(string userId, string status, int maxNumber = 10, int pageNumber = 1)
         {
             JObject msg = new JObject();
             if (status != null && status != "PAID" && status != "UNPAID")
