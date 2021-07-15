@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore.Query.SqlExpressions;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -109,15 +110,22 @@ namespace Mercury_Backend.Controllers
                 var order = context.Orders.Where(o => o.Id == id).Select(o => new
                 {
                     OrderId = o.Id,
+                    OwnerName = o.Commodity.Owner.Nickname,
+                    OwnerPhone = o.Commodity.Owner.Phone,
+                    OwnerRealName = o.Commodity.Owner.RealName,
                     BuyerId = o.BuyerId,
-                    Commodity = o.Commodity,
+                    CommodityName = o.Commodity.Name,
+                    CommodityPrice = o.Commodity.Price,
                     Count = o.Count,
                     Time = o.Time,
                     Location = o.Location,
                     ReturnTime = o.ReturnTime,
                     ReturnLocation = o.ReturnLocation,
                     Status = o.Status,
-                }).Single();
+                });
+                // var order = context.Orders.Where(o=>o.Id == id)
+                //     .Include(o => o.Commodity)
+                //     .ThenInclude(c => c.Owner).Single();
                 msg["order"] = JToken.FromObject(order, new JsonSerializer()
                 {
                     ReferenceLoopHandling = ReferenceLoopHandling.Ignore //忽略循环引用，默认是throw exception
