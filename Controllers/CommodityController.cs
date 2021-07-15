@@ -290,6 +290,7 @@ namespace Mercury_Backend.Controllers
             JObject msg = new JObject();
             var id = Generator.GenerateId(12);
             newCommodity.Id = id;
+            
             var pathList = new List<string>();
             try
             {
@@ -298,6 +299,8 @@ namespace Mercury_Backend.Controllers
                 {
                     Console.WriteLine("No files uploaded.");
                 }
+
+                var flag = 0;
                 for (int i = 0; i < files.Count(); i++)
                 {
                     var tmpVideoId = Generator.GenerateId(20);
@@ -308,6 +311,7 @@ namespace Mercury_Backend.Controllers
                     if (postFix == "jpg" || postFix == "jpeg" || postFix == "gif" || postFix == "png")
                     {
                         path = "Media" + "/Image/" + tmpVideoId + '.' + postFix;
+                        
                         if (Directory.Exists(path))
                         {
                             Console.WriteLine("This path exists.");
@@ -329,7 +333,11 @@ namespace Mercury_Backend.Controllers
                             Image = med,
                             ImageId = med.Id
                         };
-                        
+                        if (flag == 0)
+                        {
+                            newCommodity.Cover = path;
+                            flag = 1;
+                        }
                         using (var stream = new FileStream(path, FileMode.Create))
                         {
                             await files[i].CopyToAsync(stream);
@@ -342,7 +350,6 @@ namespace Mercury_Backend.Controllers
                         path = "Media" + "/Video/" + tmpVideoId + '.' + postFix;
                         Console.WriteLine(path);
                         pathList.Add(path);
-                        
                         if (Directory.Exists(path))
                         {
                             Console.WriteLine("This path exists.");
@@ -368,10 +375,18 @@ namespace Mercury_Backend.Controllers
                     {
                         Console.WriteLine("Not a media file.");
                     }
+
+                    if (flag == 0)
+                    {
+                        newCommodity.Cover = "Media/Image/Default.png";
+                    }
                 }
                 context.Commodities.Add(newCommodity);
-                // Console.WriteLine("haha");
+                // Console.WriteLine("haha")
+                
+                
                 context.SaveChanges();
+                
 
                 msg["Code"] = "201";
             }
