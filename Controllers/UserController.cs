@@ -322,7 +322,8 @@ namespace Mercury_Backend.Controllers
                 IJwtAlgorithm algorithm = new HMACSHA256Algorithm(); // symmetric
                 IJwtDecoder decoder = new JwtDecoder(serializer, validator, urlEncoder, algorithm);
 
-                var loginInformation = decoder.DecodeToObject<IDictionary<string, object>>(token, secretKey, verify: true);
+                var loginInformation =
+                    decoder.DecodeToObject<IDictionary<string, object>>(token, secretKey, verify: true);
                 var user = context.SchoolUsers.Where(u => u.SchoolId == (string) loginInformation["userId"])
                     .Include(u => u.Avatar).Single();
                 msg["User"] = JToken.FromObject(Simplify.SimplifyUser(user));
@@ -337,6 +338,11 @@ namespace Mercury_Backend.Controllers
             {
                 msg["Code"] = "403";
                 msg["Description"] = "Token has invalid signature.";
+            }
+            catch (Exception e)
+            {
+                msg["Code"] = "400";
+                msg["Description"] = "Unknown exception, probably caused by invalid token format";
             }
             return JsonConvert.SerializeObject(msg);
         }
