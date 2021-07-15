@@ -5,8 +5,6 @@ using System.Data;
 using System.Linq;
 using Mercury_Backend.Contexts;
 using Mercury_Backend.Models;
-using Mercury_Backend.Utils;
-using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -46,7 +44,7 @@ namespace Mercury_Backend.Controllers
         {
             JObject msg = new JObject();
             var list = context.ChatRecords
-                    .Where(record => record.SenderId == userId || record.ReceiverId == userId)
+                .Where(record => record.SenderId == userId || record.ReceiverId == userId)
                 .Distinct()
                 .OrderBy(record => record.Time)
                 .Select(a => new {ReceiverId = a.ReceiverId, SenderId = a.SenderId});

@@ -24,10 +24,13 @@ namespace Mercury_Backend.Models
         [Key]
         [Column("ID")]
         [StringLength(12)]
+        
+        
         public string Id { get; set; }
         [Required]
         [Column("OWNER_ID")]
         [StringLength(10)]
+        
         public string OwnerId { get; set; }
         [Column("VIDEO_ID")]
         [StringLength(20)]
@@ -55,6 +58,7 @@ namespace Mercury_Backend.Models
         [Column("NAME")]
         [StringLength(60)]
         public string Name { get; set; }
+
         [Column("COVER")]
         [StringLength(100)]
         public string Cover { get; set; }
@@ -62,6 +66,7 @@ namespace Mercury_Backend.Models
         [ForeignKey(nameof(Classification))]
         [InverseProperty("Commodities")]
         public virtual Classification ClassificationNavigation { get; set; }
+        
         [ForeignKey(nameof(OwnerId))]
         [InverseProperty(nameof(SchoolUser.Commodities))]
         public virtual SchoolUser Owner { get; set; }

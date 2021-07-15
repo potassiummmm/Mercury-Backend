@@ -54,19 +54,15 @@ namespace Mercury_Backend.Controllers
             var commodityList = new List<Commodity>();
             try
             {
-
                 var judge = Request.Form["keyword"].ToString();
-                
             }
             catch 
             {
-
                 try
                 {
                     var simplifiedList = new List<SimplifiedCommodity>();
                     var tmpList = context.Commodities.Where(s=>true).Include(commodity => commodity.CommodityTags)
                         .Include(commodity => commodity.Owner).ThenInclude(owner => owner.Avatar);
-                    
                     commodityList = tmpList.ToList<Commodity>();
                     for (int i = 0; i < commodityList.Count; i++)
                     {
@@ -144,7 +140,17 @@ namespace Mercury_Backend.Controllers
                     commodityList = commodityList.Concat(tmpList).ToList<Commodity>();
                 }
             }
-            
+            else if (Request.Form["classification"].ToString() == "" != true)
+            {
+                var ownerName = Request.Form["classification"];
+                var strOwnerName = byte.Parse(ownerName);
+                
+                // msg["commodityList"] = JToken.FromObject(commodityList);
+                
+                
+               commodityList = context.Commodities.Where(b => b.Classification == strOwnerName).Include(commodity => commodity.CommodityTags).Include(commodity => commodity.Owner).ThenInclude(owner => owner.Avatar).ToList<Commodity>();
+              
+            }
             else if (Request.Form["userId"].ToString() == "" != true)
             {
                 var ownerName = Request.Form["userId"];
@@ -256,15 +262,17 @@ namespace Mercury_Backend.Controllers
                 {
                     var tmpTag = context.CommodityTags.Where(tag => tag.CommodityId == idList[i])
                         .ToList();
-                    
+                   
                     tags = tags.Concat(tmpTag).ToList();
-                    
                 }
-
+                
                 var tagSet = tags.Select(s => s.Tag).ToList();
+                
+                
                 tagSet = tagSet.Distinct().ToList();
                 msg["tags"] = JToken.FromObject(tagSet);
-                
+                var classSet = commodityList.Select(s => s.Classification).ToList().Distinct().ToList();
+                msg["classifications"] = JToken.FromObject(classSet);
                     
 
                 msg["Code"] = "200";
@@ -285,11 +293,13 @@ namespace Mercury_Backend.Controllers
 
         // POST api/<CommodityController>
         [HttpPost]
-        public async Task<string> Post([FromForm]Commodity newCommodity, [FromForm] List<IFormFile> files)
+        public async Task<string> Post([FromForm]Commodity newCommodity, [FromForm] List<IFormFile> files, [FromForm] List<string> tags)
         {
             JObject msg = new JObject();
+            
             var id = Generator.GenerateId(12);
             newCommodity.Id = id;
+            Console.WriteLine(newCommodity.Price);
             var pathList = new List<string>();
             try
             {
@@ -298,6 +308,8 @@ namespace Mercury_Backend.Controllers
                 {
                     Console.WriteLine("No files uploaded.");
                 }
+
+                var flag = 0;
                 for (int i = 0; i < files.Count(); i++)
                 {
                     var tmpVideoId = Generator.GenerateId(20);
@@ -308,6 +320,7 @@ namespace Mercury_Backend.Controllers
                     if (postFix == "jpg" || postFix == "jpeg" || postFix == "gif" || postFix == "png")
                     {
                         path = "Media" + "/Image/" + tmpVideoId + '.' + postFix;
+                        
                         if (Directory.Exists(path))
                         {
                             Console.WriteLine("This path exists.");
@@ -329,7 +342,11 @@ namespace Mercury_Backend.Controllers
                             Image = med,
                             ImageId = med.Id
                         };
-                        
+                        if (flag == 0)
+                        {
+                            newCommodity.Cover = path;
+                            flag = 1;
+                        }
                         using (var stream = new FileStream(path, FileMode.Create))
                         {
                             await files[i].CopyToAsync(stream);
@@ -342,7 +359,6 @@ namespace Mercury_Backend.Controllers
                         path = "Media" + "/Video/" + tmpVideoId + '.' + postFix;
                         Console.WriteLine(path);
                         pathList.Add(path);
-                        
                         if (Directory.Exists(path))
                         {
                             Console.WriteLine("This path exists.");
@@ -368,11 +384,27 @@ namespace Mercury_Backend.Controllers
                     {
                         Console.WriteLine("Not a media file.");
                     }
+
+                    if (flag == 0)
+                    {
+                        newCommodity.Cover = "Media/Image/Default.png";
+                    }
+                }
+
+                foreach (var t in tags)
+                {
+                    var tmpTag = new CommodityTag();
+                    tmpTag.CommodityId = id;
+                    tmpTag.Tag = t;
+                    context.CommodityTags.Add(tmpTag);
                 }
                 context.Commodities.Add(newCommodity);
-                // Console.WriteLine("haha");
+                // Console.WriteLine("haha")
+                
+                
                 context.SaveChanges();
 
+                msg["CommodityId"] = id;
                 msg["Code"] = "201";
             }
             catch (Exception e)
@@ -554,8 +586,6 @@ namespace Mercury_Backend.Controllers
             }
             if (Request.Form["classification"].ToString() != "")
             {
-                
-
                 msg["Code"] = "403";
 
                 detailMsg += " classification ";
