@@ -58,7 +58,7 @@ namespace Mercury_Backend.Controllers
             }
             chatList.Remove(userId);
             msg["Code"] = 200;
-            msg["ChatRecord"] = JToken.FromObject(chatList);
+            msg["ChatList"] = JToken.FromObject(chatList);
             return JsonConvert.SerializeObject(msg);
         }
         
