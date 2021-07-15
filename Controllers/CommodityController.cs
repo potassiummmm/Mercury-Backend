@@ -334,6 +334,7 @@ namespace Mercury_Backend.Controllers
                         var med = new Medium();
                         med.Id = tmpVideoId;
                         med.Type = "Image";
+                        med.Path = path;
                         context.Media.Add(med);
                         var comImg = new CommodityImage
                         {
@@ -648,7 +649,10 @@ namespace Mercury_Backend.Controllers
             JObject msg = new JObject();
             try
             {
-                var commodityToDelete = context.Commodities.Find(id);
+                var commodityToDelete = context.Commodities.Where(c => c.Id == id)
+                    .Include(c => c.CommodityImages)
+                    .ThenInclude(ci => ci.Image)
+                    .Include(c => c.Orders).Single();
                 if (commodityToDelete == null)
                 {
 
@@ -668,6 +672,7 @@ namespace Mercury_Backend.Controllers
                 {
                     if(System.IO.File.Exists(ci.Image.Path) && ci.Image.Path != "Media/Image/Default.png")
                     {
+                        Console.WriteLine(ci.Image.Path);
                         try
                         {
                             System.IO.File.Delete(ci.Image.Path);
@@ -679,18 +684,14 @@ namespace Mercury_Backend.Controllers
                     }
                 }
                 context.Commodities.Remove(commodityToDelete);
-                
                 context.SaveChanges();
-
                 msg["Code"] = "200";
-
             }
             catch (Exception e)
             {
                 Console.WriteLine(e.ToString());
                 msg["Code"] = "403";
                 msg["Description"] = "Error occured when putting data into model.";
-
             }
             return JsonConvert.SerializeObject(msg);
         }
