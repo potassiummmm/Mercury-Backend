@@ -38,7 +38,7 @@ namespace Mercury_Backend.Controllers
                 msg["ViewList"] = JToken.FromObject(list);
                 msg["Code"] = "200";
             }
-            catch (Exception e)
+            catch 
             {
                 msg["Code"] = "400";
             }

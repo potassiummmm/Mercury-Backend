@@ -21,11 +21,13 @@ namespace Mercury_Backend.Utils
                 commodityTag.Add(t.Tag);
             }
 
+            // var comment = new List<SimplifiedComment>();
+            
             var tag = commodityTag;
             var simplifiedCommodity = new SimplifiedCommodity(
                 commodity.Id,
                 commodity.Name,
-                commodity.Price == null? 0: (decimal)commodity.Price,
+                commodity.Price == null ? 0: (decimal)commodity.Price,
                 commodity.Likes == null?0: (int)commodity.Likes ,
                 commodity.Cover,
                 commodity.OwnerId,
@@ -33,10 +35,14 @@ namespace Mercury_Backend.Utils
                 commodity.Owner.Avatar.Path,
                 commodityTag,
                 commodity.Classification,
-                commodity.Clicks,
+                commodity.Clicks == null ? 0: commodity.Clicks,
                 commodity.Stock,
+                commodity.Video == null? "": commodity.Video.Path,
+                commodity.Condition == null ? "good": commodity.Condition ,
+                commodity.ForRent == null ? false: commodity.ForRent,
                 commodity.Description
-                    );
+            );
+
             return simplifiedCommodity;
         }
 
@@ -59,6 +65,18 @@ namespace Mercury_Backend.Utils
             var simplifiedComment = new SimplifiedComment(comment.Id, comment.SenderId, comment.Sender.Nickname,
                 comment.Sender.Avatar.Path, (DateTime)comment.Time, comment.Content);
             return simplifiedComment;
+        }
+
+        public static SimplifiedRating SimplifyRating(Rating rating)
+        {
+            var simplifiedRating = new SimplifiedRating(
+                rating.User.Nickname,
+                rating.User.Avatar.Path,
+                rating.UserId,
+                rating.Comment,
+                rating.Rate
+            );
+            return simplifiedRating;
         }
     }
 }

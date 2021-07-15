@@ -338,7 +338,7 @@ namespace Mercury_Backend.Controllers
                 msg["Code"] = "403";
                 msg["Description"] = "Token has invalid signature.";
             }
-            catch (Exception e)
+            catch 
             {
                 msg["Code"] = "400";
                 msg["Description"] = "Unknown exception, probably caused by invalid token format";
