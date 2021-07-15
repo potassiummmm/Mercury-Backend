@@ -290,7 +290,7 @@ namespace Mercury_Backend.Controllers
             JObject msg = new JObject();
             var id = Generator.GenerateId(12);
             newCommodity.Id = id;
-            
+            Console.WriteLine(newCommodity.Price);
             var pathList = new List<string>();
             try
             {
@@ -386,8 +386,8 @@ namespace Mercury_Backend.Controllers
                 
                 
                 context.SaveChanges();
-                
 
+                msg["CommodityId"] = id;
                 msg["Code"] = "201";
             }
             catch (Exception e)
