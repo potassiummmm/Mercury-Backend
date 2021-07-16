@@ -111,6 +111,7 @@ namespace Mercury_Backend.Controllers
                 var order = context.Orders.Where(o => o.Id == id).Select(o => new
                 {
                     OrderId = o.Id,
+                    OwnerId = o.Commodity.OwnerId,
                     OwnerName = o.Commodity.Owner.Nickname,
                     OwnerPhone = o.Commodity.Owner.Phone,
                     OwnerRealName = o.Commodity.Owner.RealName,
