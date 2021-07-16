@@ -108,7 +108,6 @@ namespace Mercury_Backend.Controllers
                 {   
                     context.Likes.Add(like);
                     context.Commodities.Find(like.CommodityId).Likes++;
-
                 }
                 context.SaveChanges();
                 msg["Code"] = "200";

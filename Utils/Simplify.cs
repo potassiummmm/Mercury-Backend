@@ -8,7 +8,7 @@ namespace Mercury_Backend.Utils
     {
         public static SimplifiedOrder SimplifyOrder(Order order)
         {
-            var simplifiedOrder = new SimplifiedOrder(order.Id, order.Commodity.Name, order.BuyerId, (decimal)order.Commodity.Price
+            var simplifiedOrder = new SimplifiedOrder(order.Id, order.Commodity.Name, order.BuyerId, order.Commodity.OwnerId, (decimal)order.Commodity.Price
                 , (int)order.Count, order.Status, order.Commodity.Cover);
             return simplifiedOrder;
         }
