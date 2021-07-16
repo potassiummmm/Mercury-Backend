@@ -149,7 +149,7 @@ namespace Mercury_Backend.Controllers
                 for (int i = 0; i < idList.Count; i++)
                 {
                     var tmpList = context.Commodities.Where(b => b.OwnerId== idList[i].SchoolId).
-                        Include(commodity => commodity.Video).
+                       Include(commodity => commodity.Video).
                         Include(commodity => commodity.CommodityTags).Include(commodity => commodity.Owner).ThenInclude(owner => owner.Avatar).ToList<Commodity>();
                     commodityList = commodityList.Concat(tmpList).ToList<Commodity>();
                 }
@@ -256,7 +256,13 @@ namespace Mercury_Backend.Controllers
                         simplifiedOrderList.Add(Simplify.SimplifyRating(t));
                     }
 
-                    var imgList = context.Media.Where(s => s.Id == strId && s.Type.ToUpper() == "IMAGE").Select(s => s.Path);
+                    var mediaList = context.CommodityImages.Where(s => s.CommodityId == strId).ToList().Select(s => s.ImageId).ToList();
+                    var imgList = new List<string>();
+                    for (int i = 0; i < mediaList.Count; i++)
+                    {
+                        imgList.Add(context.Media.Find(mediaList[i]).Path);
+                    }
+
                     msg["ImgList"] = JToken.FromObject(imgList, new JsonSerializer()
                     {
                         ReferenceLoopHandling = ReferenceLoopHandling.Ignore //忽略循环引用，默认是throw exception

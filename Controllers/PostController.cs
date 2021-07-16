@@ -96,7 +96,15 @@ namespace Mercury_Backend.Controllers
                 var commmentList = new List<SimplifiedComment>();
                 foreach (var c in post.PostComments)
                 {
-                    commmentList.Add(Simplify.SimplifyComment(c));
+                    try
+                    {
+                        commmentList.Add(Simplify.SimplifyComment(c));
+                    }
+                    catch
+                    {
+                        
+                        Console.WriteLine(c);
+                    }
                 }
 
                 var postDetail = new PostDetail(post.Id, post.SenderId, post.Sender.Nickname, post.Title, post.Content, (DateTime)post.Time,
