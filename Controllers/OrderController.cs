@@ -10,8 +10,13 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
+using JWT;
+using JWT.Algorithms;
+using JWT.Exceptions;
+using JWT.Serializers;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Query.SqlExpressions;
+using Microsoft.Extensions.Configuration;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -22,9 +27,11 @@ namespace Mercury_Backend.Controllers
     public class OrderController : ControllerBase
     {
         private readonly ModelContext context;
-        public OrderController(ModelContext modelContext)
+        private readonly IConfiguration config;
+        public OrderController(ModelContext modelContext, IConfiguration configuration)
         {
             context = modelContext;
+            config = configuration;
         }
         // GET: api/<OrderController>
         [HttpGet]
@@ -149,11 +156,28 @@ namespace Mercury_Backend.Controllers
 
         // POST api/<OrderController>
         [HttpPost]
-        public string Post([FromForm] Order order)
+        public string Post([FromForm] Order order, [FromForm] string token)
         {
             JObject msg = new JObject();
             try
             {
+                var secretKey = config["TokenKey"];
+                IJsonSerializer serializer = new JsonNetSerializer();
+                var provider = new UtcDateTimeProvider();
+                IJwtValidator validator = new JwtValidator(serializer, provider);
+                IBase64UrlEncoder urlEncoder = new JwtBase64UrlEncoder();
+                IJwtAlgorithm algorithm = new HMACSHA256Algorithm(); // symmetric
+                IJwtDecoder decoder = new JwtDecoder(serializer, validator, urlEncoder, algorithm);
+
+                var userInformation =
+                    decoder.DecodeToObject<IDictionary<string, object>>(token, secretKey, verify: true);
+
+                if ((string)userInformation["userId"] != order.BuyerId)
+                {
+                    msg["Code"] = "403";
+                    msg["Description"] = "Cannot place order with wrong token";
+                    return JsonConvert.SerializeObject(msg);
+                }
                 var commodity = context.Commodities.Single(c => c.Id == order.CommodityId);
                 if (commodity.Stock <= 0)
                 {
@@ -169,6 +193,16 @@ namespace Mercury_Backend.Controllers
                 msg["Code"] = "201";
                 msg["OrderId"] = order.Id;
             }
+            catch (TokenExpiredException)
+            {
+                msg["Code"] = "403";
+                msg["Description"] = "Token has expired.";
+            }
+            catch (SignatureVerificationException)
+            {
+                msg["Code"] = "403";
+                msg["Description"] = "Token has invalid signature.";
+            }
             catch (Exception e)
             {
                 Console.WriteLine(e.ToString());
@@ -179,7 +213,7 @@ namespace Mercury_Backend.Controllers
 
         // PUT api/<OrderController>/5
         [HttpPut("{id}")]
-        public string Put(string id, [FromForm]string newStatus)
+        public string Put(string id, [FromForm]string newStatus, [FromForm] string token)
         {
             JObject msg = new JObject();
             if(newStatus != "PAID" && newStatus != "CANCELLED")
@@ -190,7 +224,24 @@ namespace Mercury_Backend.Controllers
             }
             try
             {
+                var secretKey = config["TokenKey"];
                 var order = context.Orders.Single(o => o.Id == id);
+                IJsonSerializer serializer = new JsonNetSerializer();
+                var provider = new UtcDateTimeProvider();
+                IJwtValidator validator = new JwtValidator(serializer, provider);
+                IBase64UrlEncoder urlEncoder = new JwtBase64UrlEncoder();
+                IJwtAlgorithm algorithm = new HMACSHA256Algorithm(); // symmetric
+                IJwtDecoder decoder = new JwtDecoder(serializer, validator, urlEncoder, algorithm);
+
+                var userInformation =
+                    decoder.DecodeToObject<IDictionary<string, object>>(token, secretKey, verify: true);
+
+                if ((string)userInformation["userId"] != order.BuyerId)
+                {
+                    msg["Code"] = "403";
+                    msg["Description"] = "Cannot change order status with wrong token";
+                    return JsonConvert.SerializeObject(msg);
+                }
                 if (order.Status != "UNPAID")
                 {
                     msg["Code"] = "403";
@@ -212,6 +263,16 @@ namespace Mercury_Backend.Controllers
                 order.Status = newStatus;
                 context.SaveChanges();
                 msg["Code"] = "200";
+            }
+            catch (TokenExpiredException)
+            {
+                msg["Code"] = "403";
+                msg["Description"] = "Token has expired.";
+            }
+            catch (SignatureVerificationException)
+            {
+                msg["Code"] = "403";
+                msg["Description"] = "Token has invalid signature.";
             }
             catch (DbUpdateException e)
             {
